@@ -38,9 +38,11 @@ interface ChoreListProps {
   familyId: string;
   refreshTrigger: number;
   onRefresh: () => void;
+  onEditChore?: (chore: Chore) => void;
+  showEditButton?: boolean;
 }
 
-const ChoreList = ({ familyId, refreshTrigger, onRefresh }: ChoreListProps) => {
+const ChoreList = ({ familyId, refreshTrigger, onRefresh, onEditChore, showEditButton = false }: ChoreListProps) => {
   const [chores, setChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<{
@@ -399,6 +401,17 @@ const ChoreList = ({ familyId, refreshTrigger, onRefresh }: ChoreListProps) => {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2">
+                      {showEditButton && onEditChore && (
+                        <button
+                          onClick={() => onEditChore(chore)}
+                          className="btn btn-ghost btn-sm"
+                          title="Edit chore"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                      )}
                       {chore.status === "pending" && (
                         <button
                           onClick={() =>

@@ -2,10 +2,10 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 
 import AppLayout from "@/components/AppLayout";
-import ParentDashboard from "@/components/ParentDashboard";
+import ChildDashboard from "@/components/ChildDashboard";
 import { authOptions } from "@/lib/auth";
 
-export default async function ParentDashboardPage() {
+export default async function ChildDashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -13,8 +13,8 @@ export default async function ParentDashboardPage() {
   }
 
   return (
-    <AppLayout requiresFamily={true} allowedRoles={["parent", "admin"]}>
-      <ParentDashboard />
+    <AppLayout requiresFamily={true} allowedRoles={["child", "user", "parent", "admin"]}>
+      <ChildDashboard />
     </AppLayout>
   );
 }
