@@ -19,7 +19,17 @@
     "sample-data": "node scripts/create-sample-data.js",
     "sample-data:full": "node scripts/create-sample-data.js full",
     "sample-data:minimal": "node scripts/create-sample-data.js minimal",
-    "sample-data:clear": "node scripts/create-sample-data.js clear"
+    "sample-data:clear": "node scripts/create-sample-data.js clear",
+    "demo:create": "npx tsx scripts/create-demo-data.js",
+    "demo:reset": "npx tsx scripts/reset-demo-data.js",
+    "demo:scenarios": "npx tsx scripts/demo-scenarios.js",
+    "production:indexes": "npx tsx scripts/create-production-indexes.js",
+    "production:validate": "bash deployment/validate-deployment.sh", 
+    "production:benchmark": "npx tsx scripts/performance-benchmark.js",
+    "test:final": "npx tsx scripts/final-testing-suite.js",
+    "audit:security": "npx tsx scripts/security-audit.js",
+    "launch:checklist": "npx tsx scripts/launch-checklist.js",
+    "validate:launch": "node scripts/simple-test.js"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -33,6 +43,11 @@
   "dependencies": {
     "@auth/mongodb-adapter": "^3.10.0",
     "@aws-sdk/client-s3": "^3.850.0",
+    "@fullcalendar/core": "^6.1.18",
+    "@fullcalendar/daygrid": "^6.1.18",
+    "@fullcalendar/interaction": "^6.1.18",
+    "@fullcalendar/react": "^6.1.18",
+    "@fullcalendar/timegrid": "^6.1.18",
     "@headlessui/react": "^1.7.18",
     "@mdx-js/loader": "^2.3.0",
     "@mdx-js/react": "^2.3.0",
@@ -42,6 +57,7 @@
     "@types/mongodb": "^4.0.6",
     "axios": "^1.6.8",
     "bcryptjs": "^3.0.2",
+    "chart.js": "^4.5.0",
     "crisp-sdk-web": "^1.0.22",
     "eslint": "^8.56.0",
     "eslint-config-next": "13.4.19",
@@ -54,6 +70,7 @@
     "nextjs-toploader": "^1.6.11",
     "nodemailer": "^6.9.13",
     "react": "18.2.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.4.1",
     "react-syntax-highlighter": "^15.5.0",
