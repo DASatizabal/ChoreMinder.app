@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+
 import ChoreDetail from "./ChoreDetail";
-import StatusControls from "./StatusControls";
 import HelpRequest from "./HelpRequest";
+import StatusControls from "./StatusControls";
 
 interface Chore {
   _id: string;
@@ -33,7 +34,12 @@ interface MyChoresProps {
   refreshTrigger: number;
 }
 
-const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChoresProps) => {
+const MyChores = ({
+  userId,
+  familyId,
+  onChoreUpdated,
+  refreshTrigger,
+}: MyChoresProps) => {
   const [chores, setChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -49,9 +55,11 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
   const fetchMyChores = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/chores?assignedTo=${userId}&familyId=${familyId}`);
+      const response = await fetch(
+        `/api/chores?assignedTo=${userId}&familyId=${familyId}`,
+      );
       if (!response.ok) throw new Error("Failed to fetch chores");
-      
+
       const data = await response.json();
       setChores(data.chores || []);
     } catch (error) {
@@ -94,7 +102,9 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
       fetchMyChores(); // Refresh the chores list
     } catch (error) {
       console.error("Error updating chore:", error);
-      toast.error(error instanceof Error ? error.message : "Oops! Something went wrong");
+      toast.error(
+        error instanceof Error ? error.message : "Oops! Something went wrong",
+      );
     }
   };
 
@@ -136,47 +146,69 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
     setShowHelpRequest(true);
   };
 
-  const filteredChores = chores.filter(chore => {
+  const filteredChores = chores.filter((chore) => {
     if (filter === "todo") return chore.status === "pending";
     if (filter === "doing") return chore.status === "in_progress";
-    if (filter === "done") return ["completed", "verified"].includes(chore.status);
+    if (filter === "done")
+      return ["completed", "verified"].includes(chore.status);
     if (filter === "overdue") {
-      return chore.dueDate && new Date(chore.dueDate) < new Date() && 
-             !["completed", "verified"].includes(chore.status);
+      return (
+        chore.dueDate &&
+        new Date(chore.dueDate) < new Date() &&
+        !["completed", "verified"].includes(chore.status)
+      );
     }
     return true;
   });
 
   const getStatusEmoji = (status: string) => {
     switch (status) {
-      case "pending": return "⏳";
-      case "in_progress": return "🔥";
-      case "completed": return "✅";
-      case "verified": return "🏆";
-      case "rejected": return "😅";
-      default: return "📝";
+      case "pending":
+        return "⏳";
+      case "in_progress":
+        return "🔥";
+      case "completed":
+        return "✅";
+      case "verified":
+        return "🏆";
+      case "rejected":
+        return "😅";
+      default:
+        return "📝";
     }
   };
 
   const getPriorityEmoji = (priority: string) => {
     switch (priority) {
-      case "high": return "🚨";
-      case "medium": return "⚡";
-      case "low": return "😎";
-      default: return "📝";
+      case "high":
+        return "🚨";
+      case "medium":
+        return "⚡";
+      case "low":
+        return "😎";
+      default:
+        return "📝";
     }
   };
 
   const getCategoryEmoji = (category?: string) => {
     switch (category?.toLowerCase()) {
-      case "cleaning": return "🧹";
-      case "kitchen": return "🍽️";
-      case "laundry": return "👕";
-      case "outdoor": return "🌳";
-      case "pet care": return "🐕";
-      case "homework": return "📚";
-      case "organization": return "📦";
-      default: return "⭐";
+      case "cleaning":
+        return "🧹";
+      case "kitchen":
+        return "🍽️";
+      case "laundry":
+        return "👕";
+      case "outdoor":
+        return "🌳";
+      case "pet care":
+        return "🐕";
+      case "homework":
+        return "📚";
+      case "organization":
+        return "📦";
+      default:
+        return "⭐";
     }
   };
 
@@ -187,24 +219,26 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
 
   const getTimeUntilDue = (dueDate?: string) => {
     if (!dueDate) return null;
-    
+
     const now = new Date();
     const due = new Date(dueDate);
     const diff = due.getTime() - now.getTime();
-    
+
     if (diff < 0) return "Overdue!";
-    
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
-    
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} left`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} left`;
+
+    if (days > 0) return `${days} day${days > 1 ? "s" : ""} left`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} left`;
     return "Due soon!";
   };
 
   const getEncouragingMessage = (chore: Chore) => {
-    if (chore.status === "verified") return "🏆 Amazing work! You're a champion!";
-    if (chore.status === "completed") return "🎉 Fantastic! Waiting for approval!";
+    if (chore.status === "verified")
+      return "🏆 Amazing work! You're a champion!";
+    if (chore.status === "completed")
+      return "🎉 Fantastic! Waiting for approval!";
     if (chore.status === "in_progress") return "🔥 You're on fire! Keep going!";
     if (isOverdue(chore.dueDate)) return "⏰ Almost there! You can do this!";
     return "🌟 Ready for this challenge?";
@@ -215,7 +249,9 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
       <div className="p-8">
         <div className="text-center">
           <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
-          <p className="text-lg font-medium">Loading your awesome chores... 🚀</p>
+          <p className="text-lg font-medium">
+            Loading your awesome chores... 🚀
+          </p>
         </div>
       </div>
     );
@@ -236,7 +272,12 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
       {/* Filter Buttons */}
       <div className="flex flex-wrap justify-center gap-3 mb-8">
         {[
-          { key: "all", label: "All Chores", emoji: "📜", color: "btn-primary" },
+          {
+            key: "all",
+            label: "All Chores",
+            emoji: "📜",
+            color: "btn-primary",
+          },
           { key: "todo", label: "To Do", emoji: "⏳", color: "btn-warning" },
           { key: "doing", label: "Doing", emoji: "🔥", color: "btn-info" },
           { key: "done", label: "Done", emoji: "✅", color: "btn-success" },
@@ -245,19 +286,26 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
           <button
             key={key}
             onClick={() => setFilter(key)}
-            className={`btn ${filter === key ? color : 'btn-outline'} btn-sm font-bold transition-all transform hover:scale-105`}
+            className={`btn ${filter === key ? color : "btn-outline"} btn-sm font-bold transition-all transform hover:scale-105`}
           >
             <span className="text-lg mr-1">{emoji}</span>
             {label}
             {key !== "all" && (
               <div className="badge badge-neutral ml-2">
-                {chores.filter(c => {
-                  if (key === "todo") return c.status === "pending";
-                  if (key === "doing") return c.status === "in_progress";
-                  if (key === "done") return ["completed", "verified"].includes(c.status);
-                  if (key === "overdue") return isOverdue(c.dueDate) && !["completed", "verified"].includes(c.status);
-                  return true;
-                }).length}
+                {
+                  chores.filter((c) => {
+                    if (key === "todo") return c.status === "pending";
+                    if (key === "doing") return c.status === "in_progress";
+                    if (key === "done")
+                      return ["completed", "verified"].includes(c.status);
+                    if (key === "overdue")
+                      return (
+                        isOverdue(c.dueDate) &&
+                        !["completed", "verified"].includes(c.status)
+                      );
+                    return true;
+                  }).length
+                }
               </div>
             )}
           </button>
@@ -271,20 +319,20 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
             {filter === "done" ? "🎉" : filter === "todo" ? "😴" : "🤔"}
           </div>
           <h3 className="text-2xl font-bold text-gray-600 mb-2">
-            {filter === "done" 
-              ? "No completed chores yet!" 
-              : filter === "todo" 
-              ? "No chores to do right now!"
-              : filter === "doing"
-              ? "No chores in progress!"
-              : "No chores here!"}
+            {filter === "done"
+              ? "No completed chores yet!"
+              : filter === "todo"
+                ? "No chores to do right now!"
+                : filter === "doing"
+                  ? "No chores in progress!"
+                  : "No chores here!"}
           </h3>
           <p className="text-gray-500">
-            {filter === "done" 
-              ? "Complete some chores to see them here! 🚀" 
+            {filter === "done"
+              ? "Complete some chores to see them here! 🚀"
               : filter === "todo"
-              ? "Check back later for new adventures! ✨"
-              : "Start a chore to see progress here! 💪"}
+                ? "Check back later for new adventures! ✨"
+                : "Start a chore to see progress here! 💪"}
           </p>
         </div>
       ) : (
@@ -293,15 +341,15 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
             <div
               key={chore._id}
               className={`card shadow-xl border-4 transition-all transform hover:scale-105 cursor-pointer ${
-                chore.status === "verified" 
-                  ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200" :
-                chore.status === "completed"
-                  ? "bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200" :
-                chore.status === "in_progress"
-                  ? "bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200" :
-                isOverdue(chore.dueDate)
-                  ? "bg-gradient-to-br from-red-50 to-pink-50 border-red-200" :
-                  "bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200"
+                chore.status === "verified"
+                  ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
+                  : chore.status === "completed"
+                    ? "bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200"
+                    : chore.status === "in_progress"
+                      ? "bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200"
+                      : isOverdue(chore.dueDate)
+                        ? "bg-gradient-to-br from-red-50 to-pink-50 border-red-200"
+                        : "bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200"
               } hover:shadow-2xl`}
               onClick={() => openChoreDetail(chore)}
             >
@@ -309,11 +357,17 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
                 {/* Header with status and priority */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl">{getCategoryEmoji(chore.category)}</span>
-                    <span className="text-2xl">{getStatusEmoji(chore.status)}</span>
+                    <span className="text-3xl">
+                      {getCategoryEmoji(chore.category)}
+                    </span>
+                    <span className="text-2xl">
+                      {getStatusEmoji(chore.status)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{getPriorityEmoji(chore.priority)}</span>
+                    <span className="text-xl">
+                      {getPriorityEmoji(chore.priority)}
+                    </span>
                     <div className="badge badge-primary font-bold">
                       {chore.points} pts
                     </div>
@@ -324,7 +378,7 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
                 <h3 className="card-title text-xl font-bold text-gray-800 mb-2">
                   {chore.title}
                 </h3>
-                
+
                 {chore.description && (
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {chore.description}
@@ -334,7 +388,9 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
                 {/* Due date and time estimate */}
                 <div className="flex flex-wrap gap-2 mb-4 text-xs">
                   {chore.dueDate && (
-                    <div className={`badge ${isOverdue(chore.dueDate) ? 'badge-error' : 'badge-info'}`}>
+                    <div
+                      className={`badge ${isOverdue(chore.dueDate) ? "badge-error" : "badge-info"}`}
+                    >
                       ⏰ {getTimeUntilDue(chore.dueDate)}
                     </div>
                   )}
@@ -344,9 +400,7 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
                     </div>
                   )}
                   {chore.requiresPhotoVerification && (
-                    <div className="badge badge-accent">
-                      📸 Photo needed
-                    </div>
+                    <div className="badge badge-accent">📸 Photo needed</div>
                   )}
                 </div>
 
@@ -366,7 +420,7 @@ const MyChores = ({ userId, familyId, onChoreUpdated, refreshTrigger }: MyChores
                       showConfirmation={false}
                     />
                   </div>
-                  
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

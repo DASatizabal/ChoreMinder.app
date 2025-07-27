@@ -37,9 +37,15 @@ interface AssignmentControlsProps {
   onChoreUpdated: () => void;
 }
 
-const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: AssignmentControlsProps) => {
+const AssignmentControls = ({
+  chore,
+  familyMembers,
+  onChoreUpdated,
+}: AssignmentControlsProps) => {
   const [isAssigning, setIsAssigning] = useState(false);
-  const [selectedMember, setSelectedMember] = useState(chore.assignedTo?._id || "");
+  const [selectedMember, setSelectedMember] = useState(
+    chore.assignedTo?._id || "",
+  );
   const [dueDate, setDueDate] = useState(() => {
     if (chore.dueDate) {
       return new Date(chore.dueDate).toISOString().slice(0, 16);
@@ -72,7 +78,9 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
       onChoreUpdated();
     } catch (error) {
       console.error("Error assigning chore:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to assign chore");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to assign chore",
+      );
     } finally {
       setIsAssigning(false);
     }
@@ -100,7 +108,9 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
       onChoreUpdated();
     } catch (error) {
       console.error("Error updating due date:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to update due date");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update due date",
+      );
     } finally {
       setIsScheduling(false);
     }
@@ -129,7 +139,9 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
       onChoreUpdated();
     } catch (error) {
       console.error("Error clearing due date:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to clear due date");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to clear due date",
+      );
     } finally {
       setIsScheduling(false);
     }
@@ -154,7 +166,9 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
       onChoreUpdated();
     } catch (error) {
       console.error("Error unassigning chore:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to unassign chore");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to unassign chore",
+      );
     } finally {
       setIsAssigning(false);
     }
@@ -206,7 +220,10 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
 
   const isOverdue = () => {
     if (!chore.dueDate) return false;
-    return new Date(chore.dueDate) < new Date() && !["completed", "verified"].includes(chore.status);
+    return (
+      new Date(chore.dueDate) < new Date() &&
+      !["completed", "verified"].includes(chore.status)
+    );
   };
 
   return (
@@ -214,14 +231,17 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
       {/* Current Assignment */}
       <div className="card bg-base-200 p-6">
         <h3 className="font-semibold text-lg mb-4">Current Assignment</h3>
-        
+
         {chore.assignedTo ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="avatar">
                 <div className="w-12 h-12 rounded-full">
                   {chore.assignedTo.image ? (
-                    <img src={chore.assignedTo.image} alt={chore.assignedTo.name} />
+                    <img
+                      src={chore.assignedTo.image}
+                      alt={chore.assignedTo.name}
+                    />
                   ) : (
                     <div className="bg-primary text-primary-content flex items-center justify-center">
                       {chore.assignedTo.name.charAt(0).toUpperCase()}
@@ -231,7 +251,9 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
               </div>
               <div>
                 <div className="font-medium">{chore.assignedTo.name}</div>
-                <div className="text-sm text-base-content/70">{chore.assignedTo.email}</div>
+                <div className="text-sm text-base-content/70">
+                  {chore.assignedTo.email}
+                </div>
               </div>
             </div>
             <button
@@ -248,8 +270,18 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
           </div>
         ) : (
           <div className="text-center py-8 text-base-content/60">
-            <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg
+              className="w-12 h-12 mx-auto mb-4 opacity-50"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
             </svg>
             <p>This chore is not assigned to anyone</p>
           </div>
@@ -259,7 +291,7 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
       {/* Assign to Family Member */}
       <div className="card bg-base-200 p-6">
         <h3 className="font-semibold text-lg mb-4">Assign to Family Member</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {familyMembers.map((member) => (
             <div
@@ -285,13 +317,25 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium text-sm">{member.user.name}</div>
-                    <div className="text-xs text-base-content/70 capitalize">{member.role}</div>
+                    <div className="font-medium text-sm">
+                      {member.user.name}
+                    </div>
+                    <div className="text-xs text-base-content/70 capitalize">
+                      {member.role}
+                    </div>
                   </div>
                   {selectedMember === member.user._id && (
                     <div className="text-primary">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                   )}
@@ -326,16 +370,28 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
       {/* Due Date Scheduling */}
       <div className="card bg-base-200 p-6">
         <h3 className="font-semibold text-lg mb-4">Schedule Due Date</h3>
-        
+
         {/* Current Due Date */}
         {chore.dueDate && (
-          <div className={`alert mb-4 ${isOverdue() ? "alert-error" : "alert-info"}`}>
-            <svg className="stroke-current shrink-0 w-6 h-6" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <div
+            className={`alert mb-4 ${isOverdue() ? "alert-error" : "alert-info"}`}
+          >
+            <svg
+              className="stroke-current shrink-0 w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              ></path>
             </svg>
             <div>
               <span className="font-medium">
-                {isOverdue() ? "Overdue:" : "Due:"} {new Date(chore.dueDate).toLocaleDateString("en-US", {
+                {isOverdue() ? "Overdue:" : "Due:"}{" "}
+                {new Date(chore.dueDate).toLocaleDateString("en-US", {
                   weekday: "long",
                   month: "short",
                   day: "numeric",
@@ -350,8 +406,18 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
               className="btn btn-ghost btn-sm"
               title="Clear due date"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -401,8 +467,17 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
 
         {/* Scheduling Tips */}
         <div className="alert alert-info">
-          <svg className="stroke-current shrink-0 w-6 h-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          <svg
+            className="stroke-current shrink-0 w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
           </svg>
           <div className="text-sm">
             <div className="font-medium">Scheduling Tips:</div>
@@ -418,10 +493,16 @@ const AssignmentControls = ({ chore, familyMembers, onChoreUpdated }: Assignment
 
       {/* Assignment History */}
       <div className="card bg-base-200 p-6">
-        <h3 className="font-semibold text-lg mb-4">Recent Assignment Changes</h3>
+        <h3 className="font-semibold text-lg mb-4">
+          Recent Assignment Changes
+        </h3>
         <div className="text-sm text-base-content/70">
-          <p>Assignment history will appear here once tracking is implemented.</p>
-          <p className="mt-2">This will show who assigned/reassigned the chore and when.</p>
+          <p>
+            Assignment history will appear here once tracking is implemented.
+          </p>
+          <p className="mt-2">
+            This will show who assigned/reassigned the chore and when.
+          </p>
         </div>
       </div>
     </div>

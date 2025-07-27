@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 interface Family {
@@ -33,7 +33,10 @@ interface FamilySwitcherProps {
   onFamilyChange: () => void;
 }
 
-const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) => {
+const FamilySwitcher = ({
+  familyContext,
+  onFamilyChange,
+}: FamilySwitcherProps) => {
   const { data: session } = useSession();
   const [families, setFamilies] = useState<Family[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +54,7 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
       setLoading(true);
       const response = await fetch("/api/families");
       if (!response.ok) throw new Error("Failed to fetch families");
-      
+
       const data = await response.json();
       setFamilies(data.families || []);
     } catch (error) {
@@ -111,7 +114,7 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
       }
 
       const data = await response.json();
-      
+
       toast.success(`Family "${newFamilyName}" created successfully! 🎉`, {
         icon: "🏠",
         duration: 4000,
@@ -123,7 +126,9 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
       onFamilyChange();
     } catch (error) {
       console.error("Error creating family:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to create family");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create family",
+      );
     } finally {
       setLoading(false);
     }
@@ -151,7 +156,7 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
       }
 
       const data = await response.json();
-      
+
       toast.success(`Joined family "${data.family.name}" successfully! 🎉`, {
         icon: "👨‍👩‍👧‍👦",
         duration: 4000,
@@ -163,7 +168,9 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
       onFamilyChange();
     } catch (error) {
       console.error("Error joining family:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to join family");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to join family",
+      );
     } finally {
       setLoading(false);
     }
@@ -171,10 +178,14 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
 
   const getRoleEmoji = (role: string) => {
     switch (role) {
-      case "parent": return "👨‍👩‍👧‍👦";
-      case "child": return "🧒";
-      case "admin": return "⚙️";
-      default: return "👤";
+      case "parent":
+        return "👨‍👩‍👧‍👦";
+      case "child":
+        return "🧒";
+      case "admin":
+        return "⚙️";
+      default:
+        return "👤";
     }
   };
 
@@ -203,8 +214,18 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
             {familyContext.activeFamily?.name || "Select Family"}
           </span>
         </div>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
         {familyContext.familyCount > 1 && (
           <div className="badge badge-primary badge-xs">
@@ -213,7 +234,10 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
         )}
       </label>
 
-      <div tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80 max-h-96 overflow-y-auto">
+      <div
+        tabIndex={0}
+        className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80 max-h-96 overflow-y-auto"
+      >
         {/* Current Family Info */}
         {familyContext.activeFamily && (
           <>
@@ -223,13 +247,16 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
                 <span className="font-bold text-primary">Current Family</span>
               </div>
               <div className="text-sm">
-                <div className="font-medium">{familyContext.activeFamily.name}</div>
+                <div className="font-medium">
+                  {familyContext.activeFamily.name}
+                </div>
                 <div className="text-xs opacity-70 flex items-center gap-1">
                   {getRoleEmoji(familyContext.role || "user")}
                   Role: {familyContext.role || "member"}
                 </div>
                 <div className="text-xs opacity-70">
-                  👥 {familyContext.activeFamily.memberCount} member{familyContext.activeFamily.memberCount !== 1 ? 's' : ''}
+                  👥 {familyContext.activeFamily.memberCount} member
+                  {familyContext.activeFamily.memberCount !== 1 ? "s" : ""}
                 </div>
               </div>
             </div>
@@ -241,7 +268,7 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
         {families.length > 0 && (
           <div className="max-h-40 overflow-y-auto">
             {families
-              .filter(family => family._id !== familyContext.activeFamily?.id)
+              .filter((family) => family._id !== familyContext.activeFamily?.id)
               .map((family) => (
                 <li key={family._id}>
                   <button
@@ -252,9 +279,13 @@ const FamilySwitcher = ({ familyContext, onFamilyChange }: FamilySwitcherProps) 
                     <div className="flex items-center gap-2 flex-1">
                       <span className="text-lg">🏠</span>
                       <div className="flex-1">
-                        <div className="font-medium">{getFamilyDisplayName(family)}</div>
+                        <div className="font-medium">
+                          {getFamilyDisplayName(family)}
+                        </div>
                         <div className="text-xs opacity-70 flex items-center gap-2">
-                          <span>{getRoleEmoji(family.role)} {family.role}</span>
+                          <span>
+                            {getRoleEmoji(family.role)} {family.role}
+                          </span>
                           <span>👥 {family.memberCount}</span>
                         </div>
                       </div>

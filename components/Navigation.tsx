@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+
 import ButtonAccount from "./ButtonAccount";
 import FamilySwitcher from "./FamilySwitcher";
 
@@ -37,8 +38,11 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
   });
 
   // Determine user role and interface
-  const isParent = familyContext?.role === "parent" || familyContext?.activeFamily?.createdBy === session?.user?.id;
-  const isChild = familyContext?.role === "child" || familyContext?.role === "user";
+  const isParent =
+    familyContext?.role === "parent" ||
+    familyContext?.activeFamily?.createdBy === session?.user?.id;
+  const isChild =
+    familyContext?.role === "child" || familyContext?.role === "user";
   const isAdmin = session?.user?.role === "admin";
 
   useEffect(() => {
@@ -52,13 +56,17 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
   const fetchParentNotifications = async () => {
     try {
       // Fetch help requests count
-      const helpResponse = await fetch(`/api/help-requests?status=pending&familyId=${familyContext?.activeFamily?.id}`);
+      const helpResponse = await fetch(
+        `/api/help-requests?status=pending&familyId=${familyContext?.activeFamily?.id}`,
+      );
       const helpData = await helpResponse.json();
-      
+
       // Fetch pending photos count
-      const photosResponse = await fetch(`/api/chores?familyId=${familyContext?.activeFamily?.id}&requiresPhotoReview=true`);
+      const photosResponse = await fetch(
+        `/api/chores?familyId=${familyContext?.activeFamily?.id}&requiresPhotoReview=true`,
+      );
       const photosData = await photosResponse.json();
-      
+
       setNotifications({
         helpRequests: helpData.requests?.length || 0,
         pendingPhotos: photosData.chores?.length || 0,
@@ -72,9 +80,11 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
   const fetchChildNotifications = async () => {
     try {
       // Fetch new achievements or completed chores waiting for approval
-      const response = await fetch(`/api/chores?assignedTo=${session?.user?.id}&status=completed`);
+      const response = await fetch(
+        `/api/chores?assignedTo=${session?.user?.id}&status=completed`,
+      );
       const data = await response.json();
-      
+
       setNotifications({
         helpRequests: 0,
         pendingPhotos: 0,
@@ -91,7 +101,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
       label: "Dashboard",
       icon: "🏠",
       description: "Family overview",
-      active: pathname === "/dashboard/parent"
+      active: pathname === "/dashboard/parent",
     },
     {
       href: "/dashboard/parent/chores",
@@ -99,14 +109,17 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
       icon: "📋",
       description: "Manage family chores",
       active: pathname === "/dashboard/parent/chores",
-      badge: notifications.pendingPhotos > 0 ? notifications.pendingPhotos : undefined
+      badge:
+        notifications.pendingPhotos > 0
+          ? notifications.pendingPhotos
+          : undefined,
     },
     {
       href: "/dashboard/parent/family",
       label: "Family Members",
       icon: "👨‍👩‍👧‍👦",
       description: "Manage family",
-      active: pathname === "/dashboard/parent/family"
+      active: pathname === "/dashboard/parent/family",
     },
     {
       href: "/dashboard/parent/help",
@@ -114,15 +127,16 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
       icon: "🆘",
       description: "Review help requests",
       active: pathname === "/dashboard/parent/help",
-      badge: notifications.helpRequests > 0 ? notifications.helpRequests : undefined
+      badge:
+        notifications.helpRequests > 0 ? notifications.helpRequests : undefined,
     },
     {
       href: "/dashboard/parent/analytics",
       label: "Progress Analytics",
       icon: "📊",
       description: "Family progress",
-      active: pathname === "/dashboard/parent/analytics"
-    }
+      active: pathname === "/dashboard/parent/analytics",
+    },
   ];
 
   const childNavItems = [
@@ -131,14 +145,14 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
       label: "My Dashboard",
       icon: "🌟",
       description: "Your awesome space",
-      active: pathname === "/dashboard/child"
+      active: pathname === "/dashboard/child",
     },
     {
       href: "/dashboard/child/chores",
       label: "My Chores",
       icon: "📝",
       description: "Tasks to complete",
-      active: pathname === "/dashboard/child/chores"
+      active: pathname === "/dashboard/child/chores",
     },
     {
       href: "/dashboard/child/achievements",
@@ -146,22 +160,25 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
       icon: "🏆",
       description: "Your badges & rewards",
       active: pathname === "/dashboard/child/achievements",
-      badge: notifications.newAchievements > 0 ? notifications.newAchievements : undefined
+      badge:
+        notifications.newAchievements > 0
+          ? notifications.newAchievements
+          : undefined,
     },
     {
       href: "/dashboard/child/photos",
       label: "Photo Missions",
       icon: "📸",
       description: "Upload chore photos",
-      active: pathname === "/dashboard/child/photos"
+      active: pathname === "/dashboard/child/photos",
     },
     {
       href: "/dashboard/child/progress",
       label: "My Progress",
       icon: "📈",
       description: "See your growth",
-      active: pathname === "/dashboard/child/progress"
-    }
+      active: pathname === "/dashboard/child/progress",
+    },
   ];
 
   const adminNavItems = [
@@ -170,22 +187,22 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
       label: "Admin Panel",
       icon: "⚙️",
       description: "System administration",
-      active: pathname === "/dashboard/admin"
+      active: pathname === "/dashboard/admin",
     },
     {
       href: "/dashboard/admin/families",
       label: "All Families",
       icon: "🏘️",
       description: "Manage all families",
-      active: pathname === "/dashboard/admin/families"
+      active: pathname === "/dashboard/admin/families",
     },
     {
       href: "/dashboard/admin/users",
       label: "User Management",
       icon: "👥",
       description: "Manage users",
-      active: pathname === "/dashboard/admin/users"
-    }
+      active: pathname === "/dashboard/admin/users",
+    },
   ];
 
   const getNavItems = () => {
@@ -216,19 +233,32 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
         <div className="navbar-start">
           {/* Mobile menu button */}
           <div className="dropdown lg:hidden">
-            <label 
-              tabIndex={0} 
+            <label
+              tabIndex={0}
               className="btn btn-ghost"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </label>
           </div>
 
           {/* Logo */}
-          <Link href="/" className="btn btn-ghost text-xl font-bold text-primary">
+          <Link
+            href="/"
+            className="btn btn-ghost text-xl font-bold text-primary"
+          >
             <span className="text-2xl mr-2">🏠</span>
             ChoreMinder
           </Link>
@@ -262,8 +292,8 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
         <div className="navbar-end gap-2">
           {/* Family Switcher */}
           {familyContext && (
-            <FamilySwitcher 
-              familyContext={familyContext} 
+            <FamilySwitcher
+              familyContext={familyContext}
               onFamilyChange={onFamilyChange}
             />
           )}
@@ -276,13 +306,26 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                 <span className="hidden sm:inline">
                   {isParent ? "Parent View" : "Child View"}
                 </span>
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </label>
-              <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+              <ul
+                tabIndex={0}
+                className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+              >
                 <li>
-                  <button 
+                  <button
                     onClick={() => router.push("/dashboard/parent")}
                     className={`${isParent ? "active" : ""}`}
                   >
@@ -291,7 +334,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => router.push("/dashboard/child")}
                     className={`${isChild ? "active" : ""}`}
                   >
@@ -325,7 +368,9 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                     <span className="text-lg mr-3">{item.icon}</span>
                     <div className="flex-1 text-left">
                       <div className="font-bold">{item.label}</div>
-                      <div className="text-xs opacity-70">{item.description}</div>
+                      <div className="text-xs opacity-70">
+                        {item.description}
+                      </div>
                     </div>
                     {item.badge && (
                       <div className="badge badge-error badge-sm">
@@ -338,12 +383,10 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
             </ul>
 
             {/* Mobile Role Switch */}
-            {canSwitchRoles && (
-              <div className="divider">Switch View</div>
-            )}
+            {canSwitchRoles && <div className="divider">Switch View</div>}
             {canSwitchRoles && (
               <div className="grid grid-cols-2 gap-2">
-                <button 
+                <button
                   onClick={() => {
                     router.push("/dashboard/parent");
                     setIsMobileMenuOpen(false);
@@ -353,7 +396,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                   <span className="text-lg mr-1">👨‍👩‍👧‍👦</span>
                   Parent
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     router.push("/dashboard/child");
                     setIsMobileMenuOpen(false);
@@ -371,7 +414,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
 
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-25 z-30 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />

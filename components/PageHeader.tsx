@@ -17,44 +17,43 @@ interface PageHeaderProps {
   size?: "sm" | "md" | "lg";
 }
 
-const PageHeader = ({ 
-  title, 
-  description, 
-  icon, 
-  children, 
+const PageHeader = ({
+  title,
+  description,
+  icon,
+  children,
   actions,
   breadcrumbs,
   gradient = false,
-  size = "md"
+  size = "md",
 }: PageHeaderProps) => {
-
   const sizeClasses = {
     sm: {
       title: "text-2xl md:text-3xl",
       description: "text-base",
       icon: "text-4xl",
-      padding: "py-4 md:py-6"
+      padding: "py-4 md:py-6",
     },
     md: {
       title: "text-3xl md:text-4xl",
       description: "text-lg",
-      icon: "text-5xl md:text-6xl", 
-      padding: "py-6 md:py-8"
+      icon: "text-5xl md:text-6xl",
+      padding: "py-6 md:py-8",
     },
     lg: {
       title: "text-4xl md:text-5xl",
       description: "text-xl",
       icon: "text-6xl md:text-7xl",
-      padding: "py-8 md:py-12"
-    }
+      padding: "py-8 md:py-12",
+    },
   };
 
-  const backgroundClass = gradient 
+  const backgroundClass = gradient
     ? "bg-gradient-to-r from-primary via-secondary to-accent text-white"
     : "bg-base-100";
 
   return (
-    <div className={`${backgroundClass} ${gradient ? 'shadow-lg' : ''}`}>
+    <div className={`${backgroundClass} ${gradient ? "shadow-lg" : ""}`}>
       <div className={`container mx-auto px-4 ${sizeClasses[size].padding}`}>
         {/* Breadcrumbs */}
         {breadcrumbs && breadcrumbs.length > 0 && (
@@ -63,11 +62,18 @@ const PageHeader = ({
               {breadcrumbs.map((crumb, index) => (
                 <li key={index}>
                   {crumb.href && !crumb.active ? (
-                    <a href={crumb.href} className={gradient ? "text-white/80 hover:text-white" : ""}>
+                    <a
+                      href={crumb.href}
+                      className={
+                        gradient ? "text-white/80 hover:text-white" : ""
+                      }
+                    >
                       {crumb.label}
                     </a>
                   ) : (
-                    <span className={`${crumb.active ? 'font-bold' : ''} ${gradient ? 'text-white' : ''}`}>
+                    <span
+                      className={`${crumb.active ? "font-bold" : ""} ${gradient ? "text-white" : ""}`}
+                    >
                       {crumb.label}
                     </span>
                   )}
@@ -83,41 +89,39 @@ const PageHeader = ({
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-2">
               {icon && (
-                <div className={`${sizeClasses[size].icon} ${gradient ? 'drop-shadow-lg' : ''}`}>
+                <div
+                  className={`${sizeClasses[size].icon} ${gradient ? "drop-shadow-lg" : ""}`}
+                >
                   {icon}
                 </div>
               )}
-              <h1 className={`
+              <h1
+                className={`
                 font-bold ${sizeClasses[size].title} 
-                ${gradient ? 'text-white drop-shadow-lg' : 'text-base-content'}
-              `}>
+                ${gradient ? "text-white drop-shadow-lg" : "text-base-content"}
+              `}
+              >
                 {title}
               </h1>
             </div>
-            
+
             {description && (
-              <p className={`
+              <p
+                className={`
                 ${sizeClasses[size].description} 
-                ${gradient ? 'text-white/90' : 'text-base-content/70'} 
+                ${gradient ? "text-white/90" : "text-base-content/70"} 
                 max-w-2xl
-              `}>
+              `}
+              >
                 {description}
               </p>
             )}
-            
-            {children && (
-              <div className="mt-4">
-                {children}
-              </div>
-            )}
+
+            {children && <div className="mt-4">{children}</div>}
           </div>
 
           {/* Actions */}
-          {actions && (
-            <div className="flex-shrink-0">
-              {actions}
-            </div>
-          )}
+          {actions && <div className="flex-shrink-0">{actions}</div>}
         </div>
       </div>
     </div>

@@ -26,8 +26,9 @@ const MobileTestHelper = () => {
         width: window.innerWidth,
         height: window.innerHeight,
         userAgent: navigator.userAgent,
-        isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-        orientation: window.innerWidth > window.innerHeight ? "landscape" : "portrait",
+        isTouchDevice: "ontouchstart" in window || navigator.maxTouchPoints > 0,
+        orientation:
+          window.innerWidth > window.innerHeight ? "landscape" : "portrait",
         pixelRatio: window.devicePixelRatio || 1,
       });
 
@@ -37,22 +38,32 @@ const MobileTestHelper = () => {
       const isDesktop = window.innerWidth >= 1024;
 
       setTestResults({
-        navigation: isDesktop ? "✅ Desktop navigation visible" : 
-                   isMobile ? "✅ Mobile menu available" : "✅ Tablet navigation responsive",
-        tabBar: isMobile ? "✅ Mobile tab bar visible" : "✅ Tab bar hidden on larger screens",
-        touchTargets: screenInfo.isTouchDevice ? "✅ Touch-optimized targets" : "✅ Mouse-optimized targets",
+        navigation: isDesktop
+          ? "✅ Desktop navigation visible"
+          : isMobile
+            ? "✅ Mobile menu available"
+            : "✅ Tablet navigation responsive",
+        tabBar: isMobile
+          ? "✅ Mobile tab bar visible"
+          : "✅ Tab bar hidden on larger screens",
+        touchTargets: screenInfo.isTouchDevice
+          ? "✅ Touch-optimized targets"
+          : "✅ Mouse-optimized targets",
         responsiveGrid: "✅ Grid adapts to screen size",
-        textReadability: window.innerWidth < 400 ? "⚠️ Very small screen - check text size" : "✅ Text readable",
+        textReadability:
+          window.innerWidth < 400
+            ? "⚠️ Very small screen - check text size"
+            : "✅ Text readable",
       });
     };
 
     updateScreenInfo();
-    window.addEventListener('resize', updateScreenInfo);
-    window.addEventListener('orientationchange', updateScreenInfo);
+    window.addEventListener("resize", updateScreenInfo);
+    window.addEventListener("orientationchange", updateScreenInfo);
 
     return () => {
-      window.removeEventListener('resize', updateScreenInfo);
-      window.removeEventListener('orientationchange', updateScreenInfo);
+      window.removeEventListener("resize", updateScreenInfo);
+      window.removeEventListener("orientationchange", updateScreenInfo);
     };
   }, [screenInfo.isTouchDevice]);
 
@@ -71,7 +82,7 @@ const MobileTestHelper = () => {
     return "2xl";
   };
 
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== "development") {
     return null;
   }
 
@@ -81,7 +92,7 @@ const MobileTestHelper = () => {
         <div className="font-bold text-primary border-b pb-2">
           📊 Mobile Test Helper
         </div>
-        
+
         {/* Device Info */}
         <div>
           <div className="font-semibold">{getDeviceType()}</div>
@@ -110,25 +121,25 @@ const MobileTestHelper = () => {
         <div className="border-t pt-2">
           <div className="font-semibold mb-1">Quick Tests:</div>
           <div className="space-y-1">
-            <button 
+            <button
               onClick={() => {
-                const nav = document.querySelector('nav');
-                if (nav) nav.style.border = '2px solid red';
+                const nav = document.querySelector("nav");
+                if (nav) nav.style.border = "2px solid red";
                 setTimeout(() => {
-                  if (nav) nav.style.border = 'none';
+                  if (nav) nav.style.border = "none";
                 }, 2000);
               }}
               className="btn btn-xs btn-outline w-full"
             >
               Highlight Navigation
             </button>
-            <button 
+            <button
               onClick={() => {
-                const tabBar = document.querySelector('[data-mobile-tab-bar]');
+                const tabBar = document.querySelector("[data-mobile-tab-bar]");
                 if (tabBar) {
-                  tabBar.style.border = '2px solid red';
+                  tabBar.style.border = "2px solid red";
                   setTimeout(() => {
-                    tabBar.style.border = 'none';
+                    tabBar.style.border = "none";
                   }, 2000);
                 }
               }}
@@ -136,11 +147,11 @@ const MobileTestHelper = () => {
             >
               Highlight Tab Bar
             </button>
-            <button 
+            <button
               onClick={() => {
-                document.body.style.transform = 'rotate(90deg)';
+                document.body.style.transform = "rotate(90deg)";
                 setTimeout(() => {
-                  document.body.style.transform = 'none';
+                  document.body.style.transform = "none";
                 }, 2000);
               }}
               className="btn btn-xs btn-outline w-full"

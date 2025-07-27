@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+
 import { authOptions } from "@/lib/auth";
+
 import dbConnect from "@/lib/mongoose";
 
 // Simple in-memory storage for demo purposes
 // In production, this would be stored in the database
-let helpRequests: any[] = [];
+const helpRequests: any[] = [];
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (!choreId || !message) {
       return NextResponse.json(
         { error: "Chore ID and message are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating help request:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -64,14 +66,19 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("userId") || session.user.id;
 
     // Filter help requests
-    let filteredRequests = helpRequests.filter(req => req.userId === userId);
-    
+    let filteredRequests = helpRequests.filter((req) => req.userId === userId);
+
     if (choreId) {
-      filteredRequests = filteredRequests.filter(req => req.choreId === choreId);
+      filteredRequests = filteredRequests.filter(
+        (req) => req.choreId === choreId,
+      );
     }
 
     // Sort by creation date (newest first)
-    filteredRequests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    filteredRequests.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
     return NextResponse.json({
       requests: filteredRequests,
@@ -80,7 +87,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching help requests:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -20,7 +20,11 @@ interface QuickActionsProps {
   onRefresh: () => void;
 }
 
-const QuickActions = ({ familyMembers, familyId, onRefresh }: QuickActionsProps) => {
+const QuickActions = ({
+  familyMembers,
+  familyId,
+  onRefresh,
+}: QuickActionsProps) => {
   const [selectedMember, setSelectedMember] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
 

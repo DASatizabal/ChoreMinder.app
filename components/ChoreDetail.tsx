@@ -32,7 +32,13 @@ interface ChoreDetailProps {
   isOpen: boolean;
 }
 
-const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: ChoreDetailProps) => {
+const ChoreDetail = ({
+  chore,
+  onClose,
+  onStatusUpdate,
+  onHelpRequest,
+  isOpen,
+}: ChoreDetailProps) => {
   const [showInstructions, setShowInstructions] = useState(true);
   const [helpMessage, setHelpMessage] = useState("");
   const [showHelpForm, setShowHelpForm] = useState(false);
@@ -46,7 +52,9 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
     if (timerRunning && startTime) {
       interval = setInterval(() => {
         const now = new Date();
-        const elapsed = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+        const elapsed = Math.floor(
+          (now.getTime() - startTime.getTime()) / 1000,
+        );
         setTimeSpent(elapsed);
       }, 1000);
     }
@@ -55,45 +63,69 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
 
   const getCategoryEmoji = (category?: string) => {
     switch (category?.toLowerCase()) {
-      case "cleaning": return "🧹";
-      case "kitchen": return "🍽️";
-      case "laundry": return "👕";
-      case "outdoor": return "🌳";
-      case "pet care": return "🐕";
-      case "homework": return "📚";
-      case "organization": return "📦";
-      default: return "⭐";
+      case "cleaning":
+        return "🧹";
+      case "kitchen":
+        return "🍽️";
+      case "laundry":
+        return "👕";
+      case "outdoor":
+        return "🌳";
+      case "pet care":
+        return "🐕";
+      case "homework":
+        return "📚";
+      case "organization":
+        return "📦";
+      default:
+        return "⭐";
     }
   };
 
   const getPriorityEmoji = (priority: string) => {
     switch (priority) {
-      case "high": return "🚨";
-      case "medium": return "⚡";
-      case "low": return "😎";
-      default: return "📝";
+      case "high":
+        return "🚨";
+      case "medium":
+        return "⚡";
+      case "low":
+        return "😎";
+      default:
+        return "📝";
     }
   };
 
   const getStatusEmoji = (status: string) => {
     switch (status) {
-      case "pending": return "⏳";
-      case "in_progress": return "🔥";
-      case "completed": return "✅";
-      case "verified": return "🏆";
-      case "rejected": return "😅";
-      default: return "📝";
+      case "pending":
+        return "⏳";
+      case "in_progress":
+        return "🔥";
+      case "completed":
+        return "✅";
+      case "verified":
+        return "🏆";
+      case "rejected":
+        return "😅";
+      default:
+        return "📝";
     }
   };
 
   const getStatusMessage = (status: string) => {
     switch (status) {
-      case "pending": return "Ready to start this awesome chore! 🚀";
-      case "in_progress": return "You're doing great! Keep going! 💪";
-      case "completed": return "Amazing work! Waiting for approval! 🎉";
-      case "verified": return "You're a champion! This chore is complete! 🏆";
-      case "rejected": return "No worries! Let's try again together! 😊";
-      default: return "Let's get started! 🌟";
+      case "pending":
+        return "Ready to start this awesome chore! 🚀";
+      case "in_progress":
+        return "You're doing great! Keep going! 💪";
+      case "completed":
+        return "Amazing work! Waiting for approval! 🎉";
+      case "verified":
+        return "You're a champion! This chore is complete! 🏆";
+      case "rejected":
+        return "No worries! Let's try again together! 😊";
+      default:
+        return "Let's get started! 🌟";
     }
   };
 
@@ -104,25 +136,27 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
 
   const getTimeUntilDue = () => {
     if (!chore.dueDate) return null;
-    
+
     const now = new Date();
     const due = new Date(chore.dueDate);
     const diff = due.getTime() - now.getTime();
-    
+
     if (diff < 0) return "Overdue - but you can still do it! 💪";
-    
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
-    
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} left - plenty of time! ⏰`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} left - you've got this! ⏰`;
+
+    if (days > 0)
+      return `${days} day${days > 1 ? "s" : ""} left - plenty of time! ⏰`;
+    if (hours > 0)
+      return `${hours} hour${hours > 1 ? "s" : ""} left - you've got this! ⏰`;
     return "Due soon - but no pressure! 🕐";
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleStartChore = () => {
@@ -149,7 +183,7 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
       toast.error("Please tell us what you need help with! 😊");
       return;
     }
-    
+
     onHelpRequest(chore._id, helpMessage);
     setHelpMessage("");
     setShowHelpForm(false);
@@ -170,39 +204,49 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
             <span className="text-6xl">{getCategoryEmoji(chore.category)}</span>
             <span className="text-4xl">{getStatusEmoji(chore.status)}</span>
           </div>
-          
+
           <h3 className="text-3xl font-bold text-primary mb-2">
             {chore.title}
           </h3>
-          
+
           <p className="text-lg text-gray-600 mb-4">
             {getStatusMessage(chore.status)}
           </p>
 
           {/* Status badges */}
           <div className="flex flex-wrap justify-center gap-3 mb-4">
-            <div className={`badge badge-lg font-bold ${
-              chore.status === "verified" ? "badge-success" :
-              chore.status === "completed" ? "badge-info" :
-              chore.status === "in_progress" ? "badge-warning" :
-              chore.status === "rejected" ? "badge-error" :
-              "badge-ghost"
-            }`}>
+            <div
+              className={`badge badge-lg font-bold ${
+                chore.status === "verified"
+                  ? "badge-success"
+                  : chore.status === "completed"
+                    ? "badge-info"
+                    : chore.status === "in_progress"
+                      ? "badge-warning"
+                      : chore.status === "rejected"
+                        ? "badge-error"
+                        : "badge-ghost"
+              }`}
+            >
               {getStatusEmoji(chore.status)} {chore.status.replace("_", " ")}
             </div>
-            
-            <div className={`badge badge-lg font-bold ${
-              chore.priority === "high" ? "badge-error" :
-              chore.priority === "medium" ? "badge-warning" :
-              "badge-success"
-            }`}>
+
+            <div
+              className={`badge badge-lg font-bold ${
+                chore.priority === "high"
+                  ? "badge-error"
+                  : chore.priority === "medium"
+                    ? "badge-warning"
+                    : "badge-success"
+              }`}
+            >
               {getPriorityEmoji(chore.priority)} {chore.priority} priority
             </div>
-            
+
             <div className="badge badge-primary badge-lg font-bold">
               💰 {chore.points} points
             </div>
-            
+
             {chore.requiresPhotoVerification && (
               <div className="badge badge-accent badge-lg font-bold">
                 📸 Photo needed
@@ -215,15 +259,16 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
         {chore.status === "in_progress" && (
           <div className="card bg-gradient-to-r from-yellow-100 to-orange-100 border-4 border-yellow-300 mb-6">
             <div className="card-body p-4 text-center">
-              <h4 className="font-bold text-lg text-orange-700">⏱️ Time Tracker</h4>
+              <h4 className="font-bold text-lg text-orange-700">
+                ⏱️ Time Tracker
+              </h4>
               <div className="text-3xl font-bold text-orange-800 mb-2">
                 {formatTime(timeSpent)}
               </div>
               <p className="text-sm text-orange-600">
-                {chore.estimatedMinutes ? 
-                  `Goal: ${chore.estimatedMinutes} minutes - You're doing great! 💪` :
-                  "Take your time and do your best! 🌟"
-                }
+                {chore.estimatedMinutes
+                  ? `Goal: ${chore.estimatedMinutes} minutes - You're doing great! 💪`
+                  : "Take your time and do your best! 🌟"}
               </p>
             </div>
           </div>
@@ -231,7 +276,9 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
 
         {/* Due date warning */}
         {chore.dueDate && (
-          <div className={`alert mb-6 ${isOverdue() ? "alert-warning" : "alert-info"}`}>
+          <div
+            className={`alert mb-6 ${isOverdue() ? "alert-warning" : "alert-info"}`}
+          >
             <div className="flex items-center gap-2">
               <span className="text-2xl">📅</span>
               <div>
@@ -271,7 +318,7 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
                   {showInstructions ? "Hide" : "Show"} Instructions
                 </button>
               </div>
-              
+
               {showInstructions && (
                 <div className="bg-green-50 p-4 rounded-lg">
                   <pre className="whitespace-pre-wrap text-gray-700 font-sans text-base leading-relaxed">
@@ -289,9 +336,13 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
             <div className="flex items-center gap-2">
               <span className="text-2xl">💭</span>
               <div>
-                <h4 className="font-bold">Feedback from {chore.assignedBy.name}</h4>
+                <h4 className="font-bold">
+                  Feedback from {chore.assignedBy.name}
+                </h4>
                 <p>{chore.rejectionReason}</p>
-                <p className="text-sm mt-1">Don't worry - we can fix this together! 😊</p>
+                <p className="text-sm mt-1">
+                  Don't worry - we can fix this together! 😊
+                </p>
               </div>
             </div>
           </div>
@@ -305,7 +356,8 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
                 🆘 Ask for Help
               </h4>
               <p className="text-purple-600 mb-4">
-                It's totally okay to ask for help! What do you need assistance with?
+                It's totally okay to ask for help! What do you need assistance
+                with?
               </p>
               <textarea
                 value={helpMessage}
@@ -315,10 +367,7 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
                 rows={3}
               />
               <div className="flex gap-3">
-                <button
-                  onClick={handleHelpSubmit}
-                  className="btn btn-primary"
-                >
+                <button onClick={handleHelpSubmit} className="btn btn-primary">
                   Send Help Request 🚀
                 </button>
                 <button
@@ -347,14 +396,18 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
           <div className="stat bg-white shadow-lg rounded-xl border-2 border-gray-200">
             <div className="stat-figure text-4xl">⏱️</div>
             <div className="stat-title text-gray-600">Time Needed</div>
-            <div className="stat-value text-secondary">{chore.estimatedMinutes || "?"}</div>
+            <div className="stat-value text-secondary">
+              {chore.estimatedMinutes || "?"}
+            </div>
             <div className="stat-desc text-gray-500">Minutes (about)</div>
           </div>
 
           <div className="stat bg-white shadow-lg rounded-xl border-2 border-gray-200">
             <div className="stat-figure text-4xl">👤</div>
             <div className="stat-title text-gray-600">Assigned By</div>
-            <div className="stat-value text-accent text-sm">{chore.assignedBy.name}</div>
+            <div className="stat-value text-accent text-sm">
+              {chore.assignedBy.name}
+            </div>
             <div className="stat-desc text-gray-500">Your awesome parent!</div>
           </div>
         </div>
@@ -362,10 +415,7 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
         {/* Action buttons */}
         <div className="modal-action">
           <div className="flex flex-wrap gap-3 w-full">
-            <button
-              onClick={onClose}
-              className="btn btn-ghost"
-            >
+            <button onClick={onClose} className="btn btn-ghost">
               Close
             </button>
 
@@ -411,7 +461,7 @@ const ChoreDetail = ({ chore, onClose, onStatusUpdate, onHelpRequest, isOpen }: 
         <div className="text-center mt-6 p-4 bg-white/50 rounded-xl">
           <div className="text-3xl mb-2">🌟</div>
           <p className="text-sm text-gray-600">
-            Remember: Every chore helps your family and makes you stronger! 
+            Remember: Every chore helps your family and makes you stronger!
             You've got this, champion! 💪✨
           </p>
         </div>

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+
 import { authOptions } from "@/lib/auth";
-import dbConnect from "@/lib/mongoose";
 import User from "@/models/User";
+
+import dbConnect from "@/lib/mongoose";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
     if (!familyId) {
       return NextResponse.json(
         { error: "Family ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,11 +31,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is a member of the requested family
-    const isMember = user.families?.some((family: any) => family.familyId.toString() === familyId);
+    const isMember = user.families?.some(
+      (family: any) => family.familyId.toString() === familyId,
+    );
     if (!isMember) {
       return NextResponse.json(
         { error: "You are not a member of this family" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
     console.error("Error switching family:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

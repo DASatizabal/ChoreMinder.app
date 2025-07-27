@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+
 import AssignmentControls from "./AssignmentControls";
 
 interface FamilyMember {
@@ -22,7 +23,13 @@ interface Chore {
   instructions?: string;
   category?: string;
   notes?: string;
-  status: "pending" | "in_progress" | "completed" | "verified" | "rejected" | "cancelled";
+  status:
+    | "pending"
+    | "in_progress"
+    | "completed"
+    | "verified"
+    | "rejected"
+    | "cancelled";
   priority: "low" | "medium" | "high";
   points: number;
   dueDate?: string;
@@ -46,7 +53,14 @@ interface Chore {
   requiresPhotoVerification: boolean;
   isRecurring: boolean;
   recurrence?: {
-    type: "daily" | "weekly" | "monthly" | "yearly" | "custom" | "once" | "none";
+    type:
+      | "daily"
+      | "weekly"
+      | "monthly"
+      | "yearly"
+      | "custom"
+      | "once"
+      | "none";
     interval?: number;
     daysOfWeek?: number[];
     dayOfMonth?: number;
@@ -94,7 +108,7 @@ interface ChoreEditorProps {
 
 const categories = [
   "Cleaning",
-  "Kitchen", 
+  "Kitchen",
   "Laundry",
   "Outdoor",
   "Pet Care",
@@ -103,7 +117,13 @@ const categories = [
   "General",
 ];
 
-const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: ChoreEditorProps) => {
+const ChoreEditor = ({
+  chore,
+  familyMembers,
+  onClose,
+  onChoreUpdated,
+  isOpen,
+}: ChoreEditorProps) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -158,30 +178,32 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
   }, [chore]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value, type } = e.target;
-    
+
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else if (type === "number") {
-      setFormData(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
+      setFormData((prev) => ({ ...prev, [name]: parseInt(value) || 0 }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleRecurrenceChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      recurrence: { ...prev.recurrence, [field]: value }
+      recurrence: { ...prev.recurrence, [field]: value },
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !chore) {
       toast.error("Please fill in all required fields");
       return;
@@ -197,7 +219,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
         },
         body: JSON.stringify({
           ...formData,
-          recurrence: formData.isRecurring ? formData.recurrence : { type: "none" },
+          recurrence: formData.isRecurring
+            ? formData.recurrence
+            : { type: "none" },
         }),
       });
 
@@ -211,14 +235,21 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
       onClose();
     } catch (error) {
       console.error("Error updating chore:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to update chore");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update chore",
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const deleteChore = async () => {
-    if (!chore || !confirm("Are you sure you want to delete this chore? This action cannot be undone.")) {
+    if (
+      !chore ||
+      !confirm(
+        "Are you sure you want to delete this chore? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -237,7 +268,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
       onClose();
     } catch (error) {
       console.error("Error deleting chore:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to delete chore");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete chore",
+      );
     }
   };
 
@@ -255,7 +288,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
           title: `${formData.title} (Copy)`,
           familyId: chore.family._id,
           assignedTo: chore.assignedTo?._id,
-          recurrence: formData.isRecurring ? formData.recurrence : { type: "none" },
+          recurrence: formData.isRecurring
+            ? formData.recurrence
+            : { type: "none" },
         }),
       });
 
@@ -268,7 +303,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
       onChoreUpdated();
     } catch (error) {
       console.error("Error duplicating chore:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to duplicate chore");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to duplicate chore",
+      );
     }
   };
 
@@ -295,7 +332,7 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
 
   if (!isOpen || !chore) return null;
 
-  const children = familyMembers.filter(member => member.role === "child");
+  const children = familyMembers.filter((member) => member.role === "child");
 
   return (
     <div className="modal modal-open">
@@ -314,8 +351,18 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
               className="btn btn-ghost btn-sm"
               title="Duplicate chore"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
               </svg>
             </button>
             <button
@@ -323,13 +370,33 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
               className="btn btn-ghost btn-sm"
               title="View history"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </button>
             <button onClick={onClose} className="btn btn-ghost btn-sm">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -395,8 +462,10 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                       onChange={handleInputChange}
                       className="select select-bordered"
                     >
-                      {categories.map(category => (
-                        <option key={category} value={category}>{category}</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -417,7 +486,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
 
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Detailed Instructions</span>
+                    <span className="label-text font-medium">
+                      Detailed Instructions
+                    </span>
                   </label>
                   <textarea
                     name="instructions"
@@ -475,7 +546,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-medium">Est. Minutes</span>
+                      <span className="label-text font-medium">
+                        Est. Minutes
+                      </span>
                     </label>
                     <input
                       type="number"
@@ -507,7 +580,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
               <div className="space-y-6">
                 <div className="form-control">
                   <label className="label cursor-pointer">
-                    <span className="label-text font-medium">Make this a recurring chore</span>
+                    <span className="label-text font-medium">
+                      Make this a recurring chore
+                    </span>
                     <input
                       type="checkbox"
                       name="isRecurring"
@@ -521,7 +596,7 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                 {formData.isRecurring && (
                   <div className="card bg-base-200 p-6">
                     <h4 className="font-semibold mb-4">Recurrence Settings</h4>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div className="form-control">
                         <label className="label">
@@ -529,7 +604,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                         </label>
                         <select
                           value={formData.recurrence.type}
-                          onChange={(e) => handleRecurrenceChange("type", e.target.value)}
+                          onChange={(e) =>
+                            handleRecurrenceChange("type", e.target.value)
+                          }
                           className="select select-bordered"
                         >
                           <option value="daily">Daily</option>
@@ -546,7 +623,12 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                         <input
                           type="number"
                           value={formData.recurrence.interval}
-                          onChange={(e) => handleRecurrenceChange("interval", parseInt(e.target.value) || 1)}
+                          onChange={(e) =>
+                            handleRecurrenceChange(
+                              "interval",
+                              parseInt(e.target.value) || 1,
+                            )
+                          }
                           className="input input-bordered"
                           min="1"
                           max="30"
@@ -557,24 +639,35 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="form-control">
                         <label className="label">
-                          <span className="label-text">End Date (Optional)</span>
+                          <span className="label-text">
+                            End Date (Optional)
+                          </span>
                         </label>
                         <input
                           type="date"
                           value={formData.recurrence.endDate}
-                          onChange={(e) => handleRecurrenceChange("endDate", e.target.value)}
+                          onChange={(e) =>
+                            handleRecurrenceChange("endDate", e.target.value)
+                          }
                           className="input input-bordered"
                         />
                       </div>
 
                       <div className="form-control">
                         <label className="label">
-                          <span className="label-text">Max Occurrences (Optional)</span>
+                          <span className="label-text">
+                            Max Occurrences (Optional)
+                          </span>
                         </label>
                         <input
                           type="number"
                           value={formData.recurrence.maxCount || ""}
-                          onChange={(e) => handleRecurrenceChange("maxCount", parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            handleRecurrenceChange(
+                              "maxCount",
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
                           className="input input-bordered"
                           min="1"
                           placeholder="No limit"
@@ -591,7 +684,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
               <div className="space-y-6">
                 <div className="form-control">
                   <label className="label cursor-pointer">
-                    <span className="label-text font-medium">Requires Photo Verification</span>
+                    <span className="label-text font-medium">
+                      Requires Photo Verification
+                    </span>
                     <input
                       type="checkbox"
                       name="requiresPhotoVerification"
@@ -601,7 +696,9 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                     />
                   </label>
                   <div className="label">
-                    <span className="label-text-alt">Child must submit a photo when completing this chore</span>
+                    <span className="label-text-alt">
+                      Child must submit a photo when completing this chore
+                    </span>
                   </div>
                 </div>
 
@@ -611,11 +708,15 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <span className="text-base-content/60">Created</span>
-                      <div className="font-medium">{formatDate(chore.createdAt)}</div>
+                      <div className="font-medium">
+                        {formatDate(chore.createdAt)}
+                      </div>
                     </div>
                     <div>
                       <span className="text-base-content/60">Last Updated</span>
-                      <div className="font-medium">{formatDate(chore.updatedAt)}</div>
+                      <div className="font-medium">
+                        {formatDate(chore.updatedAt)}
+                      </div>
                     </div>
                     <div>
                       <span className="text-base-content/60">Assigned By</span>
@@ -637,8 +738,18 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                       onClick={deleteChore}
                       className="btn btn-error btn-outline"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
                       </svg>
                       Delete Chore
                     </button>
@@ -659,8 +770,18 @@ const ChoreEditor = ({ chore, familyMembers, onClose, onChoreUpdated, isOpen }: 
                   onClick={() => setShowHistory(false)}
                   className="btn btn-ghost btn-sm"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>

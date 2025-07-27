@@ -160,15 +160,17 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({
       message: `Photo ${action}d successfully`,
-      chore: updatedChore ? {
-        id: updatedChore._id,
-        title: updatedChore.title,
-        status: updatedChore.status,
-        verifiedAt: updatedChore.verifiedAt,
-        verifiedBy: updatedChore.verifiedBy,
-        rejectionReason: updatedChore.rejectionReason,
-        photoVerification: updatedChore.photoVerification,
-      } : null,
+      chore: updatedChore
+        ? {
+            id: updatedChore._id,
+            title: updatedChore.title,
+            status: updatedChore.status,
+            verifiedAt: updatedChore.verifiedAt,
+            verifiedBy: updatedChore.verifiedBy,
+            rejectionReason: updatedChore.rejectionReason,
+            photoVerification: updatedChore.photoVerification,
+          }
+        : null,
     });
   } catch (error) {
     console.error("Error verifying photo:", error);

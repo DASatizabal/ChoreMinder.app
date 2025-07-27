@@ -13,7 +13,10 @@ export default async function ChildDashboardPage() {
   }
 
   return (
-    <AppLayout requiresFamily={true} allowedRoles={["child", "user", "parent", "admin"]}>
+    <AppLayout
+      requiresFamily={true}
+      allowedRoles={["child", "user", "parent", "admin"]}
+    >
       <ChildDashboard />
     </AppLayout>
   );

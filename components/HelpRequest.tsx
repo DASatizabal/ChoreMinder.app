@@ -27,7 +27,13 @@ interface HelpRequestProps {
   isOpen: boolean;
 }
 
-const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequestProps) => {
+const HelpRequest = ({
+  chore,
+  userId,
+  onClose,
+  onHelpSent,
+  isOpen,
+}: HelpRequestProps) => {
   const [helpMessage, setHelpMessage] = useState("");
   const [helpType, setHelpType] = useState("question");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,38 +45,38 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
       id: "question",
       emoji: "❓",
       title: "I have a question",
-      description: "Ask about how to do something"
+      description: "Ask about how to do something",
     },
     {
       id: "stuck",
       emoji: "😅",
       title: "I'm stuck",
-      description: "Need help figuring out a step"
+      description: "Need help figuring out a step",
     },
     {
       id: "confused",
       emoji: "🤔",
       title: "I'm confused",
-      description: "Don't understand the instructions"
+      description: "Don't understand the instructions",
     },
     {
       id: "need_supplies",
       emoji: "🧰",
       title: "Need supplies",
-      description: "Missing tools or materials"
+      description: "Missing tools or materials",
     },
     {
       id: "safety",
       emoji: "⚠️",
       title: "Safety concern",
-      description: "Something doesn't feel safe"
+      description: "Something doesn't feel safe",
     },
     {
       id: "other",
       emoji: "💭",
       title: "Something else",
-      description: "Other type of help needed"
-    }
+      description: "Other type of help needed",
+    },
   ];
 
   const helpSuggestions = [
@@ -83,7 +89,7 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
     "Can you show me how?",
     "Is this safe for me to do?",
     "I'm having trouble with...",
-    "Can someone help me?"
+    "Can someone help me?",
   ];
 
   useEffect(() => {
@@ -94,7 +100,9 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
 
   const fetchExistingRequests = async () => {
     try {
-      const response = await fetch(`/api/help-requests?choreId=${chore._id}&userId=${userId}`);
+      const response = await fetch(
+        `/api/help-requests?choreId=${chore._id}&userId=${userId}`,
+      );
       if (response.ok) {
         const data = await response.json();
         setExistingRequests(data.requests || []);
@@ -148,23 +156,35 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
 
   const getCategoryEmoji = (category?: string) => {
     switch (category?.toLowerCase()) {
-      case "cleaning": return "🧹";
-      case "kitchen": return "🍽️";
-      case "laundry": return "👕";
-      case "outdoor": return "🌳";
-      case "pet care": return "🐕";
-      case "homework": return "📚";
-      case "organization": return "📦";
-      default: return "⭐";
+      case "cleaning":
+        return "🧹";
+      case "kitchen":
+        return "🍽️";
+      case "laundry":
+        return "👕";
+      case "outdoor":
+        return "🌳";
+      case "pet care":
+        return "🐕";
+      case "homework":
+        return "📚";
+      case "organization":
+        return "📦";
+      default:
+        return "⭐";
     }
   };
 
   const getStatusEmoji = (status: string) => {
     switch (status) {
-      case "pending": return "⏳";
-      case "in_progress": return "👀";
-      case "resolved": return "✅";
-      default: return "❓";
+      case "pending":
+        return "⏳";
+      case "in_progress":
+        return "👀";
+      case "resolved":
+        return "✅";
+      default:
+        return "❓";
     }
   };
 
@@ -177,9 +197,10 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
     const diffDays = Math.floor(diffHours / 24);
 
     if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   };
 
   if (!isOpen) return null;
@@ -194,7 +215,8 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
             Ask for Help!
           </h3>
           <p className="text-lg text-gray-600">
-            It's totally okay to ask for help with: <strong>{chore.title}</strong> {getCategoryEmoji(chore.category)}
+            It's totally okay to ask for help with:{" "}
+            <strong>{chore.title}</strong> {getCategoryEmoji(chore.category)}
           </p>
         </div>
 
@@ -204,8 +226,10 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
             <span className="text-3xl">💡</span>
             <div>
               <h4 className="font-bold">Remember:</h4>
-              <p>Asking for help is super smart! Even adults ask for help all the time. 
-                 We're here to support you and make sure you succeed! 🌟</p>
+              <p>
+                Asking for help is super smart! Even adults ask for help all the
+                time. We're here to support you and make sure you succeed! 🌟
+              </p>
             </div>
           </div>
         </div>
@@ -222,28 +246,39 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
                 {showExisting ? "Hide" : "Show"} ({existingRequests.length})
               </button>
             </div>
-            
+
             {showExisting && (
               <div className="space-y-3 max-h-40 overflow-y-auto">
                 {existingRequests.map((request) => (
-                  <div key={request._id} className="card bg-white shadow-sm border-l-4 border-l-info">
+                  <div
+                    key={request._id}
+                    className="card bg-white shadow-sm border-l-4 border-l-info"
+                  >
                     <div className="card-body p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-lg">{getStatusEmoji(request.status)}</span>
-                            <span className={`badge badge-sm ${
-                              request.status === "resolved" ? "badge-success" :
-                              request.status === "in_progress" ? "badge-warning" :
-                              "badge-info"
-                            }`}>
+                            <span className="text-lg">
+                              {getStatusEmoji(request.status)}
+                            </span>
+                            <span
+                              className={`badge badge-sm ${
+                                request.status === "resolved"
+                                  ? "badge-success"
+                                  : request.status === "in_progress"
+                                    ? "badge-warning"
+                                    : "badge-info"
+                              }`}
+                            >
                               {request.status}
                             </span>
                             <span className="text-xs text-gray-500">
                               {formatTimeAgo(request.createdAt)}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-700 mb-2">{request.message}</p>
+                          <p className="text-sm text-gray-700 mb-2">
+                            {request.message}
+                          </p>
                           {request.response && (
                             <div className="bg-green-50 p-2 rounded border-l-4 border-l-green-300">
                               <p className="text-sm text-green-700">
@@ -268,14 +303,16 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
 
         {/* Help type selection */}
         <div className="mb-6">
-          <h4 className="font-bold text-lg mb-4">🤔 What kind of help do you need?</h4>
+          <h4 className="font-bold text-lg mb-4">
+            🤔 What kind of help do you need?
+          </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {helpTypes.map((type) => (
               <label
                 key={type.id}
                 className={`card cursor-pointer transition-all transform hover:scale-105 ${
-                  helpType === type.id 
-                    ? "bg-primary text-primary-content border-2 border-primary" 
+                  helpType === type.id
+                    ? "bg-primary text-primary-content border-2 border-primary"
                     : "bg-white hover:bg-base-200 border-2 border-transparent"
                 }`}
               >
@@ -305,7 +342,9 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
 
         {/* Message input */}
         <div className="mb-6">
-          <h4 className="font-bold text-lg mb-3">✍️ Tell us what you need help with:</h4>
+          <h4 className="font-bold text-lg mb-3">
+            ✍️ Tell us what you need help with:
+          </h4>
           <textarea
             value={helpMessage}
             onChange={(e) => setHelpMessage(e.target.value)}
@@ -313,10 +352,12 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
             className="textarea textarea-bordered w-full h-32 text-base"
             disabled={isSubmitting}
           />
-          
+
           {/* Quick suggestions */}
           <div className="mt-3">
-            <p className="text-sm text-gray-600 mb-2">💡 Need ideas? Click any of these:</p>
+            <p className="text-sm text-gray-600 mb-2">
+              💡 Need ideas? Click any of these:
+            </p>
             <div className="flex flex-wrap gap-2">
               {helpSuggestions.slice(0, 6).map((suggestion, index) => (
                 <button
@@ -339,8 +380,11 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
               <span className="text-3xl">⚠️</span>
               <div>
                 <h4 className="font-bold">Safety First!</h4>
-                <p>Great job thinking about safety! If something feels unsafe, 
-                   STOP what you're doing and ask for help right away. You're being very smart! 🛡️</p>
+                <p>
+                  Great job thinking about safety! If something feels unsafe,
+                  STOP what you're doing and ask for help right away. You're
+                  being very smart! 🛡️
+                </p>
               </div>
             </div>
           </div>
@@ -356,7 +400,7 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
             >
               Cancel
             </button>
-            
+
             <button
               onClick={handleSubmitHelp}
               disabled={isSubmitting || !helpMessage.trim()}
@@ -381,8 +425,8 @@ const HelpRequest = ({ chore, userId, onClose, onHelpSent, isOpen }: HelpRequest
         <div className="text-center mt-6 p-4 bg-white/50 rounded-xl">
           <div className="text-3xl mb-2">🤝</div>
           <p className="text-sm text-gray-600">
-            You're being super responsible by asking for help! 
-            Someone will respond to you as soon as possible. Keep being awesome! 💪✨
+            You're being super responsible by asking for help! Someone will
+            respond to you as soon as possible. Keep being awesome! 💪✨
           </p>
         </div>
       </div>

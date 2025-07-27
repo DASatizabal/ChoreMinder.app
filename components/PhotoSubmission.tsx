@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
+import { useNotifications } from "@/hooks/useNotifications";
+
 interface Chore {
   _id: string;
   title: string;
@@ -22,9 +24,16 @@ interface PhotoSubmissionProps {
   userId: string;
   familyId: string;
   onPhotoSubmitted: () => void;
+  choreId?: string; // Optional - if provided, directly submit for this chore
 }
 
-const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmissionProps) => {
+const PhotoSubmission = ({
+  userId,
+  familyId,
+  onPhotoSubmitted,
+  choreId,
+}: PhotoSubmissionProps) => {
+  const notifications = useNotifications({ familyId });
   const [chores, setChores] = useState<Chore[]>([]);
   const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +50,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
     fetchChoresWithPhotoRequirement();
     return () => {
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       }
     };
   }, [userId, familyId]);
@@ -49,13 +58,16 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
   const fetchChoresWithPhotoRequirement = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/chores?assignedTo=${userId}&familyId=${familyId}&requiresPhoto=true`);
+      const response = await fetch(
+        `/api/chores?assignedTo=${userId}&familyId=${familyId}&requiresPhoto=true`,
+      );
       if (!response.ok) throw new Error("Failed to fetch chores");
-      
+
       const data = await response.json();
-      const photoChores = (data.chores || []).filter((chore: Chore) => 
-        chore.requiresPhotoVerification && 
-        (chore.status === "in_progress" || chore.status === "completed")
+      const photoChores = (data.chores || []).filter(
+        (chore: Chore) =>
+          chore.requiresPhotoVerification &&
+          (chore.status === "in_progress" || chore.status === "completed"),
       );
       setChores(photoChores);
     } catch (error) {
@@ -68,8 +80,8 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } // Try to use rear camera on mobile
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }, // Try to use rear camera on mobile
       });
       setStream(mediaStream);
       setCameraMode(true);
@@ -84,7 +96,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
 
   const stopCamera = () => {
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
       setStream(null);
     }
     setCameraMode(false);
@@ -95,22 +107,28 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    const ctx = canvas.getContext('2d');
-    
+    const ctx = canvas.getContext("2d");
+
     if (!ctx) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
-    
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], `chore-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-        setSelectedFile(file);
-        setPreview(URL.createObjectURL(file));
-        stopCamera();
-      }
-    }, 'image/jpeg', 0.8);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const file = new File([blob], `chore-photo-${Date.now()}.jpg`, {
+            type: "image/jpeg",
+          });
+          setSelectedFile(file);
+          setPreview(URL.createObjectURL(file));
+          stopCamera();
+        }
+      },
+      "image/jpeg",
+      0.8,
+    );
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,12 +137,14 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
 
     // Check file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("File is too big! Please choose a smaller photo (under 10MB)");
+      toast.error(
+        "File is too big! Please choose a smaller photo (under 10MB)",
+      );
       return;
     }
 
     // Check file type
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file!");
       return;
     }
@@ -139,11 +159,11 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('photo', selectedFile);
-      formData.append('choreId', selectedChore._id);
+      formData.append("photo", selectedFile);
+      formData.append("choreId", selectedChore._id);
 
       const response = await fetch(`/api/chores/${selectedChore._id}/photos`, {
-        method: 'POST',
+        method: "POST",
         body: formData,
       });
 
@@ -161,13 +181,26 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
       setSelectedFile(null);
       setPreview(null);
       setSelectedChore(null);
-      
+
+      // Send notification to parent that photo was submitted
+      const parentId = selectedChore.assignedBy?._id; // Assuming chore has assignedBy field
+      if (parentId) {
+        await notifications.notifyPhotoSubmitted(
+          selectedChore._id,
+          parentId,
+          selectedChore.title,
+          URL.createObjectURL(selectedFile),
+        );
+      }
+
       // Refresh data
       onPhotoSubmitted();
       fetchChoresWithPhotoRequirement();
     } catch (error) {
       console.error("Error uploading photo:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to upload photo");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload photo",
+      );
     } finally {
       setUploading(false);
     }
@@ -177,13 +210,14 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
     setSelectedFile(null);
     setPreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const getChoreStatusEmoji = (chore: Chore) => {
     if (chore.photoVerification && chore.photoVerification.length > 0) {
-      const latestPhoto = chore.photoVerification[chore.photoVerification.length - 1];
+      const latestPhoto =
+        chore.photoVerification[chore.photoVerification.length - 1];
       if (latestPhoto.status === "approved") return "✅";
       if (latestPhoto.status === "rejected") return "❌";
       return "⏳";
@@ -195,10 +229,13 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
     if (!chore.photoVerification || chore.photoVerification.length === 0) {
       return "No photo yet";
     }
-    const latestPhoto = chore.photoVerification[chore.photoVerification.length - 1];
-    return latestPhoto.status === "pending" ? "Waiting for approval" :
-           latestPhoto.status === "approved" ? "Photo approved!" :
-           "Photo needs work";
+    const latestPhoto =
+      chore.photoVerification[chore.photoVerification.length - 1];
+    return latestPhoto.status === "pending"
+      ? "Waiting for approval"
+      : latestPhoto.status === "approved"
+        ? "Photo approved!"
+        : "Photo needs work";
   };
 
   if (loading) {
@@ -206,7 +243,9 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
       <div className="p-8">
         <div className="text-center">
           <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
-          <p className="text-lg font-medium">Looking for chores that need photos... 📸</p>
+          <p className="text-lg font-medium">
+            Looking for chores that need photos... 📸
+          </p>
         </div>
       </div>
     );
@@ -232,7 +271,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
             No photo missions right now!
           </h3>
           <p className="text-gray-500 mb-4">
-            Complete chores that need photos to unlock this feature! 
+            Complete chores that need photos to unlock this feature!
           </p>
           <div className="text-4xl">📸✨</div>
         </div>
@@ -258,9 +297,9 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                       {chore.points} pts
                     </div>
                   </div>
-                  
+
                   <h4 className="card-title text-lg mb-2">{chore.title}</h4>
-                  
+
                   {chore.description && (
                     <p className="text-gray-600 text-sm mb-3">
                       {chore.description}
@@ -273,11 +312,17 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                     </p>
                   </div>
 
-                  {chore.photoVerification && chore.photoVerification.length > 0 && (
-                    <div className="text-xs text-gray-500">
-                      Last photo: {new Date(chore.photoVerification[chore.photoVerification.length - 1].uploadedAt).toLocaleDateString()}
-                    </div>
-                  )}
+                  {chore.photoVerification &&
+                    chore.photoVerification.length > 0 && (
+                      <div className="text-xs text-gray-500">
+                        Last photo:{" "}
+                        {new Date(
+                          chore.photoVerification[
+                            chore.photoVerification.length - 1
+                          ].uploadedAt,
+                        ).toLocaleDateString()}
+                      </div>
+                    )}
 
                   <div className="card-actions justify-center mt-4">
                     <button className="btn btn-primary btn-wide font-bold">
@@ -310,7 +355,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                 <h4 className="font-bold text-lg mb-4 text-center">
                   How do you want to add your photo?
                 </h4>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     onClick={startCamera}
@@ -320,7 +365,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                     <span className="text-2xl mr-2">📷</span>
                     Take Photo
                   </button>
-                  
+
                   <label className="btn btn-secondary btn-lg font-bold shadow-lg transform hover:scale-105 cursor-pointer">
                     <span className="text-2xl mr-2">📁</span>
                     Choose Photo
@@ -343,9 +388,11 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
               <div className="card-body p-6">
                 <div className="text-center mb-4">
                   <h4 className="font-bold text-lg">📷 Camera Ready!</h4>
-                  <p className="text-sm text-gray-600">Make sure your work looks awesome in the frame!</p>
+                  <p className="text-sm text-gray-600">
+                    Make sure your work looks awesome in the frame!
+                  </p>
                 </div>
-                
+
                 <div className="relative bg-black rounded-lg overflow-hidden mb-4">
                   <video
                     ref={videoRef}
@@ -354,7 +401,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                     className="w-full h-64 object-cover"
                   />
                 </div>
-                
+
                 <div className="flex justify-center gap-4">
                   <button
                     onClick={capturePhoto}
@@ -363,10 +410,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                     <span className="text-2xl mr-2">📸</span>
                     Capture!
                   </button>
-                  <button
-                    onClick={stopCamera}
-                    className="btn btn-ghost btn-lg"
-                  >
+                  <button onClick={stopCamera} className="btn btn-ghost btn-lg">
                     Cancel
                   </button>
                 </div>
@@ -382,9 +426,11 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                   <h4 className="font-bold text-lg text-success">
                     🎉 Awesome Photo!
                   </h4>
-                  <p className="text-sm text-gray-600">Does this show your great work?</p>
+                  <p className="text-sm text-gray-600">
+                    Does this show your great work?
+                  </p>
                 </div>
-                
+
                 <div className="relative mb-4">
                   <img
                     src={preview}
@@ -392,7 +438,7 @@ const PhotoSubmission = ({ userId, familyId, onPhotoSubmitted }: PhotoSubmission
                     className="w-full max-h-64 object-contain rounded-lg border-2 border-gray-200"
                   />
                 </div>
-                
+
                 <div className="flex justify-center gap-4">
                   <button
                     onClick={uploadPhoto}

@@ -306,10 +306,10 @@ const ParentDashboard = () => {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <QuickActions 
-            familyMembers={children} 
+          <QuickActions
+            familyMembers={children}
             familyId={familyContext.activeFamily.id}
-            onRefresh={refreshData} 
+            onRefresh={refreshData}
           />
         </div>
 

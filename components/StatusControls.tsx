@@ -19,24 +19,33 @@ interface StatusControlsProps {
   showConfirmation?: boolean;
 }
 
-const StatusControls = ({ 
-  chore, 
-  onStatusUpdate, 
-  onPhotoRequired, 
+const StatusControls = ({
+  chore,
+  onStatusUpdate,
+  onPhotoRequired,
   isLoading = false,
-  showConfirmation = true 
+  showConfirmation = true,
 }: StatusControlsProps) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingAction, setPendingAction] = useState<{ status: string; message: string } | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    status: string;
+    message: string;
+  } | null>(null);
 
   const getStatusEmoji = (status: string) => {
     switch (status) {
-      case "pending": return "⏳";
-      case "in_progress": return "🔥";
-      case "completed": return "✅";
-      case "verified": return "🏆";
-      case "rejected": return "😅";
-      default: return "📝";
+      case "pending":
+        return "⏳";
+      case "in_progress":
+        return "🔥";
+      case "completed":
+        return "✅";
+      case "verified":
+        return "🏆";
+      case "rejected":
+        return "😅";
+      default:
+        return "📝";
     }
   };
 
@@ -44,29 +53,33 @@ const StatusControls = ({
     if (fromStatus === "pending" && toStatus === "in_progress") {
       return {
         title: "Ready to Start? 🚀",
-        message: "You're about to begin this chore! Are you ready to show what an awesome helper you are?",
+        message:
+          "You're about to begin this chore! Are you ready to show what an awesome helper you are?",
         buttonText: "Yes, Let's Start!",
-        encouragement: "You've got this! Every great accomplishment starts with the decision to try! 💪"
+        encouragement:
+          "You've got this! Every great accomplishment starts with the decision to try! 💪",
       };
     }
-    
+
     if (fromStatus === "in_progress" && toStatus === "completed") {
       return {
         title: "All Done? 🎉",
         message: `Fantastic work! You're about to mark this chore as complete and earn ${chore.points} points!`,
         buttonText: "Yes, I'm Done!",
-        encouragement: chore.requiresPhotoVerification 
+        encouragement: chore.requiresPhotoVerification
           ? "Great job! Don't forget to take a photo to show your awesome work! 📸✨"
-          : "You're amazing! Your hard work is really paying off! 🌟"
+          : "You're amazing! Your hard work is really paying off! 🌟",
       };
     }
 
     if (fromStatus === "rejected" && toStatus === "pending") {
       return {
         title: "Ready to Try Again? 🔄",
-        message: "No worries at all! Everyone learns and improves. Ready to give it another awesome try?",
+        message:
+          "No worries at all! Everyone learns and improves. Ready to give it another awesome try?",
         buttonText: "Yes, Let's Do This!",
-        encouragement: "You learn something new every time you try! That's what makes you so amazing! 🌈"
+        encouragement:
+          "You learn something new every time you try! That's what makes you so amazing! 🌈",
       };
     }
 
@@ -74,14 +87,17 @@ const StatusControls = ({
       title: "Confirm Action",
       message: "Are you sure you want to update this chore?",
       buttonText: "Confirm",
-      encouragement: "You're doing great! Keep up the awesome work! ⭐"
+      encouragement: "You're doing great! Keep up the awesome work! ⭐",
     };
   };
 
   const handleStatusChange = (newStatus: string) => {
     if (showConfirmation) {
       const actionMessage = getActionMessage(chore.status, newStatus);
-      setPendingAction({ status: newStatus, message: JSON.stringify(actionMessage) });
+      setPendingAction({
+        status: newStatus,
+        message: JSON.stringify(actionMessage),
+      });
       setShowConfirmModal(true);
     } else {
       executeStatusChange(newStatus);
@@ -90,17 +106,24 @@ const StatusControls = ({
 
   const executeStatusChange = (newStatus: string) => {
     // Check if photo is required before completing
-    if (newStatus === "completed" && chore.requiresPhotoVerification && onPhotoRequired) {
-      toast.success("Great work! Now let's take a photo to show off your awesome work! 📸", {
-        duration: 4000,
-        icon: "🎉"
-      });
+    if (
+      newStatus === "completed" &&
+      chore.requiresPhotoVerification &&
+      onPhotoRequired
+    ) {
+      toast.success(
+        "Great work! Now let's take a photo to show off your awesome work! 📸",
+        {
+          duration: 4000,
+          icon: "🎉",
+        },
+      );
       onPhotoRequired();
       return;
     }
 
     onStatusUpdate(chore._id, newStatus);
-    
+
     // Show encouraging messages
     if (newStatus === "in_progress") {
       toast.success("Awesome! You started the chore! You're amazing! 🚀", {
@@ -130,7 +153,7 @@ const StatusControls = ({
           action: () => handleStatusChange("in_progress"),
           text: "🚀 Start Chore!",
           className: "btn-primary btn-lg",
-          disabled: false
+          disabled: false,
         };
 
       case "in_progress":
@@ -138,15 +161,17 @@ const StatusControls = ({
           action: () => handleStatusChange("completed"),
           text: "✅ Mark Complete!",
           className: "btn-success btn-lg",
-          disabled: false
+          disabled: false,
         };
 
       case "completed":
         return {
           action: null,
-          text: chore.requiresPhotoVerification ? "📸 Take Photo First!" : "🎉 Waiting for Approval!",
+          text: chore.requiresPhotoVerification
+            ? "📸 Take Photo First!"
+            : "🎉 Waiting for Approval!",
           className: "btn-ghost btn-lg",
-          disabled: true
+          disabled: true,
         };
 
       case "verified":
@@ -154,7 +179,7 @@ const StatusControls = ({
           action: null,
           text: "🏆 You're Amazing!",
           className: "btn-ghost btn-lg",
-          disabled: true
+          disabled: true,
         };
 
       case "rejected":
@@ -162,7 +187,7 @@ const StatusControls = ({
           action: () => handleStatusChange("pending"),
           text: "🔄 Try Again!",
           className: "btn-warning btn-lg",
-          disabled: false
+          disabled: false,
         };
 
       default:
@@ -170,7 +195,7 @@ const StatusControls = ({
           action: null,
           text: "📝 Unknown Status",
           className: "btn-ghost",
-          disabled: true
+          disabled: true,
         };
     }
   };
@@ -184,13 +209,19 @@ const StatusControls = ({
         {/* Current status display */}
         <div className="text-center mb-4">
           <div className="text-6xl mb-2">{getStatusEmoji(chore.status)}</div>
-          <div className={`badge badge-lg font-bold mb-2 ${
-            chore.status === "verified" ? "badge-success" :
-            chore.status === "completed" ? "badge-info" :
-            chore.status === "in_progress" ? "badge-warning" :
-            chore.status === "rejected" ? "badge-error" :
-            "badge-ghost"
-          }`}>
+          <div
+            className={`badge badge-lg font-bold mb-2 ${
+              chore.status === "verified"
+                ? "badge-success"
+                : chore.status === "completed"
+                  ? "badge-info"
+                  : chore.status === "in_progress"
+                    ? "badge-warning"
+                    : chore.status === "rejected"
+                      ? "badge-error"
+                      : "badge-ghost"
+            }`}
+          >
             {chore.status.replace("_", " ").toUpperCase()}
           </div>
         </div>
@@ -212,7 +243,9 @@ const StatusControls = ({
             )}
           </button>
         ) : (
-          <div className={`btn ${buttonConfig.className} w-full font-bold cursor-default`}>
+          <div
+            className={`btn ${buttonConfig.className} w-full font-bold cursor-default`}
+          >
             {buttonConfig.text}
           </div>
         )}
@@ -224,31 +257,31 @@ const StatusControls = ({
               🌟 Ready when you are! Take your time and do your best!
             </p>
           )}
-          
+
           {chore.status === "in_progress" && (
             <p className="text-sm text-gray-600">
               🔥 You're doing amazing! Keep up the great work!
             </p>
           )}
-          
+
           {chore.status === "completed" && !chore.requiresPhotoVerification && (
             <p className="text-sm text-gray-600">
               🎉 Fantastic work! Waiting for your parent to approve it!
             </p>
           )}
-          
+
           {chore.status === "completed" && chore.requiresPhotoVerification && (
             <p className="text-sm text-gray-600">
               📸 Great job! Now take a photo to show your awesome work!
             </p>
           )}
-          
+
           {chore.status === "verified" && (
             <p className="text-sm text-green-600 font-medium">
               🏆 You're a chore champion! Amazing work!
             </p>
           )}
-          
+
           {chore.status === "rejected" && (
             <p className="text-sm text-orange-600">
               😊 No worries! Learning is part of growing. Ready to try again?
@@ -281,7 +314,7 @@ const StatusControls = ({
                   <h3 className="font-bold text-2xl mb-4 text-center text-primary">
                     {actionMessage.title}
                   </h3>
-                  
+
                   <div className="text-center mb-6">
                     <div className="text-6xl mb-4">
                       {getStatusEmoji(pendingAction.status)}

@@ -39,17 +39,32 @@ interface PhotoVerificationProps {
   onChoreUpdated: () => void;
 }
 
-const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) => {
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+const PhotoVerification = ({
+  chore,
+  onChoreUpdated,
+}: PhotoVerificationProps) => {
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(
+    null,
+  );
   const [rejectionReason, setRejectionReason] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "detail">("grid");
 
-  const pendingPhotos = chore.photoVerification?.filter(photo => photo.status === "pending") || [];
-  const approvedPhotos = chore.photoVerification?.filter(photo => photo.status === "approved") || [];
-  const rejectedPhotos = chore.photoVerification?.filter(photo => photo.status === "rejected") || [];
+  const pendingPhotos =
+    chore.photoVerification?.filter((photo) => photo.status === "pending") ||
+    [];
+  const approvedPhotos =
+    chore.photoVerification?.filter((photo) => photo.status === "approved") ||
+    [];
+  const rejectedPhotos =
+    chore.photoVerification?.filter((photo) => photo.status === "rejected") ||
+    [];
 
-  const handlePhotoAction = async (photoIndex: number, action: "approve" | "reject", reason?: string) => {
+  const handlePhotoAction = async (
+    photoIndex: number,
+    action: "approve" | "reject",
+    reason?: string,
+  ) => {
     setIsProcessing(true);
     try {
       const response = await fetch(`/api/chores/${chore._id}/verify`, {
@@ -75,7 +90,9 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
       setRejectionReason("");
     } catch (error) {
       console.error(`Error ${action}ing photo:`, error);
-      toast.error(error instanceof Error ? error.message : `Failed to ${action} photo`);
+      toast.error(
+        error instanceof Error ? error.message : `Failed to ${action} photo`,
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -86,21 +103,22 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
 
     setIsProcessing(true);
     try {
-      const promises = chore.photoVerification?.map((photo, index) => {
-        if (photo.status === "pending") {
-          return fetch(`/api/chores/${chore._id}/verify`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              photoIndex: index,
-              action: "approve",
-            }),
-          });
-        }
-        return Promise.resolve();
-      }) || [];
+      const promises =
+        chore.photoVerification?.map((photo, index) => {
+          if (photo.status === "pending") {
+            return fetch(`/api/chores/${chore._id}/verify`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                photoIndex: index,
+                action: "approve",
+              }),
+            });
+          }
+          return Promise.resolve();
+        }) || [];
 
       await Promise.all(promises);
       toast.success("All photos approved!");
@@ -135,12 +153,31 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
     return (
       <div className="card bg-base-200 p-6">
         <div className="text-center py-8">
-          <svg className="w-12 h-12 mx-auto mb-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          <svg
+            className="w-12 h-12 mx-auto mb-4 text-base-content/30"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+            />
           </svg>
-          <h3 className="font-medium text-lg mb-2">No Photo Verification Required</h3>
-          <p className="text-base-content/60">This chore does not require photo verification.</p>
+          <h3 className="font-medium text-lg mb-2">
+            No Photo Verification Required
+          </h3>
+          <p className="text-base-content/60">
+            This chore does not require photo verification.
+          </p>
         </div>
       </div>
     );
@@ -150,12 +187,23 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
     return (
       <div className="card bg-base-200 p-6">
         <div className="text-center py-8">
-          <svg className="w-12 h-12 mx-auto mb-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <svg
+            className="w-12 h-12 mx-auto mb-4 text-base-content/30"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
           </svg>
           <h3 className="font-medium text-lg mb-2">No Photos Submitted</h3>
           <p className="text-base-content/60">
-            {chore.assignedTo?.name || "The assigned person"} hasn't submitted any photos yet.
+            {chore.assignedTo?.name || "The assigned person"} hasn't submitted
+            any photos yet.
           </p>
         </div>
       </div>
@@ -178,8 +226,18 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
               className={`btn btn-sm ${viewMode === "grid" ? "btn-active" : ""}`}
               onClick={() => setViewMode("grid")}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                />
               </svg>
               Grid
             </button>
@@ -187,8 +245,18 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
               className={`btn btn-sm ${viewMode === "detail" ? "btn-active" : ""}`}
               onClick={() => setViewMode("detail")}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                />
               </svg>
               List
             </button>
@@ -213,8 +281,18 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="stat bg-warning/10 border border-warning/20 rounded-lg">
           <div className="stat-figure text-warning">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <div className="stat-title">Pending Review</div>
@@ -223,8 +301,18 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
 
         <div className="stat bg-success/10 border border-success/20 rounded-lg">
           <div className="stat-figure text-success">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <div className="stat-title">Approved</div>
@@ -233,8 +321,18 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
 
         <div className="stat bg-error/10 border border-error/20 rounded-lg">
           <div className="stat-figure text-error">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <div className="stat-title">Rejected</div>
@@ -255,7 +353,9 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
                   onClick={() => setSelectedPhotoIndex(index)}
                 />
                 <div className="absolute top-2 right-2">
-                  <div className={`badge ${getStatusBadge(photo.status)} badge-lg`}>
+                  <div
+                    className={`badge ${getStatusBadge(photo.status)} badge-lg`}
+                  >
                     {photo.status}
                   </div>
                 </div>
@@ -265,7 +365,10 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
                   <div className="avatar">
                     <div className="w-6 h-6 rounded-full">
                       {photo.uploadedBy.image ? (
-                        <img src={photo.uploadedBy.image} alt={photo.uploadedBy.name} />
+                        <img
+                          src={photo.uploadedBy.image}
+                          alt={photo.uploadedBy.name}
+                        />
                       ) : (
                         <div className="bg-primary text-primary-content flex items-center justify-center text-xs">
                           {photo.uploadedBy.name.charAt(0).toUpperCase()}
@@ -306,7 +409,8 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
 
                 {photo.reviewedAt && photo.reviewedBy && (
                   <p className="text-xs text-base-content/60">
-                    {photo.status === "approved" ? "Approved" : "Rejected"} by {photo.reviewedBy.name} on {formatDate(photo.reviewedAt)}
+                    {photo.status === "approved" ? "Approved" : "Rejected"} by{" "}
+                    {photo.reviewedBy.name} on {formatDate(photo.reviewedAt)}
                   </p>
                 )}
               </div>
@@ -331,7 +435,10 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
                         <div className="avatar">
                           <div className="w-6 h-6 rounded-full">
                             {photo.uploadedBy.image ? (
-                              <img src={photo.uploadedBy.image} alt={photo.uploadedBy.name} />
+                              <img
+                                src={photo.uploadedBy.image}
+                                alt={photo.uploadedBy.name}
+                              />
                             ) : (
                               <div className="bg-primary text-primary-content flex items-center justify-center text-xs">
                                 {photo.uploadedBy.name.charAt(0).toUpperCase()}
@@ -339,7 +446,9 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
                             )}
                           </div>
                         </div>
-                        <span className="font-medium">{photo.uploadedBy.name}</span>
+                        <span className="font-medium">
+                          {photo.uploadedBy.name}
+                        </span>
                       </div>
                       <div className={`badge ${getStatusBadge(photo.status)}`}>
                         {photo.status}
@@ -376,7 +485,9 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
 
                     {photo.reviewedAt && photo.reviewedBy && (
                       <p className="text-sm text-base-content/60 mt-2">
-                        {photo.status === "approved" ? "Approved" : "Rejected"} by {photo.reviewedBy.name} on {formatDate(photo.reviewedAt)}
+                        {photo.status === "approved" ? "Approved" : "Rejected"}{" "}
+                        by {photo.reviewedBy.name} on{" "}
+                        {formatDate(photo.reviewedAt)}
                       </p>
                     )}
                   </div>
@@ -392,9 +503,10 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
         <div className="modal modal-open">
           <div className="modal-box w-11/12 max-w-4xl">
             <h3 className="font-bold text-lg mb-4">
-              Photo Verification - {selectedPhotoIndex + 1} of {chore.photoVerification.length}
+              Photo Verification - {selectedPhotoIndex + 1} of{" "}
+              {chore.photoVerification.length}
             </h3>
-            
+
             <div className="mb-4">
               <img
                 src={chore.photoVerification[selectedPhotoIndex].url}
@@ -408,26 +520,38 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
                 <h4 className="font-medium mb-2">Photo Details</h4>
                 <div className="space-y-2 text-sm">
                   <p>
-                    <span className="text-base-content/60">Uploaded by:</span> {chore.photoVerification[selectedPhotoIndex].uploadedBy.name}
+                    <span className="text-base-content/60">Uploaded by:</span>{" "}
+                    {
+                      chore.photoVerification[selectedPhotoIndex].uploadedBy
+                        .name
+                    }
                   </p>
                   <p>
-                    <span className="text-base-content/60">Upload time:</span> {formatDate(chore.photoVerification[selectedPhotoIndex].uploadedAt)}
+                    <span className="text-base-content/60">Upload time:</span>{" "}
+                    {formatDate(
+                      chore.photoVerification[selectedPhotoIndex].uploadedAt,
+                    )}
                   </p>
                   <p>
                     <span className="text-base-content/60">Status:</span>
-                    <span className={`badge ${getStatusBadge(chore.photoVerification[selectedPhotoIndex].status)} badge-sm ml-2`}>
+                    <span
+                      className={`badge ${getStatusBadge(chore.photoVerification[selectedPhotoIndex].status)} badge-sm ml-2`}
+                    >
                       {chore.photoVerification[selectedPhotoIndex].status}
                     </span>
                   </p>
                 </div>
               </div>
 
-              {chore.photoVerification[selectedPhotoIndex].status === "pending" && (
+              {chore.photoVerification[selectedPhotoIndex].status ===
+                "pending" && (
                 <div>
                   <h4 className="font-medium mb-2">Review Actions</h4>
                   <div className="form-control mb-4">
                     <label className="label">
-                      <span className="label-text">Rejection Reason (if rejecting)</span>
+                      <span className="label-text">
+                        Rejection Reason (if rejecting)
+                      </span>
                     </label>
                     <textarea
                       value={rejectionReason}
@@ -438,7 +562,9 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handlePhotoAction(selectedPhotoIndex, "approve")}
+                      onClick={() =>
+                        handlePhotoAction(selectedPhotoIndex, "approve")
+                      }
                       disabled={isProcessing}
                       className="btn btn-success flex-1"
                     >
@@ -449,7 +575,13 @@ const PhotoVerification = ({ chore, onChoreUpdated }: PhotoVerificationProps) =>
                       )}
                     </button>
                     <button
-                      onClick={() => handlePhotoAction(selectedPhotoIndex, "reject", rejectionReason)}
+                      onClick={() =>
+                        handlePhotoAction(
+                          selectedPhotoIndex,
+                          "reject",
+                          rejectionReason,
+                        )
+                      }
                       disabled={isProcessing || !rejectionReason.trim()}
                       className="btn btn-error flex-1"
                     >
