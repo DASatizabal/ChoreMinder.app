@@ -22,7 +22,9 @@
       "Bash(timeout 15s npm run dev)",
       "Bash(TEST_URL=http://localhost:3001 npm run demo:create)",
       "Bash(npm run launch:checklist:*)",
-      "Bash(npm run validate:launch:*)"
+      "Bash(npm run validate:launch:*)",
+      "Bash(curl:*)",
+      "Bash(move \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.ts\" \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.tsx\")"
     ],
     "deny": []
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { createNotification } from "@/components/NotificationSystem";
 
@@ -181,15 +181,15 @@ export const useNotifications = ({
 };
 
 // Higher-order component to automatically trigger notifications
-export const withNotifications = <T extends Record<string, any>>(
+export function withNotifications<T extends Record<string, any>>(
   Component: React.ComponentType<T>,
   familyId: string
-) => {
+) {
   return function NotificationWrappedComponent(props: T) {
     const notifications = useNotifications({ familyId });
 
     return <Component {...props} notifications={notifications} />;
   };
-};
+}
 
 export default useNotifications;
