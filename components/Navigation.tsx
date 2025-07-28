@@ -97,11 +97,18 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
 
   const parentNavItems = [
     {
-      href: "/dashboard/parent",
+      href: "/dashboard",
       label: "Dashboard",
       icon: "🏠",
       description: "Family overview",
-      active: pathname === "/dashboard/parent",
+      active: pathname === "/dashboard",
+    },
+    {
+      href: "/dashboard/families",
+      label: "Family Management",
+      icon: "👨‍👩‍👧‍👦",
+      description: "Manage family members",
+      active: pathname === "/dashboard/families",
     },
     {
       href: "/dashboard/parent/chores",
@@ -113,13 +120,6 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
         notifications.pendingPhotos > 0
           ? notifications.pendingPhotos
           : undefined,
-    },
-    {
-      href: "/dashboard/parent/family",
-      label: "Family Members",
-      icon: "👨‍👩‍👧‍👦",
-      description: "Manage family",
-      active: pathname === "/dashboard/parent/family",
     },
     {
       href: "/dashboard/parent/help",
@@ -137,15 +137,22 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
       description: "Family progress",
       active: pathname === "/dashboard/parent/analytics",
     },
+    {
+      href: "/dashboard/email-logs",
+      label: "Email Logs",
+      icon: "📧",
+      description: "View sent emails",
+      active: pathname === "/dashboard/email-logs",
+    },
   ];
 
   const childNavItems = [
     {
-      href: "/dashboard/child",
+      href: "/dashboard",
       label: "My Dashboard",
       icon: "🌟",
       description: "Your awesome space",
-      active: pathname === "/dashboard/child",
+      active: pathname === "/dashboard",
     },
     {
       href: "/dashboard/child/chores",
@@ -217,10 +224,10 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
   const handleRoleSwitch = () => {
     if (isParent && familyContext?.activeFamily) {
       // Switch to child view
-      router.push("/dashboard/child");
+      router.push("/dashboard");
     } else if (isChild && familyContext?.activeFamily) {
       // Switch to parent view (if user has parent role)
-      router.push("/dashboard/parent");
+      router.push("/dashboard");
     }
   };
 
@@ -326,7 +333,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
               >
                 <li>
                   <button
-                    onClick={() => router.push("/dashboard/parent")}
+                    onClick={() => router.push("/dashboard")}
                     className={`${isParent ? "active" : ""}`}
                   >
                     <span className="text-lg mr-2">👨‍👩‍👧‍👦</span>
@@ -335,7 +342,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                 </li>
                 <li>
                   <button
-                    onClick={() => router.push("/dashboard/child")}
+                    onClick={() => router.push("/dashboard")}
                     className={`${isChild ? "active" : ""}`}
                   >
                     <span className="text-lg mr-2">🧒</span>
@@ -388,7 +395,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => {
-                    router.push("/dashboard/parent");
+                    router.push("/dashboard");
                     setIsMobileMenuOpen(false);
                   }}
                   className={`btn btn-outline btn-sm ${isParent ? "btn-primary" : ""}`}
@@ -398,7 +405,7 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                 </button>
                 <button
                   onClick={() => {
-                    router.push("/dashboard/child");
+                    router.push("/dashboard");
                     setIsMobileMenuOpen(false);
                   }}
                   className={`btn btn-outline btn-sm ${isChild ? "btn-primary" : ""}`}
