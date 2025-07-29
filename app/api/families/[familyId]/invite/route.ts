@@ -168,8 +168,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     };
 
     // Store in memory (replace with proper storage in production)
-    global.familyInvites = global.familyInvites || new Map();
-    global.familyInvites.set(inviteCode, inviteInfo);
+    const globalThis = global as any;
+    globalThis.familyInvites = globalThis.familyInvites || new Map();
+    globalThis.familyInvites.set(inviteCode, inviteInfo);
 
     // Get inviter details
     const inviter = await User.findById(session.user.id);
