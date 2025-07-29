@@ -99,11 +99,11 @@ export async function POST(
     );
 
     if (
-      !userMember?.permissions?.canInviteMembers &&
+      userMember?.role !== "parent" &&
       session.user.role !== "admin"
     ) {
       return NextResponse.json(
-        { error: "No permission to invite members" },
+        { error: "Only parents can invite members" },
         { status: 403 },
       );
     }
