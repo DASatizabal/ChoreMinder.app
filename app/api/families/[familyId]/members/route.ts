@@ -175,6 +175,13 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       "name email image",
     );
 
+    if (!updatedFamily) {
+      return NextResponse.json(
+        { error: "Failed to retrieve updated family" },
+        { status: 500 },
+      );
+    }
+
     return NextResponse.json({
       message: "Member updated successfully",
       member: updatedFamily.members.find(
