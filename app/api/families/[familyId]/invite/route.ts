@@ -157,20 +157,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Generate simple invite code
     const inviteCode = crypto.randomBytes(8).toString("hex").toUpperCase();
 
-    // Store invite info in family (simple approach without complex schema changes)
-    if (!family.inviteInfo) {
-      family.inviteInfo = {};
-    }
-
-    family.inviteInfo[inviteCode] = {
+    // Store invite info in memory (in production, use Redis or database)
+    const inviteInfo = {
       email,
       role,
+      familyId,
       invitedBy: session.user.id,
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     };
 
-    await family.save();
+    // Store in memory (replace with proper storage in production)
+    global.familyInvites = global.familyInvites || new Map();
+    global.familyInvites.set(inviteCode, inviteInfo);
 
     // Get inviter details
     const inviter = await User.findById(session.user.id);
