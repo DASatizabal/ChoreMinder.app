@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const searchParams = req.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "50");
-    const type = searchParams.get("type");
+    const type = searchParams.get("type") || undefined;
 
     const logs = getEmailLogs(limit, type);
     const stats = getEmailStats();
