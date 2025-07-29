@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky install",
+    "prepare": "husky install || true",
     "test:api": "node scripts/test-api-endpoints.js",
     "test:api:families": "node scripts/test-api-endpoints.js families",
     "test:api:photos": "node scripts/test-api-endpoints.js photos",
