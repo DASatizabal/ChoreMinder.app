@@ -129,8 +129,8 @@ export async function POST(
           assignedTo: assignedMember
             ? {
                 _id: choreData.assignedTo,
-                name: assignedMember.user.name || "Family Member",
-                email: assignedMember.user.email || "",
+                name: assignedMember.name || "Family Member",
+                email: "", // Email will be populated when the user object is available
               }
             : undefined,
           recurrence: choreData.recurrence
