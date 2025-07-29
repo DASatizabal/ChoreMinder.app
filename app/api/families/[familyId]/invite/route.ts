@@ -161,7 +161,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const inviteInfo = {
       email,
       role,
-      familyId,
+      familyId: params.familyId,
       invitedBy: session.user.id,
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
