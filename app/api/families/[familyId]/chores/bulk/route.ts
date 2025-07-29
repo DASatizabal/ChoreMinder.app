@@ -63,11 +63,11 @@ export async function POST(
     );
 
     if (
-      !userMember?.permissions?.canAssignChores &&
+      userMember?.role !== "parent" &&
       session.user.role !== "admin"
     ) {
       return NextResponse.json(
-        { error: "No permission to create chores" },
+        { error: "Only parents can create chores" },
         { status: 403 },
       );
     }
