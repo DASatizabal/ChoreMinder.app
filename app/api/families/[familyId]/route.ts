@@ -49,6 +49,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       (m: any) => m.user._id.toString() === session.user.id,
     );
 
+    if (!userMember) {
+      return NextResponse.json(
+        { error: "Not a member of this family" },
+        { status: 403 },
+      );
+    }
+
     return NextResponse.json({
       family,
       myRole: userMember.role,
