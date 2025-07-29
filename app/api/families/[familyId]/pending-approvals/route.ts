@@ -1,9 +1,10 @@
 // app/api/families/[id]/pending-approvals/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { Types } from "mongoose";
 
-import { authOptions } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
+import { authOptions } from "@/libs/next-auth";
+import dbConnect from "@/libs/mongoose";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
 
@@ -229,7 +230,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         // Update photo status
         photo.status = approval.action === "approve" ? "approved" : "rejected";
         photo.reviewedAt = new Date();
-        photo.reviewedBy = session.user.id;
+        photo.reviewedBy = new Types.ObjectId(session.user.id);
 
         if (approval.action === "reject") {
           photo.rejectionReason = approval.rejectionReason;
