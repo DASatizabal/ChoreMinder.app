@@ -6,6 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 import config from "@/config";
 
+import { isEmailBlacklisted, getBlacklistReason } from "./email-blacklist";
 import clientPromise from "./mongo"; // ✅ mongo.ts exports clientPromise
 
 interface NextAuthOptionsExtended extends NextAuthOptions {
@@ -54,6 +55,17 @@ export const authOptions: NextAuthOptionsExtended = {
   adapter: clientPromise ? MongoDBAdapter(clientPromise) : undefined,
 
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Check if email is blacklisted
+      if (user.email && isEmailBlacklisted(user.email)) {
+        console.log(
+          `🚫 Blocked sign-in attempt for blacklisted email: ${user.email}`,
+        );
+        // Return false to deny sign-in - this will redirect to error page with AccessDenied error
+        return false;
+      }
+      return true;
+    },
     session: async ({ session, token }) => {
       if (session?.user) {
         (session.user as any).id = token.sub || "";
@@ -64,11 +76,12 @@ export const authOptions: NextAuthOptionsExtended = {
   session: {
     strategy: "jwt",
   },
+  pages: {
+    error: "/auth/error", // Custom error page
+  },
   theme: {
     brandColor: config.colors.main,
-    // Add you own logo below. Recommended size is rectangle (i.e. 200x50px) and show your logo + name.
-    // It will be used in the login flow to display your logo. If you don't add it, it will look faded.
-    logo: `/icon.png`, // Using the icon from the app root
+    // Logo removed per user request
   },
 };
 

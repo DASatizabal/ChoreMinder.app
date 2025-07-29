@@ -11,24 +11,19 @@ const list: {
   img?: string | StaticImageData;
 }[] = [
   {
-    // Optional, use for social media like Twitter. Does not link anywhere but cool to display
-    username: "marclou",
-    // REQUIRED
-    name: "Marc Lou",
-    // REQUIRED
-    text: "Really easy to use. The tutorials are really useful and explains how everything works. Hope to ship my next project really fast!",
-    // Optional, a statically imported image (usually from your public folder—recommended) or a link to the person's avatar. Shows a fallback letter if not provided
-    img: "https://pbs.twimg.com/profile_images/1514863683574599681/9k7PqDTA_400x400.jpg",
+    name: "Sarah Johnson",
+    text: "ChoreMinder has been a game-changer for our family! My kids actually ASK to do chores now because they want to earn points and level up. The photo verification feature has eliminated so many arguments - no more 'I already did it!' disputes.",
+    img: "https://images.unsplash.com/photo-1494790108755-2616b612b977?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.0.3",
   },
   {
-    username: "the_mcnaveen",
-    name: "Naveen",
-    text: "Setting up everything from the ground up is a really hard, and time consuming process. What you pay for will save your time for sure.",
+    name: "Mike Chen",
+    text: "As a single dad of three, keeping track of chores was impossible. ChoreMinder's smart assignment system distributes tasks fairly, and the automated reminders mean I'm not the 'nagging parent' anymore. Our household runs so much smoother now!",
+    img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
   },
   {
-    username: "wahab",
-    name: "Wahab Shaikh",
-    text: "Easily saves 15+ hrs for me setting up trivial stuff. Now, I can directly focus on shipping features rather than hours of setting up the same technologies from scratch. Feels like a super power! :D",
+    name: "Emily Rodriguez",
+    text: "The gamification is brilliant! My 8-year-old daughter treats it like a video game and my teenager actually participates without eye-rolling. Family chore time went from chaos to collaboration. Best parenting tool I've ever used!",
+    img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
   },
 ];
 
@@ -88,12 +83,12 @@ const Testimonials3 = () => {
         <div className="flex flex-col text-center w-full mb-20">
           <div className="mb-8">
             <h2 className="sm:text-5xl text-4xl font-extrabold text-base-content">
-              212 makers are already shipping faster!
+              Over 1,000 families have found their harmony!
             </h2>
           </div>
           <p className="lg:w-2/3 mx-auto leading-relaxed text-base text-base-content/80">
-            Don&apos;t take our word for it. Here&apos;s what they have to say
-            about ShipFast.
+            Don&apos;t take our word for it. Here&apos;s what parents are saying
+            about ChoreMinder.
           </p>
         </div>
 

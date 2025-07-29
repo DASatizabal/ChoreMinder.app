@@ -13,11 +13,11 @@ import Testimonials3 from "@/components/Testimonials3";
 
 // Add metadata for SEO
 export const metadata: Metadata = {
-  title: "FeNAgO - Agentic AI SaaS Platform Template",
+  title: "ChoreMinder - AI-Powered Family Chore Management",
   description:
-    "The complete platform for building agentic AI-powered SaaS products—ideal for students, developers, startups, and entrepreneurs looking to innovate rapidly. In the near future, every traditional SaaS application will inevitably be surpassed by an Agentic SaaS solution, redefining the competitive landscape.",
+    "Tired of the chore wars? Let ChoreMinder keep score and keep the peace. Smart chore assignment, automated reminders, and gamified tracking for happier families.",
   keywords:
-    "agentic AI, SaaS template, AI platform, DrLee, AI development, FeNAgO, AI startup",
+    "chore management, family organization, household tasks, parenting tools, chore tracking, family app, smart home, ChoreMinder",
 };
 
 export default function Home(): JSX.Element {

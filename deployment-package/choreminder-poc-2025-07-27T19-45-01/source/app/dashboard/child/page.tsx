@@ -1,9 +1,8 @@
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth/next";
-
 import AppLayout from "@/components/AppLayout";
 import ChildDashboard from "@/components/ChildDashboard";
 import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth/next";
 
 export default async function ChildDashboardPage() {
   const session = await getServerSession(authOptions);

@@ -1,8 +1,7 @@
-import Image from "next/image";
-import { notFound } from "next/navigation";
-
 import config from "@/config";
 import { getSEOTags } from "@/libs/seo";
+import Image from "next/image";
+import { notFound } from "next/navigation";
 
 import CardArticle from "../../_assets/components/CardArticle";
 import { authors, articles } from "../../_assets/content";

@@ -1,10 +1,9 @@
-import { NextResponse, NextRequest } from "next/server";
-import { getServerSession } from "next-auth/next";
-
 import connectMongo from "@/libs/mongoose";
 import { authOptions } from "@/libs/next-auth";
 import { createCustomerPortal } from "@/libs/stripe";
 import User from "@/models/User";
+import { NextResponse, NextRequest } from "next/server";
+import { getServerSession } from "next-auth/next";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);

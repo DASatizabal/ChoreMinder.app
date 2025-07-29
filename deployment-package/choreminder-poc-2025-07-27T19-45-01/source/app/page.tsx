@@ -1,6 +1,3 @@
-import { Metadata } from "next";
-import { Suspense, ReactNode } from "react";
-
 import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
 import FeaturesAccordion from "@/components/FeaturesAccordion";
@@ -10,6 +7,8 @@ import Hero from "@/components/Hero";
 import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
 import Testimonials3 from "@/components/Testimonials3";
+import { Metadata } from "next";
+import { Suspense, ReactNode } from "react";
 
 // Add metadata for SEO
 export const metadata: Metadata = {

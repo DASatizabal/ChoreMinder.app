@@ -1,7 +1,8 @@
 "use server";
 
-import { dbConnect } from "./mongoose";
 import mongoose from "mongoose";
+
+import { dbConnect } from "./mongoose";
 
 export interface CacheEntry {
   key: string;
@@ -32,7 +33,7 @@ class PerformanceService {
       await this.setupDatabaseOptimizations();
       this.startCacheCleanup();
       this.enableQueryLogging();
-      
+
       console.log("Performance optimizations initialized");
     } catch (error) {
       console.error("Error initializing performance service:", error);
@@ -49,7 +50,7 @@ class PerformanceService {
     if (process.env.NODE_ENV === "development") {
       mongoose.set("debug", (collection, method, query, doc) => {
         const startTime = Date.now();
-        
+
         // Store query metrics
         this.recordQueryMetric({
           query: JSON.stringify(query),
@@ -75,58 +76,76 @@ class PerformanceService {
   private async createOptimalIndexes(): Promise<void> {
     try {
       const db = mongoose.connection.db;
-      
+
       // Chores collection indexes
-      await db.collection("chores").createIndex({ 
-        assignedTo: 1, 
-        status: 1, 
-        dueDate: 1 
-      }, { 
-        name: "assignedTo_status_dueDate",
-        background: true 
-      });
+      await db.collection("chores").createIndex(
+        {
+          assignedTo: 1,
+          status: 1,
+          dueDate: 1,
+        },
+        {
+          name: "assignedTo_status_dueDate",
+          background: true,
+        },
+      );
 
-      await db.collection("chores").createIndex({ 
-        family: 1, 
-        deletedAt: 1, 
-        dueDate: 1 
-      }, { 
-        name: "family_deletedAt_dueDate",
-        background: true 
-      });
+      await db.collection("chores").createIndex(
+        {
+          family: 1,
+          deletedAt: 1,
+          dueDate: 1,
+        },
+        {
+          name: "family_deletedAt_dueDate",
+          background: true,
+        },
+      );
 
-      await db.collection("chores").createIndex({ 
-        scheduleId: 1, 
-        isRecurring: 1 
-      }, { 
-        name: "scheduleId_isRecurring",
-        background: true 
-      });
+      await db.collection("chores").createIndex(
+        {
+          scheduleId: 1,
+          isRecurring: 1,
+        },
+        {
+          name: "scheduleId_isRecurring",
+          background: true,
+        },
+      );
 
       // Users collection indexes
-      await db.collection("users").createIndex({ 
-        familyId: 1, 
-        role: 1 
-      }, { 
-        name: "familyId_role",
-        background: true 
-      });
+      await db.collection("users").createIndex(
+        {
+          familyId: 1,
+          role: 1,
+        },
+        {
+          name: "familyId_role",
+          background: true,
+        },
+      );
 
-      await db.collection("users").createIndex({ 
-        email: 1 
-      }, { 
-        name: "email_unique",
-        unique: true,
-        background: true 
-      });
+      await db.collection("users").createIndex(
+        {
+          email: 1,
+        },
+        {
+          name: "email_unique",
+          unique: true,
+          background: true,
+        },
+      );
 
       // Families collection indexes
-      await db.collection("families").createIndex({ 
-        createdBy: 1 
-      }, { 
-        name: "createdBy",
-        background: true 
-      });
+      await db.collection("families").createIndex(
+        {
+          createdBy: 1,
+        },
+        {
+          name: "createdBy",
+          background: true,
+        },
+      );
 
       console.log("Database indexes created successfully");
     } catch (error) {
@@ -137,7 +156,12 @@ class PerformanceService {
   /**
    * Cache management
    */
-  setCache(key: string, data: any, ttlMinutes: number = 30, tags: string[] = []): void {
+  setCache(
+    key: string,
+    data: any,
+    ttlMinutes: number = 30,
+    tags: string[] = [],
+  ): void {
     // Remove oldest entries if cache is full
     if (this.cache.size >= this.maxCacheSize) {
       const oldestKey = this.cache.keys().next().value;
@@ -145,7 +169,7 @@ class PerformanceService {
     }
 
     const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
-    
+
     this.cache.set(key, {
       key,
       data: JSON.parse(JSON.stringify(data)), // Deep clone
@@ -156,20 +180,20 @@ class PerformanceService {
 
   getCache(key: string): any | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) return null;
-    
+
     if (entry.expiresAt <= new Date()) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return entry.data;
   }
 
   invalidateCache(tags: string[]): void {
     for (const [key, entry] of this.cache.entries()) {
-      if (tags.some(tag => entry.tags.includes(tag))) {
+      if (tags.some((tag) => entry.tags.includes(tag))) {
         this.cache.delete(key);
       }
     }
@@ -194,10 +218,12 @@ class PerformanceService {
       cache?: boolean;
       cacheTTL?: number;
       cacheTags?: string[];
-    } = {}
+    } = {},
   ): Promise<any> {
-    const cacheKey = options.cache ? this.generateCacheKey(model.modelName, query, options) : null;
-    
+    const cacheKey = options.cache
+      ? this.generateCacheKey(model.modelName, query, options)
+      : null;
+
     // Check cache first
     if (cacheKey) {
       const cached = this.getCache(cacheKey);
@@ -218,7 +244,7 @@ class PerformanceService {
     if (options.lean !== false) mongoQuery = mongoQuery.lean(); // Default to lean for better performance
 
     const results = await mongoQuery.exec();
-    
+
     const executionTime = Date.now() - startTime;
 
     // Record metrics
@@ -236,7 +262,7 @@ class PerformanceService {
         cacheKey,
         results,
         options.cacheTTL || 30,
-        options.cacheTags || [model.modelName.toLowerCase()]
+        options.cacheTags || [model.modelName.toLowerCase()],
       );
     }
 
@@ -253,10 +279,12 @@ class PerformanceService {
       cache?: boolean;
       cacheTTL?: number;
       cacheTags?: string[];
-    } = {}
+    } = {},
   ): Promise<any> {
-    const cacheKey = options.cache ? this.generateCacheKey(model.modelName, { pipeline }, options) : null;
-    
+    const cacheKey = options.cache
+      ? this.generateCacheKey(model.modelName, { pipeline }, options)
+      : null;
+
     // Check cache first
     if (cacheKey) {
       const cached = this.getCache(cacheKey);
@@ -269,9 +297,9 @@ class PerformanceService {
 
     // Add performance optimizations to pipeline
     const optimizedPipeline = this.optimizePipeline(pipeline);
-    
+
     const results = await model.aggregate(optimizedPipeline).exec();
-    
+
     const executionTime = Date.now() - startTime;
 
     // Record metrics
@@ -289,7 +317,7 @@ class PerformanceService {
         cacheKey,
         results,
         options.cacheTTL || 30,
-        options.cacheTags || [model.modelName.toLowerCase()]
+        options.cacheTags || [model.modelName.toLowerCase()],
       );
     }
 
@@ -299,9 +327,13 @@ class PerformanceService {
   /**
    * Batch operations for better performance
    */
-  async batchInsert(model: any, documents: any[], batchSize: number = 100): Promise<any[]> {
+  async batchInsert(
+    model: any,
+    documents: any[],
+    batchSize: number = 100,
+  ): Promise<any[]> {
     const results = [];
-    
+
     for (let i = 0; i < documents.length; i += batchSize) {
       const batch = documents.slice(i, i + batchSize);
       const batchResults = await model.insertMany(batch, {
@@ -313,20 +345,20 @@ class PerformanceService {
 
     // Invalidate related cache
     this.invalidateCache([model.modelName.toLowerCase()]);
-    
+
     return results;
   }
 
   async batchUpdate(
     model: any,
     updates: Array<{ filter: any; update: any }>,
-    batchSize: number = 100
+    batchSize: number = 100,
   ): Promise<any[]> {
     const results = [];
-    
+
     for (let i = 0; i < updates.length; i += batchSize) {
       const batch = updates.slice(i, i + batchSize);
-      
+
       const bulkOps = batch.map(({ filter, update }) => ({
         updateOne: {
           filter,
@@ -341,7 +373,7 @@ class PerformanceService {
 
     // Invalidate related cache
     this.invalidateCache([model.modelName.toLowerCase()]);
-    
+
     return results;
   }
 
@@ -364,23 +396,31 @@ class PerformanceService {
   } {
     const cacheHits = Array.from(this.cache.values()).length;
     const slowQueries = this.queryMetrics
-      .filter(m => m.executionTime > 100) // Queries taking more than 100ms
+      .filter((m) => m.executionTime > 100) // Queries taking more than 100ms
       .sort((a, b) => b.executionTime - a.executionTime)
       .slice(0, 10);
 
-    const avgExecutionTime = this.queryMetrics.length > 0
-      ? this.queryMetrics.reduce((sum, m) => sum + m.executionTime, 0) / this.queryMetrics.length
-      : 0;
+    const avgExecutionTime =
+      this.queryMetrics.length > 0
+        ? this.queryMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+          this.queryMetrics.length
+        : 0;
 
-    const queriesByCollection = this.queryMetrics.reduce((acc, m) => {
-      acc[m.collection] = (acc[m.collection] || 0) + 1;
-      return acc;
-    }, {} as { [key: string]: number });
+    const queriesByCollection = this.queryMetrics.reduce(
+      (acc, m) => {
+        acc[m.collection] = (acc[m.collection] || 0) + 1;
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
 
     return {
       cacheStats: {
         size: this.cache.size,
-        hitRate: cacheHits > 0 ? (cacheHits / (cacheHits + this.queryMetrics.length)) * 100 : 0,
+        hitRate:
+          cacheHits > 0
+            ? (cacheHits / (cacheHits + this.queryMetrics.length)) * 100
+            : 0,
         maxSize: this.maxCacheSize,
       },
       queryStats: {
@@ -403,7 +443,7 @@ class PerformanceService {
     indexUsage: any[];
   }> {
     const startTime = Date.now();
-    
+
     try {
       await mongoose.connection.db.admin().ping();
       const responseTime = Date.now() - startTime;
@@ -434,8 +474,8 @@ class PerformanceService {
     const optimized = [...pipeline];
 
     // Move $match stages as early as possible
-    const matchStages = optimized.filter(stage => stage.$match);
-    const otherStages = optimized.filter(stage => !stage.$match);
+    const matchStages = optimized.filter((stage) => stage.$match);
+    const otherStages = optimized.filter((stage) => !stage.$match);
 
     // Add index hints for better performance
     if (matchStages.length > 0) {
@@ -449,7 +489,11 @@ class PerformanceService {
   /**
    * Generate cache key
    */
-  private generateCacheKey(modelName: string, query: any, options: any): string {
+  private generateCacheKey(
+    modelName: string,
+    query: any,
+    options: any,
+  ): string {
     const keyData = {
       model: modelName,
       query,
@@ -480,14 +524,17 @@ class PerformanceService {
    * Start cache cleanup process
    */
   private startCacheCleanup(): void {
-    setInterval(() => {
-      const now = new Date();
-      for (const [key, entry] of this.cache.entries()) {
-        if (entry.expiresAt <= now) {
-          this.cache.delete(key);
+    setInterval(
+      () => {
+        const now = new Date();
+        for (const [key, entry] of this.cache.entries()) {
+          if (entry.expiresAt <= now) {
+            this.cache.delete(key);
+          }
         }
-      }
-    }, 5 * 60 * 1000); // Clean every 5 minutes
+      },
+      5 * 60 * 1000,
+    ); // Clean every 5 minutes
   }
 
   /**

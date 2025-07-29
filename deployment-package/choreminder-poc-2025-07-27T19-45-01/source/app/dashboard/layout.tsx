@@ -1,9 +1,8 @@
+import config from "@/config";
+import { authOptions } from "@/libs/next-auth";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { ReactNode } from "react";
-
-import config from "@/config";
-import { authOptions } from "@/libs/next-auth";
 
 // This is a server-side component to ensure the user is logged in.
 // If not, it will redirect to the login page.

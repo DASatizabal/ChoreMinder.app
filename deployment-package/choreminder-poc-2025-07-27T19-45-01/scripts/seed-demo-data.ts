@@ -1,16 +1,16 @@
+import { getGamificationService } from "../libs/gamification";
 import { dbConnect } from "../libs/mongoose";
-import User from "../models/User";
-import Family from "../models/Family";
-import Chore from "../models/Chore";
 import Achievement from "../models/Achievement";
 import Challenge from "../models/Challenge";
+import Chore from "../models/Chore";
+import Family from "../models/Family";
 import Reward from "../models/Reward";
-import { getGamificationService } from "../libs/gamification";
+import User from "../models/User";
 
 async function seedDemoData() {
   try {
     console.log("🌱 Seeding Demo Data for POC Demonstration");
-    console.log("=" .repeat(50));
+    console.log("=".repeat(50));
 
     await dbConnect();
 
@@ -21,7 +21,7 @@ async function seedDemoData() {
 
     // Create Demo Users first
     console.log("👤 Creating Demo Users...");
-    
+
     // Parent 1 - Sarah Johnson
     const parentSarah = new User({
       name: "Sarah Johnson",
@@ -29,7 +29,8 @@ async function seedDemoData() {
       role: "parent",
       // familyId will be set after family creation
       hasAccess: true,
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b5bc?w=150&h=150&fit=crop&crop=face",
+      image:
+        "https://images.unsplash.com/photo-1494790108755-2616b612b5bc?w=150&h=150&fit=crop&crop=face",
       communicationPreferences: {
         primaryChannel: "email",
         fallbackChannels: ["sms", "whatsapp"],
@@ -60,7 +61,8 @@ async function seedDemoData() {
       role: "parent",
       // familyId will be set after family creation
       hasAccess: true,
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      image:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
       communicationPreferences: {
         primaryChannel: "sms",
         fallbackChannels: ["email", "whatsapp"],
@@ -84,7 +86,8 @@ async function seedDemoData() {
       role: "child",
       // familyId will be set after family creation
       hasAccess: true,
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      image:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
       communicationPreferences: {
         primaryChannel: "whatsapp",
         fallbackChannels: ["sms"],
@@ -125,7 +128,8 @@ async function seedDemoData() {
       role: "child",
       // familyId will be set after family creation
       hasAccess: true,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
       communicationPreferences: {
         primaryChannel: "sms",
         fallbackChannels: ["email"],
@@ -163,7 +167,8 @@ async function seedDemoData() {
     console.log("👨‍👩‍👧‍👦 Creating Demo Family...");
     const demoFamily = new Family({
       name: "The Johnson Family",
-      description: "A loving family learning responsibility through ChoreMinder",
+      description:
+        "A loving family learning responsibility through ChoreMinder",
       createdBy: parentSarah._id,
       settings: {
         allowChildSelfAssign: true,
@@ -174,10 +179,30 @@ async function seedDemoData() {
       },
       createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
       members: [
-        { user: parentSarah._id, name: parentSarah.name, role: "parent", joinedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-        { user: parentMike._id, name: parentMike.name, role: "parent", joinedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-        { user: childEmma._id, name: childEmma.name, role: "child", joinedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000) },
-        { user: childAlex._id, name: childAlex.name, role: "child", joinedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) },
+        {
+          user: parentSarah._id,
+          name: parentSarah.name,
+          role: "parent",
+          joinedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        },
+        {
+          user: parentMike._id,
+          name: parentMike.name,
+          role: "parent",
+          joinedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        },
+        {
+          user: childEmma._id,
+          name: childEmma.name,
+          role: "child",
+          joinedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
+        },
+        {
+          user: childAlex._id,
+          name: childAlex.name,
+          role: "child",
+          joinedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+        },
       ],
     });
     await demoFamily.save();
@@ -187,47 +212,113 @@ async function seedDemoData() {
     parentMike.familyId = demoFamily._id;
     childEmma.familyId = demoFamily._id;
     childAlex.familyId = demoFamily._id;
-    
+
     await parentSarah.save();
     await parentMike.save();
     await childEmma.save();
     await childAlex.save();
 
-
     // Create Historical Chores (Past 30 days)
     console.log("📋 Creating Historical Chores...");
-    
+
     const choreTemplates = [
-      { title: "Make your bed", category: "organizing", points: 10, duration: 5, priority: "low" },
-      { title: "Take out trash", category: "cleaning", points: 15, duration: 10, priority: "medium" },
-      { title: "Load dishwasher", category: "cleaning", points: 20, duration: 15, priority: "medium" },
-      { title: "Vacuum living room", category: "cleaning", points: 25, duration: 20, priority: "medium" },
-      { title: "Water plants", category: "maintenance", points: 10, duration: 10, priority: "low" },
-      { title: "Feed pets", category: "maintenance", points: 15, duration: 5, priority: "high" },
-      { title: "Organize bookshelf", category: "organizing", points: 30, duration: 30, priority: "low" },
-      { title: "Wipe down bathroom counter", category: "cleaning", points: 15, duration: 10, priority: "medium" },
-      { title: "Sort laundry", category: "organizing", points: 20, duration: 15, priority: "medium" },
-      { title: "Sweep kitchen floor", category: "cleaning", points: 20, duration: 15, priority: "medium" },
+      {
+        title: "Make your bed",
+        category: "organizing",
+        points: 10,
+        duration: 5,
+        priority: "low",
+      },
+      {
+        title: "Take out trash",
+        category: "cleaning",
+        points: 15,
+        duration: 10,
+        priority: "medium",
+      },
+      {
+        title: "Load dishwasher",
+        category: "cleaning",
+        points: 20,
+        duration: 15,
+        priority: "medium",
+      },
+      {
+        title: "Vacuum living room",
+        category: "cleaning",
+        points: 25,
+        duration: 20,
+        priority: "medium",
+      },
+      {
+        title: "Water plants",
+        category: "maintenance",
+        points: 10,
+        duration: 10,
+        priority: "low",
+      },
+      {
+        title: "Feed pets",
+        category: "maintenance",
+        points: 15,
+        duration: 5,
+        priority: "high",
+      },
+      {
+        title: "Organize bookshelf",
+        category: "organizing",
+        points: 30,
+        duration: 30,
+        priority: "low",
+      },
+      {
+        title: "Wipe down bathroom counter",
+        category: "cleaning",
+        points: 15,
+        duration: 10,
+        priority: "medium",
+      },
+      {
+        title: "Sort laundry",
+        category: "organizing",
+        points: 20,
+        duration: 15,
+        priority: "medium",
+      },
+      {
+        title: "Sweep kitchen floor",
+        category: "cleaning",
+        points: 20,
+        duration: 15,
+        priority: "medium",
+      },
     ];
 
     const historicalChores = [];
-    const statuses = ["verified", "verified", "verified", "completed", "pending"];
-    
+    const statuses = [
+      "verified",
+      "verified",
+      "verified",
+      "completed",
+      "pending",
+    ];
+
     // Generate chores for the past 30 days
     for (let dayOffset = 30; dayOffset >= 0; dayOffset--) {
       const date = new Date(Date.now() - dayOffset * 24 * 60 * 60 * 1000);
-      
+
       // Each child gets 1-3 chores per day
       for (const child of [childEmma, childAlex]) {
         const numChores = Math.floor(Math.random() * 3) + 1;
-        
+
         for (let i = 0; i < numChores; i++) {
-          const template = choreTemplates[Math.floor(Math.random() * choreTemplates.length)];
+          const template =
+            choreTemplates[Math.floor(Math.random() * choreTemplates.length)];
           const status = statuses[Math.floor(Math.random() * statuses.length)];
-          
+
           const dueDate = new Date(date);
           dueDate.setHours(Math.floor(Math.random() * 12) + 8); // Between 8 AM and 8 PM
-          
+
           const chore = new Chore({
             title: template.title,
             description: `${template.title} - keep our home clean and organized!`,
@@ -243,11 +334,28 @@ async function seedDemoData() {
             estimatedDuration: template.duration,
             requiresPhotoVerification: Math.random() > 0.7,
             createdAt: new Date(date.getTime() - 60 * 60 * 1000), // Created 1 hour before due
-            startedAt: status !== "pending" ? new Date(dueDate.getTime() - 30 * 60 * 1000) : undefined,
-            completedAt: status === "verified" || status === "completed" ? dueDate : undefined,
-            completedBy: status === "verified" || status === "completed" ? child._id : undefined,
-            verifiedAt: status === "verified" ? new Date(dueDate.getTime() + 60 * 60 * 1000) : undefined,
-            verifiedBy: status === "verified" ? (Math.random() > 0.5 ? parentSarah._id : parentMike._id) : undefined,
+            startedAt:
+              status !== "pending"
+                ? new Date(dueDate.getTime() - 30 * 60 * 1000)
+                : undefined,
+            completedAt:
+              status === "verified" || status === "completed"
+                ? dueDate
+                : undefined,
+            completedBy:
+              status === "verified" || status === "completed"
+                ? child._id
+                : undefined,
+            verifiedAt:
+              status === "verified"
+                ? new Date(dueDate.getTime() + 60 * 60 * 1000)
+                : undefined,
+            verifiedBy:
+              status === "verified"
+                ? Math.random() > 0.5
+                  ? parentSarah._id
+                  : parentMike._id
+                : undefined,
             history: [
               {
                 action: "created",
@@ -255,21 +363,30 @@ async function seedDemoData() {
                 user: Math.random() > 0.5 ? parentSarah._id : parentMike._id,
                 details: { status: "pending" },
               },
-              ...(status !== "pending" ? [{
-                action: "status_changed",
-                timestamp: dueDate,
-                user: child._id,
-                details: { from: "pending", to: "completed" },
-              }] : []),
-              ...(status === "verified" ? [{
-                action: "status_changed",
-                timestamp: new Date(dueDate.getTime() + 60 * 60 * 1000),
-                user: Math.random() > 0.5 ? parentSarah._id : parentMike._id,
-                details: { from: "completed", to: "verified" },
-              }] : []),
+              ...(status !== "pending"
+                ? [
+                    {
+                      action: "status_changed",
+                      timestamp: dueDate,
+                      user: child._id,
+                      details: { from: "pending", to: "completed" },
+                    },
+                  ]
+                : []),
+              ...(status === "verified"
+                ? [
+                    {
+                      action: "status_changed",
+                      timestamp: new Date(dueDate.getTime() + 60 * 60 * 1000),
+                      user:
+                        Math.random() > 0.5 ? parentSarah._id : parentMike._id,
+                      details: { from: "completed", to: "verified" },
+                    },
+                  ]
+                : []),
             ],
           });
-          
+
           historicalChores.push(chore);
         }
       }
@@ -280,23 +397,38 @@ async function seedDemoData() {
 
     // Create Current/Future Chores
     console.log("📅 Creating Current and Future Chores...");
-    
+
     const currentChores = [];
-    
+
     // Today's chores
     const today = new Date();
     for (const child of [childEmma, childAlex]) {
       const templates = [
-        { title: "Make your bed", category: "organizing", points: 10, duration: 5 },
-        { title: "Pack school lunch", category: "cooking", points: 15, duration: 15 },
-        { title: "Tidy room", category: "organizing", points: 20, duration: 20 },
+        {
+          title: "Make your bed",
+          category: "organizing",
+          points: 10,
+          duration: 5,
+        },
+        {
+          title: "Pack school lunch",
+          category: "cooking",
+          points: 15,
+          duration: 15,
+        },
+        {
+          title: "Tidy room",
+          category: "organizing",
+          points: 20,
+          duration: 20,
+        },
       ];
-      
+
       for (let i = 0; i < templates.length; i++) {
         const template = templates[i];
         const dueTime = new Date(today);
         dueTime.setHours(8 + i * 4, 0, 0, 0); // 8 AM, 12 PM, 4 PM
-        
+
         const chore = new Chore({
           title: template.title,
           description: `${template.title} - part of your daily routine!`,
@@ -306,16 +438,17 @@ async function seedDemoData() {
           assignedBy: parentSarah._id,
           dueDate: dueTime,
           points: template.points,
-          status: i === 0 ? "completed" : (i === 1 ? "in_progress" : "pending"),
+          status: i === 0 ? "completed" : i === 1 ? "in_progress" : "pending",
           category: template.category,
           priority: "medium",
           estimatedDuration: template.duration,
           requiresPhotoVerification: false,
-          startedAt: i <= 1 ? new Date(dueTime.getTime() - 30 * 60 * 1000) : undefined,
+          startedAt:
+            i <= 1 ? new Date(dueTime.getTime() - 30 * 60 * 1000) : undefined,
           completedAt: i === 0 ? dueTime : undefined,
           completedBy: i === 0 ? child._id : undefined,
         });
-        
+
         currentChores.push(chore);
       }
     }
@@ -324,16 +457,26 @@ async function seedDemoData() {
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
     for (const child of [childEmma, childAlex]) {
       const weekend_chores = [
-        { title: "Clean your room", category: "cleaning", points: 30, duration: 45 },
-        { title: "Help with groceries", category: "organizing", points: 20, duration: 30 },
+        {
+          title: "Clean your room",
+          category: "cleaning",
+          points: 30,
+          duration: 45,
+        },
+        {
+          title: "Help with groceries",
+          category: "organizing",
+          points: 20,
+          duration: 30,
+        },
         { title: "Wash car", category: "outdoor", points: 40, duration: 60 },
       ];
-      
+
       for (let i = 0; i < weekend_chores.length; i++) {
         const template = weekend_chores[i];
         const dueTime = new Date(tomorrow);
         dueTime.setHours(10 + i * 2, 0, 0, 0);
-        
+
         const chore = new Chore({
           title: template.title,
           description: `${template.title} - weekend family activities!`,
@@ -349,7 +492,7 @@ async function seedDemoData() {
           estimatedDuration: template.duration,
           requiresPhotoVerification: i === 2, // Car wash requires photo
         });
-        
+
         currentChores.push(chore);
       }
     }
@@ -359,15 +502,15 @@ async function seedDemoData() {
 
     // Award some achievements
     console.log("🏆 Setting up Achievements...");
-    
+
     const gamificationService = getGamificationService();
-    
+
     // Award points for completed chores and unlock achievements
     const emmaCompletedChores = await Chore.find({
       assignedTo: childEmma._id,
       status: "verified",
     });
-    
+
     const alexCompletedChores = await Chore.find({
       assignedTo: childAlex._id,
       status: "verified",
@@ -378,7 +521,7 @@ async function seedDemoData() {
 
     // Create demo rewards
     console.log("🎁 Creating Demo Rewards...");
-    
+
     const demoRewards = [
       {
         name: "30 Minutes Extra Screen Time",
@@ -460,8 +603,10 @@ async function seedDemoData() {
 
     // Add some pending reward requests
     const goldStarReward = await Reward.findOne({ name: "Gold Star Badge" });
-    const movieReward = await Reward.findOne({ name: "Choose Family Movie Night" });
-    
+    const movieReward = await Reward.findOne({
+      name: "Choose Family Movie Night",
+    });
+
     if (goldStarReward) {
       childEmma.gamification!.pendingRewards.push({
         rewardId: goldStarReward._id,
@@ -483,15 +628,20 @@ async function seedDemoData() {
     console.log("✅ Demo Data Seeding Complete!");
     console.log("\n📊 Demo Data Summary:");
     console.log(`👨‍👩‍👧‍👦 Family: ${demoFamily.name}`);
-    console.log(`👤 Users: ${[parentSarah, parentMike, childEmma, childAlex].map(u => u.name).join(", ")}`);
-    console.log(`📋 Total Chores: ${historicalChores.length + currentChores.length}`);
+    console.log(
+      `👤 Users: ${[parentSarah, parentMike, childEmma, childAlex].map((u) => u.name).join(", ")}`,
+    );
+    console.log(
+      `📋 Total Chores: ${historicalChores.length + currentChores.length}`,
+    );
     console.log(`🎁 Rewards: ${demoRewards.length}`);
     console.log(`\n🎯 POC Demo Ready!`);
     console.log("\nDemo Login Credentials:");
     console.log("Parent: sarah@demo.com");
     console.log("Child: emma@demo.com");
-    console.log("\n🚀 Start the demo with a populated family showing real usage patterns!");
-
+    console.log(
+      "\n🚀 Start the demo with a populated family showing real usage patterns!",
+    );
   } catch (error) {
     console.error("❌ Error seeding demo data:", error);
     process.exit(1);

@@ -1,10 +1,10 @@
 // app/api/notifications/test/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import { notificationService } from "@/lib/notification-service";
 import { reminderScheduler } from "@/lib/reminder-scheduler";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
 // POST /api/notifications/test - Send test notifications (development only)
 export async function POST(req: NextRequest) {

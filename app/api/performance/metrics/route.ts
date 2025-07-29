@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/libs/next-auth";
 import { getPerformanceService } from "@/libs/performance";
 import User from "@/models/User";
 
@@ -15,7 +15,10 @@ export async function GET(req: NextRequest) {
     // Only allow admins to view performance metrics
     const user = await User.findById(session.user.id);
     if (user?.role !== "admin") {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 },
+      );
     }
 
     const performanceService = getPerformanceService();
@@ -35,7 +38,7 @@ export async function GET(req: NextRequest) {
     console.error("Performance metrics API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -50,7 +53,10 @@ export async function DELETE(req: NextRequest) {
     // Only allow admins to clear cache
     const user = await User.findById(session.user.id);
     if (user?.role !== "admin") {
-      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 },
+      );
     }
 
     const performanceService = getPerformanceService();
@@ -64,7 +70,7 @@ export async function DELETE(req: NextRequest) {
     console.error("Clear cache API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

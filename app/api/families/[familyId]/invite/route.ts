@@ -4,10 +4,10 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@/libs/next-auth";
-import dbConnect from "@/libs/mongoose";
 import { sendFamilyInvitationEmail } from "@/libs/email";
 import { addEmailLog } from "@/libs/email-storage";
+import dbConnect from "@/libs/mongoose";
+import { authOptions } from "@/libs/next-auth";
 import Family from "@/models/Family";
 import User from "@/models/User";
 
@@ -21,14 +21,18 @@ interface RouteParams {
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     console.log(`📨 [INVITE API] Called with familyId: ${params.familyId}`);
-    
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { email, role = "child" } = await req.json();
-    console.log(`📨 [INVITE API] Request data:`, { email, role, userId: session.user.id });
+    console.log(`📨 [INVITE API] Request data:`, {
+      email,
+      role,
+      userId: session.user.id,
+    });
 
     // Validate email
     if (!email || !email.includes("@")) {
@@ -51,13 +55,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     if (params.familyId === "mock_family_id") {
       // Generate invite code for mock family
       const inviteCode = crypto.randomBytes(8).toString("hex").toUpperCase();
-      
+
       // Log the email sending attempt
       console.log(`📧 [EMAIL LOG] Invitation sent:`, {
         timestamp: new Date().toISOString(),
         to: email,
-        role: role,
-        inviteCode: inviteCode,
+        role,
+        inviteCode,
         invitedBy: session.user.id,
         familyName: "Smith Family",
         inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
@@ -102,8 +106,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
 
       return NextResponse.json({
-        message: emailResult.success 
-          ? "Invitation created and email sent successfully" 
+        message: emailResult.success
+          ? "Invitation created and email sent successfully"
           : "Invitation created but email failed to send",
         inviteCode,
         inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
@@ -175,8 +179,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     console.log(`📧 [EMAIL LOG] Invitation sent:`, {
       timestamp: new Date().toISOString(),
       to: email,
-      role: role,
-      inviteCode: inviteCode,
+      role,
+      inviteCode,
       invitedBy: session.user.id,
       inviterName: inviter?.name,
       familyId: family._id,
@@ -218,8 +222,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json({
-      message: emailResult.success 
-        ? "Invitation created and email sent successfully" 
+      message: emailResult.success
+        ? "Invitation created and email sent successfully"
         : "Invitation created but email failed to send",
       inviteCode,
       inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,

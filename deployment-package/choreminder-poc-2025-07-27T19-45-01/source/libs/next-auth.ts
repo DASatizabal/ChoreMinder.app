@@ -1,10 +1,9 @@
+import config from "@/config";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
-
-import config from "@/config";
 
 import clientPromise from "./mongo"; // ✅ mongo.ts exports clientPromise
 

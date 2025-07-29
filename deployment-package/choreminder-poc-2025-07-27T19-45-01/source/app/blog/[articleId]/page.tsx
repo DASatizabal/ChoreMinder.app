@@ -1,9 +1,8 @@
+import config from "@/config";
+import { getSEOTags } from "@/libs/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Script from "next/script";
-
-import config from "@/config";
-import { getSEOTags } from "@/libs/seo";
 
 import Avatar from "../_assets/components/Avatar";
 import BadgeCategory from "../_assets/components/BadgeCategory";

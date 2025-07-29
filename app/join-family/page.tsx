@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface InvitationInfo {
@@ -26,7 +26,9 @@ export default function JoinFamilyPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [code, setCode] = useState("");
-  const [invitationInfo, setInvitationInfo] = useState<InvitationInfo | null>(null);
+  const [invitationInfo, setInvitationInfo] = useState<InvitationInfo | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
@@ -57,7 +59,9 @@ export default function JoinFamilyPage() {
       setInvitationInfo(data);
     } catch (error) {
       console.error("Error validating invitation:", error);
-      setError(error instanceof Error ? error.message : "Invalid invitation code");
+      setError(
+        error instanceof Error ? error.message : "Invalid invitation code",
+      );
       setInvitationInfo(null);
     } finally {
       setLoading(false);
@@ -89,7 +93,9 @@ export default function JoinFamilyPage() {
       router.push("/dashboard");
     } catch (error) {
       console.error("Error joining family:", error);
-      setError(error instanceof Error ? error.message : "Failed to join family");
+      setError(
+        error instanceof Error ? error.message : "Failed to join family",
+      );
     } finally {
       setJoining(false);
     }
@@ -162,7 +168,7 @@ export default function JoinFamilyPage() {
           {invitationInfo && invitationInfo.valid && (
             <div className="mt-6 space-y-4">
               <div className="divider">Invitation Details</div>
-              
+
               <div className="bg-base-100 rounded-lg p-4 space-y-3">
                 <div className="flex justify-between">
                   <span className="font-medium">Family:</span>
@@ -170,7 +176,9 @@ export default function JoinFamilyPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Role:</span>
-                  <span className="capitalize">{invitationInfo.invitation.role}</span>
+                  <span className="capitalize">
+                    {invitationInfo.invitation.role}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Invited by:</span>
@@ -182,7 +190,11 @@ export default function JoinFamilyPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Expires:</span>
-                  <span>{new Date(invitationInfo.invitation.expiresAt).toLocaleDateString()}</span>
+                  <span>
+                    {new Date(
+                      invitationInfo.invitation.expiresAt,
+                    ).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
 
@@ -234,9 +246,7 @@ export default function JoinFamilyPage() {
                       Joining Family...
                     </>
                   ) : (
-                    <>
-                      ✅ Join {invitationInfo.family.name}
-                    </>
+                    <>✅ Join {invitationInfo.family.name}</>
                   )}
                 </button>
               )}
@@ -246,7 +256,8 @@ export default function JoinFamilyPage() {
           {/* Instructions */}
           <div className="mt-6 text-center">
             <div className="text-sm text-base-content/70">
-              Don&apos;t have an invitation code?<br/>
+              Don&apos;t have an invitation code?
+              <br />
               Ask a family member to invite you from the Family Management page.
             </div>
           </div>

@@ -24,7 +24,16 @@
       "Bash(npm run launch:checklist:*)",
       "Bash(npm run validate:launch:*)",
       "Bash(curl:*)",
-      "Bash(move \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.ts\" \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.tsx\")"
+      "Bash(move \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.ts\" \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.tsx\")",
+      "Bash(set -a)",
+      "Bash(source:*)",
+      "Bash(npm audit:*)",
+      "Bash(test:*)",
+      "Bash(npm run:*)",
+      "Bash(npm update:*)",
+      "Bash(grep:*)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(timeout 10 npm run dev)"
     ],
     "deny": []
   }

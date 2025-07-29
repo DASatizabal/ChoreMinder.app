@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
-import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import { useSession } from "next-auth/react";
+import { useState, useEffect, useRef } from "react";
 
 interface CalendarEvent {
   id: string;
@@ -69,7 +69,7 @@ export default function FamilyCalendar() {
       endDate.setDate(endDate.getDate() + 60);
 
       const response = await fetch(
-        `/api/calendar/family?start=${startDate.toISOString()}&end=${endDate.toISOString()}`
+        `/api/calendar/family?start=${startDate.toISOString()}&end=${endDate.toISOString()}`,
       );
 
       if (response.ok) {
@@ -98,19 +98,22 @@ export default function FamilyCalendar() {
 
   const transformChoresToEvents = (chores: any[]): CalendarEvent[] => {
     return chores
-      .filter(chore => {
+      .filter((chore) => {
         if (filterBy === "all") return true;
         return chore.assignedTo._id === filterBy;
       })
       .map((chore) => {
         const color = getChoreColor(chore.category, chore.priority);
-        
+
         return {
           id: chore._id,
           title: `${chore.title} (${chore.assignedTo.name})`,
           start: new Date(chore.dueDate),
-          end: chore.estimatedDuration 
-            ? new Date(new Date(chore.dueDate).getTime() + chore.estimatedDuration * 60000)
+          end: chore.estimatedDuration
+            ? new Date(
+                new Date(chore.dueDate).getTime() +
+                  chore.estimatedDuration * 60000,
+              )
             : undefined,
           allDay: false,
           backgroundColor: color.bg,
@@ -145,13 +148,13 @@ export default function FamilyCalendar() {
 
     // Adjust opacity based on priority
     if (priority === "urgent") {
-      baseColor = { ...baseColor, bg: baseColor.bg + "FF" }; // Full opacity
+      baseColor = { ...baseColor, bg: `${baseColor.bg}FF` }; // Full opacity
     } else if (priority === "high") {
-      baseColor = { ...baseColor, bg: baseColor.bg + "DD" }; // Slightly transparent
+      baseColor = { ...baseColor, bg: `${baseColor.bg}DD` }; // Slightly transparent
     } else if (priority === "medium") {
-      baseColor = { ...baseColor, bg: baseColor.bg + "BB" }; // More transparent
+      baseColor = { ...baseColor, bg: `${baseColor.bg}BB` }; // More transparent
     } else {
-      baseColor = { ...baseColor, bg: baseColor.bg + "99" }; // Most transparent
+      baseColor = { ...baseColor, bg: `${baseColor.bg}99` }; // Most transparent
     }
 
     return baseColor;
@@ -159,10 +162,10 @@ export default function FamilyCalendar() {
 
   const handleDateClick = (info: any) => {
     setSelectedDate(info.date);
-    const dayEvents = events.filter(event => 
-      event.start.toDateString() === info.date.toDateString()
+    const dayEvents = events.filter(
+      (event) => event.start.toDateString() === info.date.toDateString(),
     );
-    
+
     if (dayEvents.length > 0) {
       // Show day details modal or sidebar
       console.log("Day events:", dayEvents);
@@ -172,7 +175,7 @@ export default function FamilyCalendar() {
   const handleEventClick = (info: any) => {
     const event = info.event;
     const props = event.extendedProps;
-    
+
     // Show chore details modal
     console.log("Chore details:", {
       id: event.id,
@@ -206,7 +209,7 @@ export default function FamilyCalendar() {
     // Handle date range selection for creating new chores
     const start = info.start;
     const end = info.end;
-    
+
     console.log("Date range selected:", { start, end });
     // Open create chore modal with pre-filled dates
   };
@@ -278,7 +281,7 @@ export default function FamilyCalendar() {
 
         <div className="flex flex-wrap gap-3">
           {/* View Selector */}
-          <select 
+          <select
             className="select select-bordered select-sm"
             value={view}
             onChange={(e) => {
@@ -292,7 +295,7 @@ export default function FamilyCalendar() {
           </select>
 
           {/* Member Filter */}
-          <select 
+          <select
             className="select select-bordered select-sm"
             value={filterBy}
             onChange={(e) => {
@@ -301,7 +304,7 @@ export default function FamilyCalendar() {
             }}
           >
             <option value="all">All Members</option>
-            {familyMembers.map(member => (
+            {familyMembers.map((member) => (
               <option key={member._id} value={member._id}>
                 {member.name}
               </option>
@@ -309,7 +312,7 @@ export default function FamilyCalendar() {
           </select>
 
           {/* Conflicts Toggle */}
-          <button 
+          <button
             className={`btn btn-sm ${showConflicts ? "btn-warning" : "btn-outline"}`}
             onClick={() => setShowConflicts(!showConflicts)}
           >
@@ -321,9 +324,20 @@ export default function FamilyCalendar() {
             <label tabIndex={0} className="btn btn-sm btn-outline">
               📤 Export
             </label>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-40">
-              <li><button onClick={() => exportCalendar("ics")}>iCal (.ics)</button></li>
-              <li><button onClick={() => exportCalendar("pdf")}>PDF Report</button></li>
+            <ul
+              tabIndex={0}
+              className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-40"
+            >
+              <li>
+                <button onClick={() => exportCalendar("ics")}>
+                  iCal (.ics)
+                </button>
+              </li>
+              <li>
+                <button onClick={() => exportCalendar("pdf")}>
+                  PDF Report
+                </button>
+              </li>
             </ul>
           </div>
         </div>
@@ -337,7 +351,7 @@ export default function FamilyCalendar() {
             <div>
               <h3 className="font-bold">Schedule Conflicts Detected</h3>
               <p className="text-sm">
-                {conflicts.length} day(s) have potential scheduling conflicts. 
+                {conflicts.length} day(s) have potential scheduling conflicts.
                 Click on conflicted dates for optimization suggestions.
               </p>
             </div>
@@ -382,23 +396,23 @@ export default function FamilyCalendar() {
             eventClassNames={(info) => {
               const props = info.event.extendedProps;
               const classes = ["cursor-pointer", "hover:opacity-80"];
-              
+
               if (props.status === "completed") {
                 classes.push("opacity-60", "line-through");
               }
-              
+
               if (props.priority === "urgent") {
                 classes.push("ring-2", "ring-red-500");
               }
-              
+
               return classes;
             }}
             dayCellClassNames={(info) => {
               const dateStr = info.date.toDateString();
-              const hasConflicts = conflicts.some(conflict => 
-                conflict.date.toDateString() === dateStr
+              const hasConflicts = conflicts.some(
+                (conflict) => conflict.date.toDateString() === dateStr,
               );
-              
+
               return hasConflicts ? ["bg-warning/20", "border-warning"] : [];
             }}
             eventContent={(info) => {
@@ -459,29 +473,38 @@ export default function FamilyCalendar() {
           <div className="stat-title text-primary-content/70">Total Events</div>
           <div className="stat-value text-2xl">{events.length}</div>
         </div>
-        
+
         <div className="stat bg-warning text-warning-content rounded-lg p-4">
           <div className="stat-title text-warning-content/70">Conflicts</div>
           <div className="stat-value text-2xl">{conflicts.length}</div>
         </div>
-        
+
         <div className="stat bg-success text-success-content rounded-lg p-4">
           <div className="stat-title text-success-content/70">Completed</div>
           <div className="stat-value text-2xl">
-            {events.filter(e => e.extendedProps.status === "completed").length}
+            {
+              events.filter((e) => e.extendedProps.status === "completed")
+                .length
+            }
           </div>
         </div>
-        
+
         <div className="stat bg-info text-info-content rounded-lg p-4">
           <div className="stat-title text-info-content/70">This Week</div>
           <div className="stat-value text-2xl">
-            {events.filter(e => {
-              const eventDate = new Date(e.start);
-              const now = new Date();
-              const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
-              const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-              return eventDate >= weekStart && eventDate < weekEnd;
-            }).length}
+            {
+              events.filter((e) => {
+                const eventDate = new Date(e.start);
+                const now = new Date();
+                const weekStart = new Date(
+                  now.setDate(now.getDate() - now.getDay()),
+                );
+                const weekEnd = new Date(
+                  weekStart.getTime() + 7 * 24 * 60 * 60 * 1000,
+                );
+                return eventDate >= weekStart && eventDate < weekEnd;
+              }).length
+            }
           </div>
         </div>
       </div>

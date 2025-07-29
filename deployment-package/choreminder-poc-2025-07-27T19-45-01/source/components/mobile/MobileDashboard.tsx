@@ -1,12 +1,11 @@
 "use client";
 
+import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
-
-import { useOfflineSync } from "@/hooks/useOfflineSync";
-import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization";
 
 import LazyImage from "../performance/LazyImage";
 import VirtualizedList from "../performance/VirtualizedList";

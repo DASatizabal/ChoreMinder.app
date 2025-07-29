@@ -1,12 +1,11 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getGamificationService } from "@/libs/gamification";
+import { dbConnect } from "@/libs/mongoose";
+import Chore from "@/models/Chore";
+import Family from "@/models/Family";
 import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { dbConnect } from "@/libs/mongoose";
-import { getGamificationService } from "@/libs/gamification";
-import Chore from "@/models/Chore";
-import Family from "@/models/Family";
 
 interface RouteParams {
   params: {
@@ -249,31 +248,36 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     if (status === "verified" && chore.assignedTo) {
       try {
         const gamificationService = getGamificationService();
-        
+
         // Calculate and award points
-        const pointsBreakdown = await gamificationService.calculatePointsForChore(
-          chore._id.toString(),
-          chore.assignedTo.toString(),
-          "good" // Default quality, could be enhanced with quality rating from parent
-        );
+        const pointsBreakdown =
+          await gamificationService.calculatePointsForChore(
+            chore._id.toString(),
+            chore.assignedTo.toString(),
+            "good", // Default quality, could be enhanced with quality rating from parent
+          );
 
         const result = await gamificationService.awardPoints(
           chore.assignedTo.toString(),
           pointsBreakdown,
-          chore._id.toString()
+          chore._id.toString(),
         );
 
         gamificationResult = {
           pointsBreakdown,
           newTotalPoints: result.totalPoints,
           newAchievements: result.newAchievements,
-          levelUp: result.newLevel ? {
-            oldLevel: result.newLevel - 1,
-            newLevel: result.newLevel,
-          } : null,
+          levelUp: result.newLevel
+            ? {
+                oldLevel: result.newLevel - 1,
+                newLevel: result.newLevel,
+              }
+            : null,
         };
 
-        console.log(`Awarded ${pointsBreakdown.totalPoints} points to user ${chore.assignedTo} for completing chore ${chore.title}`);
+        console.log(
+          `Awarded ${pointsBreakdown.totalPoints} points to user ${chore.assignedTo} for completing chore ${chore.title}`,
+        );
       } catch (gamificationError) {
         console.error("Error processing gamification:", gamificationError);
         // Don't fail the chore update if gamification fails

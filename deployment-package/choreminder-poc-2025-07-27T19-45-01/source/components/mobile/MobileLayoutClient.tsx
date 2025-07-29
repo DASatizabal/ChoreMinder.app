@@ -1,13 +1,12 @@
 "use client";
 
+import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
-
-import { useOfflineSync } from "@/hooks/useOfflineSync";
-import { usePerformanceOptimization } from "@/hooks/usePerformanceOptimization";
 
 import {
   InteractiveButton,

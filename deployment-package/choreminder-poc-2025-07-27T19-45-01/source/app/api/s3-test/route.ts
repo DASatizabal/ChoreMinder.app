@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-
 import { uploadToS3 } from "@/libs/s3";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {

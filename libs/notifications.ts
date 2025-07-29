@@ -1,16 +1,24 @@
 "use server";
 
+import Chore from "@/models/Chore";
+import User from "@/models/User";
+
 import { dbConnect } from "./mongoose";
 import { getUnifiedMessagingService } from "./unified-messaging";
-import User from "@/models/User";
-import Chore from "@/models/Chore";
 
 export interface NotificationRule {
   id: string;
   name: string;
   description: string;
   trigger: {
-    event: "chore_assigned" | "chore_due_soon" | "chore_overdue" | "chore_completed" | "chore_approved" | "streak_milestone" | "points_milestone";
+    event:
+      | "chore_assigned"
+      | "chore_due_soon"
+      | "chore_overdue"
+      | "chore_completed"
+      | "chore_approved"
+      | "streak_milestone"
+      | "points_milestone";
     conditions: {
       timeOffset?: number; // Minutes before/after event
       priority?: ("low" | "medium" | "high" | "urgent")[];
@@ -96,7 +104,9 @@ class NotificationService {
   /**
    * Create notification rule
    */
-  async createNotificationRule(rule: Omit<NotificationRule, "id" | "createdAt" | "updatedAt">): Promise<NotificationRule> {
+  async createNotificationRule(
+    rule: Omit<NotificationRule, "id" | "createdAt" | "updatedAt">,
+  ): Promise<NotificationRule> {
     const newRule: NotificationRule = {
       ...rule,
       id: this.generateId(),
@@ -106,7 +116,7 @@ class NotificationService {
 
     // Store in database (would need a NotificationRule model)
     console.log("Created notification rule:", newRule.name);
-    
+
     return newRule;
   }
 
@@ -114,7 +124,14 @@ class NotificationService {
    * Trigger notification based on event
    */
   async triggerNotification(event: {
-    type: "chore_assigned" | "chore_due_soon" | "chore_overdue" | "chore_completed" | "chore_approved" | "streak_milestone" | "points_milestone";
+    type:
+      | "chore_assigned"
+      | "chore_due_soon"
+      | "chore_overdue"
+      | "chore_completed"
+      | "chore_approved"
+      | "streak_milestone"
+      | "points_milestone";
     userId: string;
     choreId?: string;
     data: any;
@@ -142,25 +159,36 @@ class NotificationService {
   private async scheduleNotification(
     rule: NotificationRule,
     event: any,
-    user: any
+    user: any,
   ): Promise<void> {
     const now = new Date();
     let scheduledAt = new Date(now);
 
     // Apply time offset if specified
     if (rule.trigger.conditions.timeOffset) {
-      scheduledAt.setMinutes(scheduledAt.getMinutes() + rule.trigger.conditions.timeOffset);
+      scheduledAt.setMinutes(
+        scheduledAt.getMinutes() + rule.trigger.conditions.timeOffset,
+      );
     }
 
     // Check quiet hours
     if (rule.scheduling.respectQuietHours) {
-      scheduledAt = this.adjustForQuietHours(scheduledAt, user, rule.scheduling.quietHours);
+      scheduledAt = this.adjustForQuietHours(
+        scheduledAt,
+        user,
+        rule.scheduling.quietHours,
+      );
     }
 
     // Check rate limiting
-    if (!this.isWithinRateLimit(user._id.toString(), rule.scheduling.maxPerHour)) {
+    if (
+      !this.isWithinRateLimit(user._id.toString(), rule.scheduling.maxPerHour)
+    ) {
       // Delay until rate limit resets
-      scheduledAt = this.getNextAvailableSlot(user._id.toString(), rule.scheduling.maxPerHour);
+      scheduledAt = this.getNextAvailableSlot(
+        user._id.toString(),
+        rule.scheduling.maxPerHour,
+      );
     }
 
     const notification: NotificationSchedule = {
@@ -180,7 +208,9 @@ class NotificationService {
     };
 
     this.scheduledNotifications.set(notification.id, notification);
-    console.log(`Scheduled notification ${notification.id} for ${scheduledAt.toISOString()}`);
+    console.log(
+      `Scheduled notification ${notification.id} for ${scheduledAt.toISOString()}`,
+    );
   }
 
   /**
@@ -188,8 +218,9 @@ class NotificationService {
    */
   private async processScheduledNotifications(): Promise<void> {
     const now = new Date();
-    const pendingNotifications = Array.from(this.scheduledNotifications.values())
-      .filter(n => n.status === "pending" && n.scheduledAt <= now);
+    const pendingNotifications = Array.from(
+      this.scheduledNotifications.values(),
+    ).filter((n) => n.status === "pending" && n.scheduledAt <= now);
 
     for (const notification of pendingNotifications) {
       await this.sendNotification(notification);
@@ -199,7 +230,9 @@ class NotificationService {
   /**
    * Send individual notification
    */
-  private async sendNotification(notification: NotificationSchedule): Promise<void> {
+  private async sendNotification(
+    notification: NotificationSchedule,
+  ): Promise<void> {
     try {
       const user = await User.findById(notification.userId);
       if (!user) {
@@ -214,14 +247,24 @@ class NotificationService {
       }
 
       // Check cooldown
-      if (!this.isOutsideCooldown(user._id.toString(), rule.scheduling.cooldownMinutes)) {
+      if (
+        !this.isOutsideCooldown(
+          user._id.toString(),
+          rule.scheduling.cooldownMinutes,
+        )
+      ) {
         // Reschedule for later
-        notification.scheduledAt = new Date(Date.now() + rule.scheduling.cooldownMinutes * 60 * 1000);
+        notification.scheduledAt = new Date(
+          Date.now() + rule.scheduling.cooldownMinutes * 60 * 1000,
+        );
         return;
       }
 
       // Prepare message context
-      const messageContext = await this.prepareMessageContext(notification, user);
+      const messageContext = await this.prepareMessageContext(
+        notification,
+        user,
+      );
       const messagingService = getUnifiedMessagingService();
 
       // Send message
@@ -253,16 +296,22 @@ class NotificationService {
   private async handleNotificationFailure(
     notification: NotificationSchedule,
     rule: NotificationRule | null,
-    error?: string
+    error?: string,
   ): Promise<void> {
     notification.attempts++;
     notification.lastAttemptAt = new Date();
 
     if (notification.attempts >= notification.maxAttempts) {
-      this.markNotificationFailed(notification, error || "Max attempts reached");
-      
+      this.markNotificationFailed(
+        notification,
+        error || "Max attempts reached",
+      );
+
       // Try escalation
-      if (rule?.actions.escalation?.enabled && rule.actions.escalation.escalateToParents) {
+      if (
+        rule?.actions.escalation?.enabled &&
+        rule.actions.escalation.escalateToParents
+      ) {
         await this.escalateToParents(notification, rule);
       }
     } else {
@@ -276,7 +325,10 @@ class NotificationService {
   /**
    * Escalate notification to parents
    */
-  private async escalateToParents(notification: NotificationSchedule, rule: NotificationRule): Promise<void> {
+  private async escalateToParents(
+    notification: NotificationSchedule,
+    rule: NotificationRule,
+  ): Promise<void> {
     try {
       const user = await User.findById(notification.userId).populate("family");
       if (!user?.family) return;
@@ -291,7 +343,9 @@ class NotificationService {
       for (const parent of parents) {
         const escalationContext = {
           user: parent,
-          chore: notification.choreId ? await Chore.findById(notification.choreId) : null,
+          chore: notification.choreId
+            ? await Chore.findById(notification.choreId)
+            : null,
           family: user.family,
           childUser: user,
         };
@@ -307,7 +361,9 @@ class NotificationService {
         });
       }
 
-      console.log(`Escalated notification ${notification.id} to ${parents.length} parents`);
+      console.log(
+        `Escalated notification ${notification.id} to ${parents.length} parents`,
+      );
     } catch (error) {
       console.error("Error escalating notification:", error);
     }
@@ -319,7 +375,7 @@ class NotificationService {
   private adjustForQuietHours(
     scheduledAt: Date,
     user: any,
-    ruleQuietHours?: { start: string; end: string; timezone: string }
+    ruleQuietHours?: { start: string; end: string; timezone: string },
   ): Date {
     const userPrefs = user.communicationPreferences;
     const quietHours = ruleQuietHours || userPrefs?.quietHours;
@@ -379,7 +435,10 @@ class NotificationService {
   /**
    * Get applicable notification rules for event
    */
-  private async getApplicableRules(event: any, user: any): Promise<NotificationRule[]> {
+  private async getApplicableRules(
+    event: any,
+    user: any,
+  ): Promise<NotificationRule[]> {
     // This would query database for applicable rules
     // For now, return default rules (simplified)
     return this.getDefaultRules(user);
@@ -444,7 +503,10 @@ class NotificationService {
   /**
    * Prepare message context for notification
    */
-  private async prepareMessageContext(notification: NotificationSchedule, user: any): Promise<any> {
+  private async prepareMessageContext(
+    notification: NotificationSchedule,
+    user: any,
+  ): Promise<any> {
     const context: any = {
       user,
       family: user.family,
@@ -486,7 +548,10 @@ class NotificationService {
   /**
    * Mark notification as failed
    */
-  private markNotificationFailed(notification: NotificationSchedule, reason?: string): void {
+  private markNotificationFailed(
+    notification: NotificationSchedule,
+    reason?: string,
+  ): void {
     notification.status = "failed";
     notification.lastAttemptAt = new Date();
     console.log(`Notification ${notification.id} failed: ${reason}`);
@@ -495,11 +560,13 @@ class NotificationService {
   /**
    * Get notification rule by ID
    */
-  private async getNotificationRule(ruleId: string): Promise<NotificationRule | null> {
+  private async getNotificationRule(
+    ruleId: string,
+  ): Promise<NotificationRule | null> {
     // This would query database for rule
     // For now, return a default rule (simplified)
     const defaultRules = this.getDefaultRules({});
-    return defaultRules.find(r => r.id === ruleId) || null;
+    return defaultRules.find((r) => r.id === ruleId) || null;
   }
 
   /**

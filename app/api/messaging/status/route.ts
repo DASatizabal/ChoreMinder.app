@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getMessageScheduler } from "@/libs/message-scheduler";
+import { authOptions } from "@/libs/next-auth";
 import { getTwilioSMSService } from "@/libs/twilio-sms";
 import { getTwilioWhatsAppService } from "@/libs/twilio-whatsapp";
 import { getUnifiedMessagingService } from "@/libs/unified-messaging";

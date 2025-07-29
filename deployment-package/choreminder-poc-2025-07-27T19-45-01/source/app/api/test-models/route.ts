@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
-
 import connectMongo from "@/libs/mongoose";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
 import User from "@/models/User";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {

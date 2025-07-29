@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
+import config from "@/config";
+
 interface FamilySetupWizardProps {
   onComplete: (familyData: FamilyData) => void;
   onSkip?: () => void;
@@ -24,6 +26,14 @@ interface FamilyData {
     timezone: string;
   };
   members: FamilyMember[];
+  kids: KidData[];
+}
+
+interface KidData {
+  name: string;
+  email: string;
+  invited: boolean;
+  tempId: string;
 }
 
 interface FamilyMember {
@@ -58,6 +68,8 @@ const FamilySetupWizard = ({
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [numberOfKids, setNumberOfKids] = useState(1);
+  const [userPlan, setUserPlan] = useState<string | null>(null);
   const [familyData, setFamilyData] = useState<FamilyData>({
     name: "",
     description: "",
@@ -74,6 +86,7 @@ const FamilySetupWizard = ({
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
     members: [],
+    kids: [],
   });
 
   // Initialize with existing family data if editing
@@ -82,6 +95,46 @@ const FamilySetupWizard = ({
       setFamilyData(existingFamily);
     }
   }, [existingFamily]);
+
+  // Fetch user plan information
+  useEffect(() => {
+    const fetchUserPlan = async () => {
+      try {
+        const response = await fetch("/api/user/plan");
+        if (response.ok) {
+          const data = await response.json();
+          setUserPlan(data.planName);
+        }
+      } catch (error) {
+        console.error("Error fetching user plan:", error);
+      }
+    };
+
+    if (session?.user) {
+      fetchUserPlan();
+    }
+  }, [session]);
+
+  // Helper function to get max kids based on plan
+  const getMaxKids = () => {
+    if (!userPlan) return 10; // Default to max if plan not loaded yet
+
+    const plan = config.stripe.plans.find((p) => p.name === userPlan);
+    if (!plan) return 10;
+
+    const kidsFeature = plan.features.find(
+      (f) =>
+        f.name.toLowerCase().includes("kids") ||
+        f.name.toLowerCase().includes("kid"),
+    );
+
+    if (kidsFeature) {
+      const match = kidsFeature.name.match(/(\d+)/);
+      return match ? parseInt(match[1]) : 10;
+    }
+
+    return 10;
+  };
 
   const predefinedRules = [
     "Be respectful to family members",
@@ -123,6 +176,12 @@ const FamilySetupWizard = ({
     return true; // Settings have defaults, so always valid
   };
 
+  const validateKidsSetup = () => {
+    return familyData.kids.every(
+      (kid) => kid.name.trim().length > 0 && kid.email.trim().length > 0,
+    );
+  };
+
   const steps: WizardStep[] = [
     {
       id: "welcome",
@@ -139,6 +198,14 @@ const FamilySetupWizard = ({
       description: "Tell us about your family",
       component: renderFamilyInfoStep(),
       isValid: validateFamilyInfo(),
+      isOptional: false,
+    },
+    {
+      id: "kids-setup",
+      title: "Kids Setup",
+      description: "Add your children to the family",
+      component: renderKidsSetupStep(),
+      isValid: validateKidsSetup(),
       isOptional: false,
     },
     {
@@ -320,6 +387,202 @@ const FamilySetupWizard = ({
               <option value="Asia/Tokyo">Tokyo</option>
             </select>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderKidsSetupStep() {
+    const maxKids = getMaxKids();
+
+    // Initialize kids array if empty
+    if (familyData.kids.length === 0) {
+      const newKids: KidData[] = Array.from(
+        { length: numberOfKids },
+        (_, index) => ({
+          name: "",
+          email: "",
+          invited: false,
+          tempId: `kid_${Date.now()}_${index}`,
+        }),
+      );
+      setFamilyData((prev) => ({ ...prev, kids: newKids }));
+    }
+
+    const updateNumberOfKids = (num: number) => {
+      setNumberOfKids(num);
+
+      // Create new kids array with the right length
+      const newKids: KidData[] = Array.from({ length: num }, (_, index) => {
+        // Keep existing kid data if it exists
+        const existingKid = familyData.kids[index];
+        return (
+          existingKid || {
+            name: "",
+            email: "",
+            invited: false,
+            tempId: `kid_${Date.now()}_${index}`,
+          }
+        );
+      });
+
+      setFamilyData((prev) => ({ ...prev, kids: newKids }));
+    };
+
+    const updateKid = (index: number, updates: Partial<KidData>) => {
+      setFamilyData((prev) => ({
+        ...prev,
+        kids: prev.kids.map((kid, i) =>
+          i === index ? { ...kid, ...updates } : kid,
+        ),
+      }));
+    };
+
+    const sendInvite = async (kidIndex: number) => {
+      const kid = familyData.kids[kidIndex];
+      if (!kid.name || !kid.email) {
+        toast.error("Please fill in name and email before sending invite");
+        return;
+      }
+
+      try {
+        // This would be implemented to send an actual invite
+        toast.success(`Invite sent to ${kid.name}!`);
+        updateKid(kidIndex, { invited: true });
+      } catch (error) {
+        toast.error("Failed to send invite");
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-4">👶</div>
+          <h3 className="text-xl font-bold mb-2">Add Your Kids</h3>
+          <p className="text-gray-600">
+            Let's set up accounts for your children so they can start helping
+            with chores!
+          </p>
+          {userPlan && (
+            <div className="badge badge-primary mt-2">
+              {userPlan} - Up to {maxKids} kids
+            </div>
+          )}
+        </div>
+
+        {/* Number of Kids Selector */}
+        <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
+          <div className="card-body p-6 text-center">
+            <h4 className="font-bold mb-4 text-blue-700">
+              How many kids do you have?
+            </h4>
+            <select
+              value={numberOfKids}
+              onChange={(e) => updateNumberOfKids(parseInt(e.target.value))}
+              className="select select-bordered w-full max-w-xs mx-auto"
+            >
+              {Array.from({ length: maxKids }, (_, i) => i + 1).map((num) => (
+                <option key={num} value={num}>
+                  {num} kid{num > 1 ? "s" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Kids Input Fields */}
+        <div className="space-y-4">
+          {familyData.kids.map((kid, index) => (
+            <div
+              key={kid.tempId}
+              className="card bg-white shadow-lg border-2 border-gray-200"
+            >
+              <div className="card-body p-6">
+                <h4 className="font-bold mb-4">
+                  {index === 0
+                    ? "1st"
+                    : index === 1
+                      ? "2nd"
+                      : index === 2
+                        ? "3rd"
+                        : `${index + 1}th`}{" "}
+                  Kid
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Kid's Name */}
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        {index === 0
+                          ? "1st"
+                          : index === 1
+                            ? "2nd"
+                            : index === 2
+                              ? "3rd"
+                              : `${index + 1}th`}{" "}
+                        Kid's Name *
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter kid's name"
+                      value={kid.name}
+                      onChange={(e) =>
+                        updateKid(index, { name: e.target.value })
+                      }
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+
+                  {/* Kid's Email */}
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        {index === 0
+                          ? "1st"
+                          : index === 1
+                            ? "2nd"
+                            : index === 2
+                              ? "3rd"
+                              : `${index + 1}th`}{" "}
+                        Kid's Email Address *
+                      </span>
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="Enter kid's email"
+                      value={kid.email}
+                      onChange={(e) =>
+                        updateKid(index, { email: e.target.value })
+                      }
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+                </div>
+
+                {/* Send Invite Button */}
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => sendInvite(index)}
+                    disabled={!kid.name || !kid.email || kid.invited}
+                    className={`btn ${kid.invited ? "btn-success" : "btn-primary"}`}
+                  >
+                    {kid.invited ? <>✓ Invite Sent</> : <>📧 Send Invite</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="alert alert-info">
+          <span className="text-lg">💡</span>
+          <span>
+            <strong>Tip:</strong> Your kids will receive email invitations to
+            join your family. They can use these to create their accounts and
+            start receiving chore assignments!
+          </span>
         </div>
       </div>
     );

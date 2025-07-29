@@ -1,9 +1,10 @@
 "use server";
 
-import { dbConnect } from "./mongoose";
 import Chore from "@/models/Chore";
-import User from "@/models/User";
 import Family from "@/models/Family";
+import User from "@/models/User";
+
+import { dbConnect } from "./mongoose";
 
 export interface ProgressMetrics {
   totalChores: number;
@@ -75,7 +76,7 @@ class AnalyticsService {
    */
   async getUserProgress(
     userId: string,
-    timeRange: "week" | "month" | "quarter" | "year" = "month"
+    timeRange: "week" | "month" | "quarter" | "year" = "month",
   ): Promise<ProgressMetrics> {
     await dbConnect();
 
@@ -89,28 +90,38 @@ class AnalyticsService {
       deletedAt: null,
     });
 
-    const completedChores = chores.filter(c => 
-      c.status === "approved" || c.status === "verified"
+    const completedChores = chores.filter(
+      (c) => c.status === "approved" || c.status === "verified",
     );
 
     // Calculate completion rate
-    const completionRate = chores.length > 0 ? 
-      (completedChores.length / chores.length) * 100 : 0;
+    const completionRate =
+      chores.length > 0 ? (completedChores.length / chores.length) * 100 : 0;
 
     // Calculate total points
-    const totalPoints = completedChores.reduce((sum, chore) => sum + (chore.points || 0), 0);
+    const totalPoints = completedChores.reduce(
+      (sum, chore) => sum + (chore.points || 0),
+      0,
+    );
 
     // Calculate average completion time
-    const avgCompletionTime = this.calculateAverageCompletionTime(completedChores);
+    const avgCompletionTime =
+      this.calculateAverageCompletionTime(completedChores);
 
     // Get current streak
     const streakDays = await this.getUserStreak(userId);
 
     // Calculate improvement trend
-    const improvementTrend = await this.calculateImprovementTrend(userId, timeRange);
+    const improvementTrend = await this.calculateImprovementTrend(
+      userId,
+      timeRange,
+    );
 
     // Calculate consistency score
-    const consistencyScore = this.calculateConsistencyScore(completedChores, daysBack);
+    const consistencyScore = this.calculateConsistencyScore(
+      completedChores,
+      daysBack,
+    );
 
     return {
       totalChores: chores.length,
@@ -129,7 +140,7 @@ class AnalyticsService {
    */
   async getTimeSeriesData(
     userId: string,
-    timeRange: "week" | "month" | "quarter" | "year" = "month"
+    timeRange: "week" | "month" | "quarter" | "year" = "month",
   ): Promise<TimeSeriesData[]> {
     await dbConnect();
 
@@ -165,11 +176,11 @@ class AnalyticsService {
 
     // Fill in missing dates with zero values
     const timeSeriesData: TimeSeriesData[] = [];
-    const choreMap = new Map(chores.map(c => [c._id, c]));
+    const choreMap = new Map(chores.map((c) => [c._id, c]));
 
     for (let i = 0; i < daysBack; i++) {
       const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-      const dateString = date.toISOString().split('T')[0];
+      const dateString = date.toISOString().split("T")[0];
       const choreData = choreMap.get(dateString);
 
       timeSeriesData.push({
@@ -188,7 +199,7 @@ class AnalyticsService {
    */
   async getCategoryInsights(
     userId: string,
-    timeRange: "week" | "month" | "quarter" | "year" = "month"
+    timeRange: "week" | "month" | "quarter" | "year" = "month",
   ): Promise<CategoryInsights[]> {
     await dbConnect();
 
@@ -209,11 +220,7 @@ class AnalyticsService {
           totalChores: { $sum: 1 },
           completedChores: {
             $sum: {
-              $cond: [
-                { $in: ["$status", ["approved", "verified"]] },
-                1,
-                0,
-              ],
+              $cond: [{ $in: ["$status", ["approved", "verified"]] }, 1, 0],
             },
           },
           totalPoints: {
@@ -238,23 +245,27 @@ class AnalyticsService {
       },
     ]);
 
-    return categoryData.map(cat => {
-      const completionRate = cat.totalChores > 0 ? 
-        (cat.completedChores / cat.totalChores) * 100 : 0;
-      const averagePoints = cat.completedChores > 0 ? 
-        cat.totalPoints / cat.completedChores : 0;
+    return categoryData.map((cat) => {
+      const completionRate =
+        cat.totalChores > 0 ? (cat.completedChores / cat.totalChores) * 100 : 0;
+      const averagePoints =
+        cat.completedChores > 0 ? cat.totalPoints / cat.completedChores : 0;
 
       // Find most common completion day
-      const validDays = cat.completionDays.filter(d => d !== null);
+      const validDays = cat.completionDays.filter((d) => d !== null);
       const dayFrequency = validDays.reduce((acc, day) => {
         acc[day] = (acc[day] || 0) + 1;
         return acc;
       }, {});
-      
-      const favoriteDay = Object.keys(dayFrequency).length > 0 ? 
-        this.getDayName(Object.keys(dayFrequency).reduce((a, b) => 
-          dayFrequency[a] > dayFrequency[b] ? a : b
-        )) : "No pattern";
+
+      const favoriteDay =
+        Object.keys(dayFrequency).length > 0
+          ? this.getDayName(
+              Object.keys(dayFrequency).reduce((a, b) =>
+                dayFrequency[a] > dayFrequency[b] ? a : b,
+              ),
+            )
+          : "No pattern";
 
       return {
         category: cat._id || "Uncategorized",
@@ -263,7 +274,10 @@ class AnalyticsService {
         completionRate: Math.round(completionRate * 100) / 100,
         averagePoints: Math.round(averagePoints * 100) / 100,
         favoriteDay,
-        improvementSuggestion: this.generateImprovementSuggestion(completionRate, cat._id),
+        improvementSuggestion: this.generateImprovementSuggestion(
+          completionRate,
+          cat._id,
+        ),
       };
     });
   }
@@ -273,7 +287,7 @@ class AnalyticsService {
    */
   async getFamilyAnalytics(
     familyId: string,
-    timeRange: "week" | "month" | "quarter" | "year" = "month"
+    timeRange: "week" | "month" | "quarter" | "year" = "month",
   ): Promise<FamilyAnalytics> {
     await dbConnect();
 
@@ -290,7 +304,7 @@ class AnalyticsService {
     const familyChores = await Chore.aggregate([
       {
         $match: {
-          assignedTo: { $in: familyMembers.map(m => m._id) },
+          assignedTo: { $in: familyMembers.map((m) => m._id) },
           createdAt: { $gte: startDate },
           deletedAt: null,
         },
@@ -301,11 +315,7 @@ class AnalyticsService {
           totalChores: { $sum: 1 },
           completedChores: {
             $sum: {
-              $cond: [
-                { $in: ["$status", ["approved", "verified"]] },
-                1,
-                0,
-              ],
+              $cond: [{ $in: ["$status", ["approved", "verified"]] }, 1, 0],
             },
           },
           totalPoints: {
@@ -323,7 +333,12 @@ class AnalyticsService {
                 {
                   $and: [
                     { $in: ["$status", ["approved", "verified"]] },
-                    { $gte: ["$completedAt", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)] },
+                    {
+                      $gte: [
+                        "$completedAt",
+                        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                      ],
+                    },
                   ],
                 },
                 1,
@@ -335,7 +350,7 @@ class AnalyticsService {
       },
     ]);
 
-    const choreMap = new Map(familyChores.map(c => [c._id.toString(), c]));
+    const choreMap = new Map(familyChores.map((c) => [c._id.toString(), c]));
 
     // Calculate member progress
     const memberProgress = await Promise.all(
@@ -347,10 +362,15 @@ class AnalyticsService {
           thisWeekChores: 0,
         };
 
-        const completionRate = choreData.totalChores > 0 ? 
-          (choreData.completedChores / choreData.totalChores) * 100 : 0;
+        const completionRate =
+          choreData.totalChores > 0
+            ? (choreData.completedChores / choreData.totalChores) * 100
+            : 0;
 
-        const trend = await this.calculateImprovementTrend(member._id.toString(), timeRange);
+        const trend = await this.calculateImprovementTrend(
+          member._id.toString(),
+          timeRange,
+        );
 
         return {
           userId: member._id.toString(),
@@ -362,20 +382,34 @@ class AnalyticsService {
           thisWeekChores: choreData.thisWeekChores,
           trend,
         };
-      })
+      }),
     );
 
     // Calculate overview stats
-    const totalFamilyChores = familyChores.reduce((sum, c) => sum + c.totalChores, 0);
-    const totalFamilyPoints = familyChores.reduce((sum, c) => sum + c.totalPoints, 0);
-    const averageCompletionRate = memberProgress.length > 0 ? 
-      memberProgress.reduce((sum, m) => sum + m.completionRate, 0) / memberProgress.length : 0;
+    const totalFamilyChores = familyChores.reduce(
+      (sum, c) => sum + c.totalChores,
+      0,
+    );
+    const totalFamilyPoints = familyChores.reduce(
+      (sum, c) => sum + c.totalPoints,
+      0,
+    );
+    const averageCompletionRate =
+      memberProgress.length > 0
+        ? memberProgress.reduce((sum, m) => sum + m.completionRate, 0) /
+          memberProgress.length
+        : 0;
 
     // Calculate improvement
-    const thisWeekTotal = memberProgress.reduce((sum, m) => sum + m.thisWeekChores, 0);
+    const thisWeekTotal = memberProgress.reduce(
+      (sum, m) => sum + m.thisWeekChores,
+      0,
+    );
     const lastWeekTotal = await this.getLastWeekTotal(familyId);
-    const thisWeekImprovement = lastWeekTotal > 0 ? 
-      ((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100 : 0;
+    const thisWeekImprovement =
+      lastWeekTotal > 0
+        ? ((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100
+        : 0;
 
     // Generate insights
     const insights = this.generateFamilyInsights(memberProgress);
@@ -398,10 +432,10 @@ class AnalyticsService {
    */
   async getTrendInsights(
     userId: string,
-    timeRange: "week" | "month" | "quarter" | "year" = "month"
+    timeRange: "week" | "month" | "quarter" | "year" = "month",
   ): Promise<TrendInsight[]> {
     const insights: TrendInsight[] = [];
-    
+
     const progress = await this.getUserProgress(userId, timeRange);
     const user = await User.findById(userId);
 
@@ -421,7 +455,8 @@ class AnalyticsService {
       insights.push({
         type: "improvement",
         title: "You're Getting Better! 📈",
-        description: "Your completion rate has improved compared to last period. Great progress!",
+        description:
+          "Your completion rate has improved compared to last period. Great progress!",
         icon: "⬆️",
         priority: "medium",
       });
@@ -432,7 +467,8 @@ class AnalyticsService {
       insights.push({
         type: "celebration",
         title: `${progress.streakDays}-Day Streak! 🔥`,
-        description: "You're building an amazing habit! Consistency is the key to success.",
+        description:
+          "You're building an amazing habit! Consistency is the key to success.",
         icon: "🔥",
         priority: "high",
       });
@@ -443,7 +479,8 @@ class AnalyticsService {
       insights.push({
         type: "suggestion",
         title: "Let's Boost Your Success Rate! 💪",
-        description: "Try breaking larger chores into smaller steps, or ask for help when needed.",
+        description:
+          "Try breaking larger chores into smaller steps, or ask for help when needed.",
         icon: "💡",
         priority: "medium",
         actionable: true,
@@ -470,7 +507,7 @@ class AnalyticsService {
    */
   async exportFamilyReport(
     familyId: string,
-    timeRange: "week" | "month" | "quarter" | "year" = "month"
+    timeRange: "week" | "month" | "quarter" | "year" = "month",
   ): Promise<{
     summary: any;
     memberData: any[];
@@ -480,22 +517,25 @@ class AnalyticsService {
   }> {
     const familyAnalytics = await this.getFamilyAnalytics(familyId, timeRange);
     const family = await Family.findById(familyId);
-    
+
     // Get chart data for each member
     const chartData = await Promise.all(
       familyAnalytics.memberProgress.map(async (member) => ({
         userId: member.userId,
         name: member.name,
         timeSeriesData: await this.getTimeSeriesData(member.userId, timeRange),
-        categoryInsights: await this.getCategoryInsights(member.userId, timeRange),
-      }))
+        categoryInsights: await this.getCategoryInsights(
+          member.userId,
+          timeRange,
+        ),
+      })),
     );
 
     // Get combined insights
     const allInsights = await Promise.all(
-      familyAnalytics.memberProgress.map(member => 
-        this.getTrendInsights(member.userId, timeRange)
-      )
+      familyAnalytics.memberProgress.map((member) =>
+        this.getTrendInsights(member.userId, timeRange),
+      ),
     );
 
     return {
@@ -503,7 +543,10 @@ class AnalyticsService {
         familyName: family?.name || "Family",
         timeRange,
         reportPeriod: {
-          start: new Date(Date.now() - this.getDaysForTimeRange(timeRange) * 24 * 60 * 60 * 1000),
+          start: new Date(
+            Date.now() -
+              this.getDaysForTimeRange(timeRange) * 24 * 60 * 60 * 1000,
+          ),
           end: new Date(),
         },
         overview: familyAnalytics.overview,
@@ -519,16 +562,21 @@ class AnalyticsService {
   // Helper methods
   private getDaysForTimeRange(timeRange: string): number {
     switch (timeRange) {
-      case "week": return 7;
-      case "month": return 30;
-      case "quarter": return 90;
-      case "year": return 365;
-      default: return 30;
+      case "week":
+        return 7;
+      case "month":
+        return 30;
+      case "quarter":
+        return 90;
+      case "year":
+        return 365;
+      default:
+        return 30;
     }
   }
 
   private calculateAverageCompletionTime(chores: any[]): number {
-    const validChores = chores.filter(c => c.startedAt && c.completedAt);
+    const validChores = chores.filter((c) => c.startedAt && c.completedAt);
     if (validChores.length === 0) return 0;
 
     const totalTime = validChores.reduce((sum, chore) => {
@@ -549,7 +597,7 @@ class AnalyticsService {
     }).sort({ completedAt: -1 });
 
     let streak = 0;
-    let currentDate = new Date();
+    const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
     for (const chore of chores) {
@@ -557,7 +605,7 @@ class AnalyticsService {
       choreDate.setHours(0, 0, 0, 0);
 
       const daysDiff = Math.floor(
-        (currentDate.getTime() - choreDate.getTime()) / (1000 * 60 * 60 * 24)
+        (currentDate.getTime() - choreDate.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       if (daysDiff === streak) {
@@ -573,13 +621,17 @@ class AnalyticsService {
 
   private async calculateImprovementTrend(
     userId: string,
-    timeRange: string
+    timeRange: string,
   ): Promise<"improving" | "stable" | "declining"> {
     const daysBack = this.getDaysForTimeRange(timeRange);
     const halfPeriod = Math.floor(daysBack / 2);
 
-    const firstHalfStart = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
-    const firstHalfEnd = new Date(Date.now() - halfPeriod * 24 * 60 * 60 * 1000);
+    const firstHalfStart = new Date(
+      Date.now() - daysBack * 24 * 60 * 60 * 1000,
+    );
+    const firstHalfEnd = new Date(
+      Date.now() - halfPeriod * 24 * 60 * 60 * 1000,
+    );
     const secondHalfStart = firstHalfEnd;
     const secondHalfEnd = new Date();
 
@@ -599,7 +651,8 @@ class AnalyticsService {
     ]);
 
     const difference = secondHalfChores - firstHalfChores;
-    const changePercentage = firstHalfChores > 0 ? (difference / firstHalfChores) * 100 : 0;
+    const changePercentage =
+      firstHalfChores > 0 ? (difference / firstHalfChores) * 100 : 0;
 
     if (changePercentage > 10) return "improving";
     if (changePercentage < -10) return "declining";
@@ -611,7 +664,7 @@ class AnalyticsService {
 
     // Group chores by date
     const dateGroups = new Map();
-    chores.forEach(chore => {
+    chores.forEach((chore) => {
       if (chore.completedAt) {
         const date = new Date(chore.completedAt).toDateString();
         dateGroups.set(date, (dateGroups.get(date) || 0) + 1);
@@ -623,11 +676,22 @@ class AnalyticsService {
   }
 
   private getDayName(dayNumber: string): string {
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
     return days[parseInt(dayNumber) - 1] || "Unknown";
   }
 
-  private generateImprovementSuggestion(completionRate: number, category: string): string {
+  private generateImprovementSuggestion(
+    completionRate: number,
+    category: string,
+  ): string {
     if (completionRate >= 90) {
       return `Excellent work on ${category} chores! You're a champion! 🏆`;
     } else if (completionRate >= 70) {
@@ -649,14 +713,15 @@ class AnalyticsService {
       };
     }
 
-    const topPerformer = memberProgress.reduce((top, member) => 
-      member.completionRate > top.completionRate ? member : top
+    const topPerformer = memberProgress.reduce((top, member) =>
+      member.completionRate > top.completionRate ? member : top,
     );
 
-    const mostImproved = memberProgress.filter(m => m.trend === "improving")[0] || topPerformer;
+    const mostImproved =
+      memberProgress.filter((m) => m.trend === "improving")[0] || topPerformer;
 
-    const consistencyChampion = memberProgress.reduce((champion, member) => 
-      member.streak > champion.streak ? member : champion
+    const consistencyChampion = memberProgress.reduce((champion, member) =>
+      member.streak > champion.streak ? member : champion,
     );
 
     const suggestions = [
@@ -684,7 +749,7 @@ class AnalyticsService {
     const lastWeekEnd = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     const lastWeekChores = await Chore.countDocuments({
-      assignedTo: { $in: familyMembers.map(m => m._id) },
+      assignedTo: { $in: familyMembers.map((m) => m._id) },
       status: { $in: ["approved", "verified"] },
       completedAt: { $gte: lastWeekStart, $lt: lastWeekEnd },
       deletedAt: null,

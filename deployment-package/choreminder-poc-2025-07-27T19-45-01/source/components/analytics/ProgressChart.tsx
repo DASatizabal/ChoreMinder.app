@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,6 +12,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
+import { useEffect, useRef } from "react";
 import { Line, Bar } from "react-chartjs-2";
 
 ChartJS.register(
@@ -24,7 +24,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 interface TimeSeriesData {
@@ -59,15 +59,16 @@ export default function ProgressChart({
   };
 
   const chartData = {
-    labels: data.map(d => formatDate(d.date)),
+    labels: data.map((d) => formatDate(d.date)),
     datasets: [
       {
         label: metric === "completed" ? "Chores Completed" : "Points Earned",
-        data: data.map(d => d[metric]),
+        data: data.map((d) => d[metric]),
         borderColor: color,
-        backgroundColor: type === "line" 
-          ? `${color}20` // Semi-transparent for area fill
-          : color,
+        backgroundColor:
+          type === "line"
+            ? `${color}20` // Semi-transparent for area fill
+            : color,
         borderWidth: 2,
         fill: type === "line" && showTrend,
         tension: 0.4,
@@ -175,7 +176,8 @@ export default function ProgressChart({
   };
 
   // Calculate trend line if enabled
-  const trendData = showTrend && type === "line" ? calculateTrend(data, metric) : null;
+  const trendData =
+    showTrend && type === "line" ? calculateTrend(data, metric) : null;
 
   if (trendData) {
     chartData.datasets.push({
@@ -204,10 +206,13 @@ export default function ProgressChart({
 }
 
 // Calculate linear trend line
-function calculateTrend(data: TimeSeriesData[], metric: "completed" | "points"): number[] {
+function calculateTrend(
+  data: TimeSeriesData[],
+  metric: "completed" | "points",
+): number[] {
   if (data.length < 2) return [];
 
-  const values = data.map(d => d[metric]);
+  const values = data.map((d) => d[metric]);
   const n = values.length;
   const sumX = (n * (n - 1)) / 2; // Sum of indices 0, 1, 2, ...
   const sumY = values.reduce((sum, val) => sum + val, 0);

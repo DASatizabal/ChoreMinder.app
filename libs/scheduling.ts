@@ -1,8 +1,9 @@
 "use server";
 
-import { dbConnect } from "./mongoose";
 import Chore from "@/models/Chore";
 import User from "@/models/User";
+
+import { dbConnect } from "./mongoose";
 // import { getUnifiedMessagingService } from "./unified-messaging"; // Disabled for testing
 
 export interface RecurrencePattern {
@@ -55,12 +56,12 @@ class SchedulingService {
    * Create a scheduled chore with recurrence pattern
    */
   async createScheduledChore(
-    choreData: Omit<ScheduledChore, "id" | "nextDue" | "createdAt">
+    choreData: Omit<ScheduledChore, "id" | "nextDue" | "createdAt">,
   ): Promise<ScheduledChore> {
     await dbConnect();
 
     const nextDue = this.calculateNextDueDate(choreData.recurrence, new Date());
-    
+
     const scheduledChore: ScheduledChore = {
       ...choreData,
       id: this.generateId(),
@@ -100,9 +101,12 @@ class SchedulingService {
   /**
    * Calculate next due date based on recurrence pattern
    */
-  calculateNextDueDate(pattern: RecurrencePattern, fromDate: Date = new Date()): Date {
+  calculateNextDueDate(
+    pattern: RecurrencePattern,
+    fromDate: Date = new Date(),
+  ): Date {
     const nextDate = new Date(fromDate);
-    
+
     switch (pattern.type) {
       case "daily":
         nextDate.setDate(nextDate.getDate() + pattern.interval);
@@ -113,8 +117,8 @@ class SchedulingService {
           // Find next occurrence of specified day(s)
           const currentDay = nextDate.getDay();
           const sortedDays = [...pattern.daysOfWeek].sort((a, b) => a - b);
-          
-          let nextDay = sortedDays.find(day => day > currentDay);
+
+          let nextDay = sortedDays.find((day) => day > currentDay);
           if (!nextDay) {
             // Next week
             nextDay = sortedDays[0];
@@ -122,7 +126,7 @@ class SchedulingService {
           } else {
             nextDate.setDate(nextDate.getDate() + (nextDay - currentDay));
           }
-          
+
           // Apply interval (every N weeks)
           if (pattern.interval > 1) {
             nextDate.setDate(nextDate.getDate() + (pattern.interval - 1) * 7);
@@ -135,11 +139,20 @@ class SchedulingService {
       case "monthly":
         if (pattern.dayOfMonth) {
           nextDate.setMonth(nextDate.getMonth() + pattern.interval);
-          nextDate.setDate(Math.min(pattern.dayOfMonth, this.getDaysInMonth(nextDate)));
-        } else if (pattern.weekOfMonth && pattern.daysOfWeek?.[0] !== undefined) {
+          nextDate.setDate(
+            Math.min(pattern.dayOfMonth, this.getDaysInMonth(nextDate)),
+          );
+        } else if (
+          pattern.weekOfMonth &&
+          pattern.daysOfWeek?.[0] !== undefined
+        ) {
           // Nth weekday of month (e.g., 2nd Tuesday)
           nextDate.setMonth(nextDate.getMonth() + pattern.interval);
-          this.setNthWeekdayOfMonth(nextDate, pattern.weekOfMonth, pattern.daysOfWeek[0]);
+          this.setNthWeekdayOfMonth(
+            nextDate,
+            pattern.weekOfMonth,
+            pattern.daysOfWeek[0],
+          );
         } else {
           nextDate.setMonth(nextDate.getMonth() + pattern.interval);
         }
@@ -153,7 +166,7 @@ class SchedulingService {
 
     // Skip holidays if requested
     if (pattern.skipHolidays) {
-      nextDate = this.skipHolidays(nextDate);
+      return this.skipHolidays(nextDate);
     }
 
     return nextDate;
@@ -162,10 +175,16 @@ class SchedulingService {
   /**
    * Generate upcoming chore instances
    */
-  async generateUpcomingInstances(scheduleId: string, daysAhead: number = 30): Promise<void> {
+  async generateUpcomingInstances(
+    scheduleId: string,
+    daysAhead: number = 30,
+  ): Promise<void> {
     await dbConnect();
 
-    const scheduledChore = await Chore.findOne({ scheduleId, isRecurring: true });
+    const scheduledChore = await Chore.findOne({
+      scheduleId,
+      isRecurring: true,
+    });
     if (!scheduledChore || !scheduledChore.recurrencePattern) return;
 
     const endDate = new Date();
@@ -175,8 +194,11 @@ class SchedulingService {
     const instances: any[] = [];
 
     while (currentDate <= endDate) {
-      const nextDue = this.calculateNextDueDate(scheduledChore.recurrencePattern, currentDate);
-      
+      const nextDue = this.calculateNextDueDate(
+        scheduledChore.recurrencePattern,
+        currentDate,
+      );
+
       if (nextDue > endDate) break;
 
       // Check if instance already exists
@@ -215,13 +237,15 @@ class SchedulingService {
 
     if (instances.length > 0) {
       await Chore.insertMany(instances);
-      
+
       // Update last generated date
       await Chore.findByIdAndUpdate(scheduledChore._id, {
         lastGenerated: currentDate,
       });
 
-      console.log(`Generated ${instances.length} chore instances for schedule ${scheduleId}`);
+      console.log(
+        `Generated ${instances.length} chore instances for schedule ${scheduleId}`,
+      );
     }
   }
 
@@ -231,7 +255,7 @@ class SchedulingService {
   async checkScheduleConflicts(
     userId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<ScheduleConflict[]> {
     await dbConnect();
 
@@ -244,7 +268,7 @@ class SchedulingService {
 
     const conflictsByDate = new Map<string, any[]>();
 
-    chores.forEach(chore => {
+    chores.forEach((chore) => {
       const dateKey = chore.dueDate.toDateString();
       if (!conflictsByDate.has(dateKey)) {
         conflictsByDate.set(dateKey, []);
@@ -260,14 +284,21 @@ class SchedulingService {
     const conflicts: ScheduleConflict[] = [];
 
     conflictsByDate.forEach((dayChores, dateStr) => {
-      const totalDuration = dayChores.reduce((sum, chore) => sum + chore.estimatedDuration, 0);
-      
-      if (totalDuration > 180 || dayChores.length > 5) { // More than 3 hours or 5 chores
+      const totalDuration = dayChores.reduce(
+        (sum, chore) => sum + chore.estimatedDuration,
+        0,
+      );
+
+      if (totalDuration > 180 || dayChores.length > 5) {
+        // More than 3 hours or 5 chores
         conflicts.push({
           date: new Date(dateStr),
           conflicts: dayChores,
           totalDuration,
-          recommendation: this.generateConflictRecommendation(dayChores, totalDuration),
+          recommendation: this.generateConflictRecommendation(
+            dayChores,
+            totalDuration,
+          ),
         });
       }
     });
@@ -278,7 +309,10 @@ class SchedulingService {
   /**
    * Optimize family schedule
    */
-  async optimizeFamilySchedule(familyId: string, date: Date): Promise<{
+  async optimizeFamilySchedule(
+    familyId: string,
+    date: Date,
+  ): Promise<{
     recommendations: string[];
     redistributions: Array<{
       choreId: string;
@@ -307,7 +341,7 @@ class SchedulingService {
     }).populate("assignedTo", "name");
 
     const workloadByMember = new Map();
-    familyMembers.forEach(member => {
+    familyMembers.forEach((member) => {
       workloadByMember.set(member._id.toString(), {
         name: member.name,
         chores: [],
@@ -315,7 +349,7 @@ class SchedulingService {
       });
     });
 
-    chores.forEach(chore => {
+    chores.forEach((chore) => {
       const assigneeId = chore.assignedTo._id.toString();
       if (workloadByMember.has(assigneeId)) {
         const workload = workloadByMember.get(assigneeId);
@@ -329,21 +363,29 @@ class SchedulingService {
 
     // Find overloaded and underloaded members
     const workloads = Array.from(workloadByMember.values());
-    const avgWorkload = workloads.reduce((sum, w) => sum + w.totalDuration, 0) / workloads.length;
-    
-    const overloaded = workloads.filter(w => w.totalDuration > avgWorkload * 1.5);
-    const underloaded = workloads.filter(w => w.totalDuration < avgWorkload * 0.5);
+    const avgWorkload =
+      workloads.reduce((sum, w) => sum + w.totalDuration, 0) / workloads.length;
+
+    const overloaded = workloads.filter(
+      (w) => w.totalDuration > avgWorkload * 1.5,
+    );
+    const underloaded = workloads.filter(
+      (w) => w.totalDuration < avgWorkload * 0.5,
+    );
 
     if (overloaded.length > 0 && underloaded.length > 0) {
-      recommendations.push("Consider redistributing chores to balance workload across family members.");
-      
+      recommendations.push(
+        "Consider redistributing chores to balance workload across family members.",
+      );
+
       // Suggest redistributions
-      overloaded.forEach(overloadedMember => {
-        const choreToMove = overloadedMember.chores
-          .sort((a, b) => (a.estimatedDuration || 30) - (b.estimatedDuration || 30))[0];
-        
+      overloaded.forEach((overloadedMember) => {
+        const choreToMove = overloadedMember.chores.sort(
+          (a, b) => (a.estimatedDuration || 30) - (b.estimatedDuration || 30),
+        )[0];
+
         const targetMember = underloaded[0];
-        
+
         redistributions.push({
           choreId: choreToMove._id.toString(),
           currentAssignee: overloadedMember.name,
@@ -353,12 +395,16 @@ class SchedulingService {
       });
     }
 
-    if (workloads.some(w => w.totalDuration > 240)) {
-      recommendations.push("Some family members have over 4 hours of chores scheduled. Consider spreading tasks across multiple days.");
+    if (workloads.some((w) => w.totalDuration > 240)) {
+      recommendations.push(
+        "Some family members have over 4 hours of chores scheduled. Consider spreading tasks across multiple days.",
+      );
     }
 
-    if (workloads.every(w => w.chores.length === 0)) {
-      recommendations.push("No chores scheduled for this day. Great job staying on top of tasks!");
+    if (workloads.every((w) => w.chores.length === 0)) {
+      recommendations.push(
+        "No chores scheduled for this day. Great job staying on top of tasks!",
+      );
     }
 
     return { recommendations, redistributions };
@@ -369,7 +415,7 @@ class SchedulingService {
    */
   async updateSchedule(
     scheduleId: string,
-    updates: Partial<ScheduledChore>
+    updates: Partial<ScheduledChore>,
   ): Promise<boolean> {
     await dbConnect();
 
@@ -383,7 +429,7 @@ class SchedulingService {
             recurrencePattern: updates.recurrence,
             nextDue: this.calculateNextDueDate(updates.recurrence, new Date()),
           }),
-        }
+        },
       );
 
       // Update future instances if recurrence changed
@@ -395,7 +441,7 @@ class SchedulingService {
             status: "pending",
             dueDate: { $gte: new Date() },
           },
-          { $set: { deletedAt: new Date() } } // Soft delete old instances
+          { $set: { deletedAt: new Date() } }, // Soft delete old instances
         );
 
         // Generate new instances
@@ -415,7 +461,7 @@ class SchedulingService {
   async getFamilySchedule(
     familyId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<{
     chores: any[];
     conflicts: ScheduleConflict[];
@@ -428,8 +474,8 @@ class SchedulingService {
       dueDate: { $gte: startDate, $lte: endDate },
       deletedAt: null,
     })
-    .populate("assignedTo", "name")
-    .sort({ dueDate: 1 });
+      .populate("assignedTo", "name")
+      .sort({ dueDate: 1 });
 
     // Check for conflicts across all family members
     const familyMembers = await User.find({
@@ -442,7 +488,7 @@ class SchedulingService {
       const conflicts = await this.checkScheduleConflicts(
         member._id.toString(),
         startDate,
-        endDate
+        endDate,
       );
       allConflicts.push(...conflicts);
     }
@@ -494,11 +540,15 @@ class SchedulingService {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   }
 
-  private setNthWeekdayOfMonth(date: Date, week: number, dayOfWeek: number): void {
+  private setNthWeekdayOfMonth(
+    date: Date,
+    week: number,
+    dayOfWeek: number,
+  ): void {
     date.setDate(1);
     const firstDay = date.getDay();
     const offset = (dayOfWeek - firstDay + 7) % 7;
-    
+
     if (week === -1) {
       // Last occurrence
       date.setMonth(date.getMonth() + 1, 0); // Last day of month
@@ -517,7 +567,7 @@ class SchedulingService {
       // Add more holidays as needed
     ];
 
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = date.toISOString().split("T")[0];
     if (holidays.includes(dateStr)) {
       // Move to next day
       const nextDate = new Date(date);
@@ -528,7 +578,10 @@ class SchedulingService {
     return date;
   }
 
-  private generateConflictRecommendation(chores: any[], totalDuration: number): string {
+  private generateConflictRecommendation(
+    chores: any[],
+    totalDuration: number,
+  ): string {
     if (totalDuration > 240) {
       return `High workload day (${Math.round(totalDuration / 60)}h total). Consider spreading some chores to other days.`;
     } else if (chores.length > 5) {

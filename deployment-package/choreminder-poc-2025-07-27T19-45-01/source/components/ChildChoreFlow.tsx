@@ -1,10 +1,9 @@
 "use client";
 
+import { useNotifications } from "@/hooks/useNotifications";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-
-import { useNotifications } from "@/hooks/useNotifications";
 
 import ChoreDetail from "./ChoreDetail";
 import HelpRequest from "./HelpRequest";

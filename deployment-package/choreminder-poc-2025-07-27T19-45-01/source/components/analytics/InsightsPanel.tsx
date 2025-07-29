@@ -15,7 +15,10 @@ interface InsightsPanelProps {
   onActionClick?: (insight: TrendInsight) => void;
 }
 
-export default function InsightsPanel({ insights, onActionClick }: InsightsPanelProps) {
+export default function InsightsPanel({
+  insights,
+  onActionClick,
+}: InsightsPanelProps) {
   if (!insights || insights.length === 0) {
     return (
       <div className="card bg-base-200 shadow-lg">
@@ -32,7 +35,7 @@ export default function InsightsPanel({ insights, onActionClick }: InsightsPanel
 
   const getInsightStyle = (type: string, priority: string) => {
     const baseClasses = "card shadow-lg border-l-4";
-    
+
     switch (type) {
       case "achievement":
         return `${baseClasses} bg-success/10 border-l-success`;
@@ -41,7 +44,7 @@ export default function InsightsPanel({ insights, onActionClick }: InsightsPanel
       case "improvement":
         return `${baseClasses} bg-info/10 border-l-info`;
       case "suggestion":
-        return priority === "high" 
+        return priority === "high"
           ? `${baseClasses} bg-warning/10 border-l-warning`
           : `${baseClasses} bg-base-200 border-l-base-300`;
       default:
@@ -64,12 +67,17 @@ export default function InsightsPanel({ insights, onActionClick }: InsightsPanel
 
   const sortedInsights = [...insights].sort((a, b) => {
     const priorityOrder = { high: 3, medium: 2, low: 1 };
-    const typeOrder = { celebration: 4, achievement: 3, improvement: 2, suggestion: 1 };
-    
+    const typeOrder = {
+      celebration: 4,
+      achievement: 3,
+      improvement: 2,
+      suggestion: 1,
+    };
+
     // Sort by priority first, then by type
     const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
     if (priorityDiff !== 0) return priorityDiff;
-    
+
     return typeOrder[b.type] - typeOrder[a.type];
   });
 
@@ -82,14 +90,19 @@ export default function InsightsPanel({ insights, onActionClick }: InsightsPanel
 
       <div className="grid gap-4">
         {sortedInsights.map((insight, index) => (
-          <div key={index} className={getInsightStyle(insight.type, insight.priority)}>
+          <div
+            key={index}
+            className={getInsightStyle(insight.type, insight.priority)}
+          >
             <div className="card-body p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="text-2xl flex-shrink-0">{insight.icon}</div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-base">{insight.title}</h4>
+                      <h4 className="font-semibold text-base">
+                        {insight.title}
+                      </h4>
                       {getPriorityBadge(insight.priority)}
                     </div>
                     <p className="text-sm text-base-content/80 leading-relaxed">
@@ -101,7 +114,7 @@ export default function InsightsPanel({ insights, onActionClick }: InsightsPanel
 
               {insight.actionable && insight.action && (
                 <div className="card-actions justify-end mt-3">
-                  <button 
+                  <button
                     className="btn btn-sm btn-outline btn-primary"
                     onClick={() => onActionClick?.(insight)}
                   >
@@ -119,28 +132,28 @@ export default function InsightsPanel({ insights, onActionClick }: InsightsPanel
         <div className="stat bg-success/10 rounded-lg p-3">
           <div className="stat-title text-xs">Celebrations</div>
           <div className="stat-value text-lg text-success">
-            {insights.filter(i => i.type === "celebration").length}
+            {insights.filter((i) => i.type === "celebration").length}
           </div>
         </div>
-        
+
         <div className="stat bg-primary/10 rounded-lg p-3">
           <div className="stat-title text-xs">Achievements</div>
           <div className="stat-value text-lg text-primary">
-            {insights.filter(i => i.type === "achievement").length}
+            {insights.filter((i) => i.type === "achievement").length}
           </div>
         </div>
-        
+
         <div className="stat bg-info/10 rounded-lg p-3">
           <div className="stat-title text-xs">Improvements</div>
           <div className="stat-value text-lg text-info">
-            {insights.filter(i => i.type === "improvement").length}
+            {insights.filter((i) => i.type === "improvement").length}
           </div>
         </div>
-        
+
         <div className="stat bg-warning/10 rounded-lg p-3">
           <div className="stat-title text-xs">Suggestions</div>
           <div className="stat-value text-lg text-warning">
-            {insights.filter(i => i.type === "suggestion").length}
+            {insights.filter((i) => i.type === "suggestion").length}
           </div>
         </div>
       </div>
@@ -154,7 +167,8 @@ export default function InsightsPanel({ insights, onActionClick }: InsightsPanel
             <span>🌟</span>
           </div>
           <p className="text-sm text-base-content/70">
-            Every chore completed is a step toward building great habits and achieving your goals!
+            Every chore completed is a step toward building great habits and
+            achieving your goals!
           </p>
         </div>
       </div>

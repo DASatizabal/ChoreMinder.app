@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { dbConnect } from "@/libs/mongoose";
+import { authOptions } from "@/libs/next-auth";
 import { getTwilioWhatsAppService } from "@/libs/twilio-whatsapp";
 import { WhatsAppMessageTemplates } from "@/libs/whatsapp-templates";
 import User from "@/models/User";

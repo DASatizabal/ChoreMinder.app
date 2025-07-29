@@ -97,10 +97,12 @@ const rewardSchema = new Schema<IReward>(
       type: Boolean,
       default: true,
     },
-    tags: [{
-      type: String,
-      trim: true,
-    }],
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     ageGroup: {
       type: String,
       enum: ["young", "teen", "all"],
@@ -114,7 +116,7 @@ const rewardSchema = new Schema<IReward>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for performance
@@ -123,6 +125,7 @@ rewardSchema.index({ familyId: 1, active: 1 });
 rewardSchema.index({ pointsCost: 1, requiredLevel: 1 });
 rewardSchema.index({ isLimitedTime: 1, availableUntil: 1 });
 
-const Reward = mongoose.models.Reward || mongoose.model<IReward>("Reward", rewardSchema);
+const Reward =
+  mongoose.models.Reward || mongoose.model<IReward>("Reward", rewardSchema);
 
 export default Reward;

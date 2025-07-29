@@ -1,11 +1,12 @@
 "use server";
 
-import { dbConnect } from "./mongoose";
 import Achievement from "@/models/Achievement";
 import Challenge from "@/models/Challenge";
+import Chore from "@/models/Chore";
 import Reward from "@/models/Reward";
 import User from "@/models/User";
-import Chore from "@/models/Chore";
+
+import { dbConnect } from "./mongoose";
 // import { getUnifiedMessagingService } from "./unified-messaging"; // Disabled for testing
 
 export interface PointsBreakdown {
@@ -51,7 +52,7 @@ class GamificationService {
   async calculatePointsForChore(
     choreId: string,
     userId: string,
-    completionQuality: "excellent" | "good" | "satisfactory" = "good"
+    completionQuality: "excellent" | "good" | "satisfactory" = "good",
   ): Promise<PointsBreakdown> {
     await dbConnect();
 
@@ -116,11 +117,11 @@ class GamificationService {
       breakdown.bonusReasons.push(...challengeBonus.reasons);
     }
 
-    breakdown.totalPoints = 
-      breakdown.basePoints + 
-      breakdown.timeBonus + 
-      breakdown.qualityBonus + 
-      breakdown.streakBonus + 
+    breakdown.totalPoints =
+      breakdown.basePoints +
+      breakdown.timeBonus +
+      breakdown.qualityBonus +
+      breakdown.streakBonus +
       breakdown.challengeBonus;
 
     return breakdown;
@@ -132,7 +133,7 @@ class GamificationService {
   async awardPoints(
     userId: string,
     pointsBreakdown: PointsBreakdown,
-    choreId: string
+    choreId: string,
   ): Promise<{
     newAchievements: AchievementProgress[];
     totalPoints: number;
@@ -148,7 +149,7 @@ class GamificationService {
     // Update user's total points
     const currentPoints = user.gamification?.totalPoints || 0;
     const newTotalPoints = currentPoints + pointsBreakdown.totalPoints;
-    
+
     await User.findByIdAndUpdate(userId, {
       $set: {
         "gamification.totalPoints": newTotalPoints,
@@ -162,7 +163,7 @@ class GamificationService {
     // Check for level up
     const currentLevel = this.calculateLevel(currentPoints);
     const newLevel = this.calculateLevel(newTotalPoints);
-    
+
     // Check for new achievements
     const newAchievements = await this.checkForNewAchievements(userId);
 
@@ -184,14 +185,16 @@ class GamificationService {
   async getUserAchievements(userId: string): Promise<AchievementProgress[]> {
     await dbConnect();
 
-    const user = await User.findById(userId).populate("gamification.achievements.achievementId");
+    const user = await User.findById(userId).populate(
+      "gamification.achievements.achievementId",
+    );
     const allAchievements = await Achievement.find({ active: true });
 
     const userAchievements = user?.gamification?.achievements || [];
-    
-    return allAchievements.map(achievement => {
+
+    return allAchievements.map((achievement) => {
       const userAchievement = userAchievements.find(
-        ua => ua.achievementId.toString() === achievement._id.toString()
+        (ua) => ua.achievementId.toString() === achievement._id.toString(),
       );
 
       return {
@@ -224,9 +227,9 @@ class GamificationService {
     const user = await User.findById(userId);
     const userChallenges = user?.gamification?.challenges || [];
 
-    return challenges.map(challenge => {
+    return challenges.map((challenge) => {
       const userChallenge = userChallenges.find(
-        uc => uc.challengeId.toString() === challenge._id.toString()
+        (uc) => uc.challengeId.toString() === challenge._id.toString(),
       );
 
       return {
@@ -247,7 +250,9 @@ class GamificationService {
   /**
    * Create weekly personal challenges
    */
-  async createWeeklyPersonalChallenge(userId: string): Promise<ActiveChallenge> {
+  async createWeeklyPersonalChallenge(
+    userId: string,
+  ): Promise<ActiveChallenge> {
     await dbConnect();
 
     const user = await User.findById(userId);
@@ -317,7 +322,7 @@ class GamificationService {
       ],
     }).sort({ pointsCost: 1 });
 
-    return rewards.map(reward => ({
+    return rewards.map((reward) => ({
       rewardId: reward._id.toString(),
       name: reward.name,
       description: reward.description,
@@ -335,7 +340,7 @@ class GamificationService {
    */
   async requestReward(
     userId: string,
-    rewardId: string
+    rewardId: string,
   ): Promise<{
     success: boolean;
     needsApproval: boolean;
@@ -347,13 +352,21 @@ class GamificationService {
     const reward = await Reward.findById(rewardId);
 
     if (!user || !reward) {
-      return { success: false, needsApproval: false, error: "User or reward not found" };
+      return {
+        success: false,
+        needsApproval: false,
+        error: "User or reward not found",
+      };
     }
 
     const userPoints = user.gamification?.totalPoints || 0;
 
     if (userPoints < reward.pointsCost) {
-      return { success: false, needsApproval: false, error: "Insufficient points" };
+      return {
+        success: false,
+        needsApproval: false,
+        error: "Insufficient points",
+      };
     }
 
     if (reward.requiresParentApproval) {
@@ -409,7 +422,7 @@ class GamificationService {
     }).sort({ completedAt: -1 });
 
     let streak = 0;
-    let currentDate = new Date();
+    const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
     for (const chore of chores) {
@@ -417,7 +430,7 @@ class GamificationService {
       choreDate.setHours(0, 0, 0, 0);
 
       const daysDiff = Math.floor(
-        (currentDate.getTime() - choreDate.getTime()) / (1000 * 60 * 60 * 24)
+        (currentDate.getTime() - choreDate.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       if (daysDiff === streak) {
@@ -436,7 +449,7 @@ class GamificationService {
    */
   private async calculateChallengeBonus(
     userId: string,
-    chore: any
+    chore: any,
   ): Promise<{ points: number; reasons: string[] }> {
     const activeChallenges = await this.getUserChallenges(userId);
     let totalBonus = 0;
@@ -445,7 +458,7 @@ class GamificationService {
     for (const challenge of activeChallenges) {
       if (!challenge.isCompleted) {
         const newProgress = challenge.currentProgress + 1;
-        
+
         if (newProgress >= challenge.targetValue) {
           totalBonus += Math.round(challenge.pointsReward * 0.1); // 10% bonus for completing challenge
           reasons.push(`Challenge "${challenge.name}" bonus!`);
@@ -459,7 +472,9 @@ class GamificationService {
   /**
    * Check for newly earned achievements
    */
-  private async checkForNewAchievements(userId: string): Promise<AchievementProgress[]> {
+  private async checkForNewAchievements(
+    userId: string,
+  ): Promise<AchievementProgress[]> {
     const user = await User.findById(userId);
     if (!user) return [];
 
@@ -469,18 +484,23 @@ class GamificationService {
 
     for (const achievement of allAchievements) {
       const userAchievement = userAchievements.find(
-        ua => ua.achievementId.toString() === achievement._id.toString()
+        (ua) => ua.achievementId.toString() === achievement._id.toString(),
       );
 
       if (!userAchievement || !userAchievement.isCompleted) {
-        const currentProgress = await this.calculateAchievementProgress(userId, achievement);
-        
+        const currentProgress = await this.calculateAchievementProgress(
+          userId,
+          achievement,
+        );
+
         if (currentProgress >= achievement.targetValue) {
           // Mark as completed
           await User.findByIdAndUpdate(userId, {
-            $pull: { "gamification.achievements": { achievementId: achievement._id } },
+            $pull: {
+              "gamification.achievements": { achievementId: achievement._id },
+            },
           });
-          
+
           await User.findByIdAndUpdate(userId, {
             $push: {
               "gamification.achievements": {
@@ -514,7 +534,10 @@ class GamificationService {
   /**
    * Calculate current progress for an achievement
    */
-  private async calculateAchievementProgress(userId: string, achievement: any): Promise<number> {
+  private async calculateAchievementProgress(
+    userId: string,
+    achievement: any,
+  ): Promise<number> {
     switch (achievement.type) {
       case "chores_completed":
         const choreCount = await Chore.countDocuments({
@@ -554,7 +577,7 @@ class GamificationService {
    */
   private async sendAchievementNotifications(
     userId: string,
-    achievements: AchievementProgress[]
+    achievements: AchievementProgress[],
   ): Promise<void> {
     // const messagingService = getUnifiedMessagingService(); // Disabled for testing
     const user = await User.findById(userId);
@@ -564,7 +587,9 @@ class GamificationService {
     for (const achievement of achievements) {
       try {
         // await messagingService.sendMessage({ // Disabled for testing
-        console.log(`🏆 Achievement Unlocked: ${achievement.name}! ${achievement.description}`);
+        console.log(
+          `🏆 Achievement Unlocked: ${achievement.name}! ${achievement.description}`,
+        );
         // });
       } catch (error) {
         console.error("Failed to send achievement notification:", error);
@@ -575,7 +600,10 @@ class GamificationService {
   /**
    * Notify parents of reward request
    */
-  private async notifyParentsOfRewardRequest(userId: string, reward: any): Promise<void> {
+  private async notifyParentsOfRewardRequest(
+    userId: string,
+    reward: any,
+  ): Promise<void> {
     const user = await User.findById(userId).populate("family");
     if (!user?.family) return;
 
@@ -589,7 +617,9 @@ class GamificationService {
     for (const parent of parents) {
       try {
         // await messagingService.sendMessage({ // Disabled for testing
-        console.log(`${user.name} wants to redeem "${reward.name}" for ${reward.pointsCost} points. Review in the app to approve.`);
+        console.log(
+          `${user.name} wants to redeem "${reward.name}" for ${reward.pointsCost} points. Review in the app to approve.`,
+        );
         // });
       } catch (error) {
         console.error("Failed to send reward approval notification:", error);

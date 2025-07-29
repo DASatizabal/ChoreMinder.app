@@ -1,16 +1,15 @@
 // app/api/chores/[id]/photos/route.ts
 import crypto from "crypto";
 
-import { Types } from "mongoose";
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
 import { optimizeImageBuffer } from "@/lib/image-optimization";
 import { uploadToS3 } from "@/libs/s3";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
+import { Types } from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
 interface RouteParams {
   params: {

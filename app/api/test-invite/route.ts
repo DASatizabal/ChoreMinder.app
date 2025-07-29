@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Simulate invitation creation
-    const inviteCode = "TEST" + Math.random().toString(36).substring(2, 8).toUpperCase();
-    
+    const inviteCode = `TEST${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
     return NextResponse.json({
       success: true,
       message: "Test invitation created successfully",
@@ -35,8 +35,11 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("🧪 [TEST INVITE] Error:", error);
     return NextResponse.json(
-      { error: "Test failed", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Test failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

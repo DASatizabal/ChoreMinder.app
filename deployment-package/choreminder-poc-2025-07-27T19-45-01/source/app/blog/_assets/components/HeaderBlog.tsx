@@ -1,15 +1,14 @@
 "use client";
 
+import logo from "@/app/icon.png";
+import ButtonSignin from "@/components/ButtonSignin";
+import config from "@/config";
 import { Popover, Transition } from "@headlessui/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
 import { useState, useEffect } from "react";
-
-import logo from "@/app/icon.png";
-import ButtonSignin from "@/components/ButtonSignin";
-import config from "@/config";
 
 import { categories } from "../content";
 

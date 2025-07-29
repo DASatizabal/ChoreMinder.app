@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import config from "@/config";
@@ -17,27 +18,45 @@ const ButtonCheckout = ({
   mode?: "payment" | "subscription";
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { data: session, status } = useSession();
 
   const handlePayment = async () => {
+    console.log("Button clicked! Status:", status, "PriceId:", priceId);
     setIsLoading(true);
 
     try {
+      // If user is not authenticated, redirect to signin with callback to continue checkout
+      if (status === "unauthenticated") {
+        const callbackUrl = `${window.location.origin}/checkout?priceId=${priceId}&mode=${mode}`;
+        window.location.href = `/api/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+        return;
+      }
+
+      if (status === "loading") {
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Making API call with priceId:", priceId);
       const { url }: { url: string } = await apiClient.post(
         "/stripe/create-checkout",
         {
           priceId,
-          successUrl: window.location.href,
+          successUrl: `${window.location.origin}/onboarding`,
           cancelUrl: window.location.href,
           mode,
         },
       );
 
-      window.location.href = url;
+      console.log("Got URL:", url);
+      if (url) {
+        window.location.href = url;
+      }
     } catch (e) {
-      console.error(e);
+      console.error("Error creating checkout session:", e);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (

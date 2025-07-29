@@ -1,7 +1,6 @@
-import { notFound } from "next/navigation";
-
 import config from "@/config";
 import { getSEOTags } from "@/libs/seo";
+import { notFound } from "next/navigation";
 
 import CardArticle from "../../_assets/components/CardArticle";
 import CardCategory from "../../_assets/components/CardCategory";

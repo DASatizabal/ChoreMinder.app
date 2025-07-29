@@ -1,6 +1,5 @@
-import { Suspense } from "react";
-
 import Footer from "@/components/Footer";
+import { Suspense } from "react";
 
 import HeaderBlog from "./_assets/components/HeaderBlog";
 

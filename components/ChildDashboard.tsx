@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 import AchievementDisplay from "./AchievementDisplay";
@@ -353,6 +353,13 @@ const ChildDashboard = () => {
           >
             <span className="text-2xl mr-2">📸</span>
             Photo Upload
+          </button>
+          <button
+            className="tab tab-lg font-bold rounded-xl transition-all hover:bg-red-100 text-red-600"
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            <span className="text-2xl mr-2">🚪</span>
+            Logout
           </button>
         </div>
 

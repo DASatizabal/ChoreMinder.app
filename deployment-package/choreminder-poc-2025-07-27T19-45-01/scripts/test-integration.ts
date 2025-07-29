@@ -1,13 +1,14 @@
+import { getAnalyticsService } from "../libs/analytics";
+import { getGamificationService } from "../libs/gamification";
 import { dbConnect } from "../libs/mongoose";
-import User from "../models/User";
-import Family from "../models/Family";
-import Chore from "../models/Chore";
+import { getPerformanceService } from "../libs/performance";
+import { getSchedulingService } from "../libs/scheduling";
 import Achievement from "../models/Achievement";
 import Challenge from "../models/Challenge";
+import Chore from "../models/Chore";
+import Family from "../models/Family";
 import Reward from "../models/Reward";
-import { getGamificationService } from "../libs/gamification";
-import { getSchedulingService } from "../libs/scheduling";
-import { getAnalyticsService } from "../libs/analytics";
+import User from "../models/User";
 // Import messaging services conditionally to handle missing env vars
 let getUnifiedMessagingService: any = null;
 let getNotificationService: any = null;
@@ -25,7 +26,6 @@ try {
 } catch (error) {
   console.warn("Notification service not available for testing");
 }
-import { getPerformanceService } from "../libs/performance";
 
 interface TestResult {
   test: string;
@@ -47,7 +47,7 @@ class IntegrationTestSuite {
     summary: string;
   }> {
     console.log("🧪 Starting Comprehensive Integration Tests");
-    console.log("=" .repeat(60));
+    console.log("=".repeat(60));
 
     await this.setupTestEnvironment();
 
@@ -72,25 +72,25 @@ class IntegrationTestSuite {
 
   private async runTest(
     testName: string,
-    testFunction: () => Promise<void>
+    testFunction: () => Promise<void>,
   ): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       console.log(`\n🔍 Testing: ${testName}`);
       await testFunction();
-      
+
       const duration = Date.now() - startTime;
       this.results.push({
         test: testName,
         status: "PASS",
         duration,
       });
-      
+
       console.log(`✅ PASS: ${testName} (${duration}ms)`);
     } catch (error: any) {
       const duration = Date.now() - startTime;
-      
+
       // Handle SKIP errors
       if (error.message.startsWith("SKIP:")) {
         this.results.push({
@@ -99,7 +99,7 @@ class IntegrationTestSuite {
           duration,
           error: error.message.replace("SKIP: ", ""),
         });
-        
+
         console.log(`⏭️ SKIP: ${testName} (${duration}ms)`);
         console.log(`   Reason: ${error.message.replace("SKIP: ", "")}`);
       } else {
@@ -109,7 +109,7 @@ class IntegrationTestSuite {
           duration,
           error: error.message,
         });
-        
+
         console.log(`❌ FAIL: ${testName} (${duration}ms)`);
         console.log(`   Error: ${error.message}`);
       }
@@ -119,7 +119,7 @@ class IntegrationTestSuite {
   private async setupTestEnvironment(): Promise<void> {
     await this.runTest("Setup Test Environment", async () => {
       await dbConnect();
-      
+
       // Create test family
       const testFamily = new Family({
         name: "Test Family",
@@ -207,13 +207,17 @@ class IntegrationTestSuite {
     await this.runTest("Database Connectivity", async () => {
       const performanceService = getPerformanceService();
       const dbHealth = await performanceService.getDatabaseHealth();
-      
+
       if (dbHealth.connectionStatus !== "healthy") {
-        throw new Error(`Database health check failed: ${dbHealth.connectionStatus}`);
+        throw new Error(
+          `Database health check failed: ${dbHealth.connectionStatus}`,
+        );
       }
-      
+
       if (dbHealth.responseTime > 1000) {
-        throw new Error(`Database response time too slow: ${dbHealth.responseTime}ms`);
+        throw new Error(
+          `Database response time too slow: ${dbHealth.responseTime}ms`,
+        );
       }
     });
   }
@@ -233,8 +237,10 @@ class IntegrationTestSuite {
       // Verify user was created with defaults
       const savedUser = await User.findById(newUser._id);
       if (!savedUser) throw new Error("User not saved properly");
-      if (savedUser.role !== "child") throw new Error("User role not set correctly");
-      if (!savedUser.gamification) throw new Error("Gamification data not initialized");
+      if (savedUser.role !== "child")
+        throw new Error("User role not set correctly");
+      if (!savedUser.gamification)
+        throw new Error("Gamification data not initialized");
 
       await User.findByIdAndDelete(newUser._id);
     });
@@ -295,17 +301,25 @@ class IntegrationTestSuite {
 
       // Try to query as family 2 user - should not see family 1 chores
       const family2Chores = await Chore.find({ family: family2._id });
-      const family1ChoresVisible = await Chore.find({ 
+      const family1ChoresVisible = await Chore.find({
         family: this.testData.familyId,
-        assignedTo: user2._id 
+        assignedTo: user2._id,
       });
 
-      if (family2Chores.some(c => c.family.toString() === this.testData.familyId.toString())) {
-        throw new Error("Family data isolation breach: Family 2 can see Family 1 chores");
+      if (
+        family2Chores.some(
+          (c) => c.family.toString() === this.testData.familyId.toString(),
+        )
+      ) {
+        throw new Error(
+          "Family data isolation breach: Family 2 can see Family 1 chores",
+        );
       }
 
       if (family1ChoresVisible.length > 0) {
-        throw new Error("Family data isolation breach: Cross-family assignment possible");
+        throw new Error(
+          "Family data isolation breach: Cross-family assignment possible",
+        );
       }
 
       // Cleanup
@@ -383,16 +397,18 @@ class IntegrationTestSuite {
   private async testGamificationIntegration(): Promise<void> {
     await this.runTest("Gamification Points System", async () => {
       const gamificationService = getGamificationService();
-      
+
       // Calculate points for completed chore
       const pointsBreakdown = await gamificationService.calculatePointsForChore(
         this.testData.testChoreId,
         this.testData.childId,
-        "good"
+        "good",
       );
 
       if (pointsBreakdown.basePoints !== 25) {
-        throw new Error(`Incorrect base points: expected 25, got ${pointsBreakdown.basePoints}`);
+        throw new Error(
+          `Incorrect base points: expected 25, got ${pointsBreakdown.basePoints}`,
+        );
       }
 
       if (pointsBreakdown.totalPoints <= pointsBreakdown.basePoints) {
@@ -403,7 +419,7 @@ class IntegrationTestSuite {
       const result = await gamificationService.awardPoints(
         this.testData.childId,
         pointsBreakdown,
-        this.testData.testChoreId
+        this.testData.testChoreId,
       );
 
       if (result.totalPoints <= 0) {
@@ -419,16 +435,18 @@ class IntegrationTestSuite {
 
     await this.runTest("Achievement System", async () => {
       const gamificationService = getGamificationService();
-      
+
       // Get user achievements
-      const achievements = await gamificationService.getUserAchievements(this.testData.childId);
-      
+      const achievements = await gamificationService.getUserAchievements(
+        this.testData.childId,
+      );
+
       if (achievements.length === 0) {
         throw new Error("No achievements loaded");
       }
 
       // Check for "First Steps" achievement (complete first chore)
-      const firstSteps = achievements.find(a => a.name === "First Steps");
+      const firstSteps = achievements.find((a) => a.name === "First Steps");
       if (!firstSteps) {
         throw new Error("First Steps achievement not found");
       }
@@ -440,16 +458,18 @@ class IntegrationTestSuite {
 
     await this.runTest("Rewards System", async () => {
       const gamificationService = getGamificationService();
-      
+
       // Get available rewards
-      const rewards = await gamificationService.getAvailableRewards(this.testData.childId);
-      
+      const rewards = await gamificationService.getAvailableRewards(
+        this.testData.childId,
+      );
+
       if (rewards.length === 0) {
         throw new Error("No rewards available");
       }
 
       // Find an affordable reward
-      const affordableReward = rewards.find(r => r.canAfford);
+      const affordableReward = rewards.find((r) => r.canAfford);
       if (!affordableReward) {
         throw new Error("No affordable rewards found");
       }
@@ -457,7 +477,7 @@ class IntegrationTestSuite {
       // Request reward
       const result = await gamificationService.requestReward(
         this.testData.childId,
-        affordableReward.rewardId
+        affordableReward.rewardId,
       );
 
       if (!result.success) {
@@ -469,7 +489,7 @@ class IntegrationTestSuite {
   private async testSchedulingSystem(): Promise<void> {
     await this.runTest("Recurring Chore Scheduling", async () => {
       const schedulingService = getSchedulingService();
-      
+
       // Create scheduled chore
       const scheduledChore = await schedulingService.createScheduledChore({
         title: "Weekly Test Chore",
@@ -510,21 +530,21 @@ class IntegrationTestSuite {
 
     await this.runTest("Schedule Optimization", async () => {
       const schedulingService = getSchedulingService();
-      
+
       // Check for conflicts
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      
+
       const conflicts = await schedulingService.checkScheduleConflicts(
         this.testData.childId,
         tomorrow,
-        new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000)
+        new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000),
       );
 
       // Optimize family schedule
       const optimization = await schedulingService.optimizeFamilySchedule(
         this.testData.familyId.toString(),
-        tomorrow
+        tomorrow,
       );
 
       if (!optimization.recommendations) {
@@ -539,7 +559,7 @@ class IntegrationTestSuite {
         throw new Error("SKIP: Notification service not available");
       }
       const notificationService = getNotificationService();
-      
+
       // Trigger chore assignment notification
       await notificationService.triggerNotification({
         type: "chore_assigned",
@@ -560,11 +580,11 @@ class IntegrationTestSuite {
         throw new Error("SKIP: Unified messaging service not available");
       }
       const messagingService = getUnifiedMessagingService();
-      
+
       // Test message sending (without actually sending)
       const user = await User.findById(this.testData.childId);
       const chore = await Chore.findById(this.testData.testChoreId);
-      
+
       if (!user || !chore) {
         throw new Error("Test data not found for messaging test");
       }
@@ -580,10 +600,13 @@ class IntegrationTestSuite {
   private async testAnalyticsSystem(): Promise<void> {
     await this.runTest("Analytics Data Generation", async () => {
       const analyticsService = getAnalyticsService();
-      
+
       // Get user progress
-      const progress = await analyticsService.getUserProgress(this.testData.childId, "week");
-      
+      const progress = await analyticsService.getUserProgress(
+        this.testData.childId,
+        "week",
+      );
+
       if (progress.totalChores === 0) {
         throw new Error("Analytics not tracking chores");
       }
@@ -593,15 +616,21 @@ class IntegrationTestSuite {
       }
 
       // Get time series data
-      const timeSeriesData = await analyticsService.getTimeSeriesData(this.testData.childId, "week");
-      
+      const timeSeriesData = await analyticsService.getTimeSeriesData(
+        this.testData.childId,
+        "week",
+      );
+
       if (timeSeriesData.length === 0) {
         throw new Error("No time series data generated");
       }
 
       // Get category insights
-      const categoryInsights = await analyticsService.getCategoryInsights(this.testData.childId, "week");
-      
+      const categoryInsights = await analyticsService.getCategoryInsights(
+        this.testData.childId,
+        "week",
+      );
+
       if (categoryInsights.length === 0) {
         throw new Error("No category insights generated");
       }
@@ -609,11 +638,11 @@ class IntegrationTestSuite {
 
     await this.runTest("Family Analytics", async () => {
       const analyticsService = getAnalyticsService();
-      
+
       // Get family analytics
       const familyAnalytics = await analyticsService.getFamilyAnalytics(
         this.testData.familyId.toString(),
-        "week"
+        "week",
       );
 
       if (familyAnalytics.memberProgress.length === 0) {
@@ -634,7 +663,7 @@ class IntegrationTestSuite {
 
       // In a real app, this would be tested via API endpoints
       // Here we test the data model constraints
-      
+
       // Child should not be able to verify their own chores
       if (chore.verifiedBy?.toString() === this.testData.childId.toString()) {
         // This would be prevented by API middleware
@@ -659,10 +688,10 @@ class IntegrationTestSuite {
   private async testPerformanceOptimizations(): Promise<void> {
     await this.runTest("Database Query Performance", async () => {
       const performanceService = getPerformanceService();
-      
+
       // Test optimized queries
       const startTime = Date.now();
-      
+
       const chores = await performanceService.optimizedFind(
         Chore,
         { family: this.testData.familyId },
@@ -671,11 +700,11 @@ class IntegrationTestSuite {
           populate: "assignedTo",
           cache: true,
           cacheTTL: 5, // 5 minutes
-        }
+        },
       );
-      
+
       const queryTime = Date.now() - startTime;
-      
+
       if (queryTime > 1000) {
         throw new Error(`Query too slow: ${queryTime}ms`);
       }
@@ -687,10 +716,12 @@ class IntegrationTestSuite {
 
     await this.runTest("Caching System", async () => {
       const performanceService = getPerformanceService();
-      
+
       // Set cache
-      performanceService.setCache("test_key", { data: "test_value" }, 1, ["test"]);
-      
+      performanceService.setCache("test_key", { data: "test_value" }, 1, [
+        "test",
+      ]);
+
       // Get cache
       const cachedData = performanceService.getCache("test_key");
       if (!cachedData || cachedData.data !== "test_value") {
@@ -720,7 +751,9 @@ class IntegrationTestSuite {
       }
 
       if (user.gamification.choresCompleted !== completedChores) {
-        throw new Error(`Gamification chore count mismatch: ${user.gamification.choresCompleted} vs ${completedChores}`);
+        throw new Error(
+          `Gamification chore count mismatch: ${user.gamification.choresCompleted} vs ${completedChores}`,
+        );
       }
 
       // Verify points consistency
@@ -740,10 +773,12 @@ class IntegrationTestSuite {
       ]);
 
       const chorePoints = totalChorePoints[0]?.totalPoints || 0;
-      
+
       // User points might be higher due to bonuses, but shouldn't be lower
       if (user.gamification.totalPoints < chorePoints) {
-        throw new Error(`Points consistency error: user has ${user.gamification.totalPoints}, chores worth ${chorePoints}`);
+        throw new Error(
+          `Points consistency error: user has ${user.gamification.totalPoints}, chores worth ${chorePoints}`,
+        );
       }
     });
 
@@ -755,17 +790,25 @@ class IntegrationTestSuite {
       if (!family) throw new Error("Test family not found");
 
       if (family.members.length !== familyUsers.length) {
-        throw new Error(`Family member count mismatch: family has ${family.members.length}, users table has ${familyUsers.length}`);
+        throw new Error(
+          `Family member count mismatch: family has ${family.members.length}, users table has ${familyUsers.length}`,
+        );
       }
 
       // Verify all family members exist as users
       for (const member of family.members) {
-        const user = familyUsers.find(u => u._id.toString() === member.userId.toString());
+        const user = familyUsers.find(
+          (u) => u._id.toString() === member.userId.toString(),
+        );
         if (!user) {
-          throw new Error(`Family member ${member.userId} not found in users table`);
+          throw new Error(
+            `Family member ${member.userId} not found in users table`,
+          );
         }
         if (user.role !== member.role) {
-          throw new Error(`Role mismatch for user ${user.name}: family says ${member.role}, user says ${user.role}`);
+          throw new Error(
+            `Role mismatch for user ${user.name}: family says ${member.role}, user says ${user.role}`,
+          );
         }
       }
     });
@@ -774,7 +817,7 @@ class IntegrationTestSuite {
   private async testCompleteUserWorkflows(): Promise<void> {
     await this.runTest("Complete Parent Workflow", async () => {
       // Parent creates chore -> assigns to child -> monitors progress -> approves completion
-      
+
       // 1. Create chore
       const newChore = new Chore({
         title: "Parent Workflow Test Chore",
@@ -807,13 +850,13 @@ class IntegrationTestSuite {
       const pointsBreakdown = await gamificationService.calculatePointsForChore(
         newChore._id.toString(),
         this.testData.childId,
-        "good"
+        "good",
       );
 
       const result = await gamificationService.awardPoints(
         this.testData.childId,
         pointsBreakdown,
-        newChore._id.toString()
+        newChore._id.toString(),
       );
 
       if (!result.newTotalPoints || result.newTotalPoints <= 0) {
@@ -825,7 +868,7 @@ class IntegrationTestSuite {
 
     await this.runTest("Complete Child Workflow", async () => {
       // Child views chores -> starts chore -> completes chore -> earns points
-      
+
       // 1. Get assigned chores
       const assignedChores = await Chore.find({
         assignedTo: this.testData.childId,
@@ -852,7 +895,10 @@ class IntegrationTestSuite {
 
       // 4. Verify user can see their progress
       const analyticsService = getAnalyticsService();
-      const progress = await analyticsService.getUserProgress(this.testData.childId, "week");
+      const progress = await analyticsService.getUserProgress(
+        this.testData.childId,
+        "week",
+      );
 
       if (progress.completedChores === 0) {
         throw new Error("Child progress not tracked properly");
@@ -866,7 +912,7 @@ class IntegrationTestSuite {
       await Chore.deleteMany({ family: this.testData.familyId });
       await User.deleteMany({ familyId: this.testData.familyId });
       await Family.findByIdAndDelete(this.testData.familyId);
-      
+
       // Clean up any scheduled chores
       if (this.testData.scheduleId) {
         await Chore.deleteMany({ scheduleId: this.testData.scheduleId });
@@ -883,10 +929,10 @@ class IntegrationTestSuite {
     results: TestResult[];
     summary: string;
   } {
-    const passed = this.results.filter(r => r.status === "PASS").length;
-    const failed = this.results.filter(r => r.status === "FAIL").length;
-    const skipped = this.results.filter(r => r.status === "SKIP").length;
-    
+    const passed = this.results.filter((r) => r.status === "PASS").length;
+    const failed = this.results.filter((r) => r.status === "FAIL").length;
+    const skipped = this.results.filter((r) => r.status === "SKIP").length;
+
     const totalDuration = this.results.reduce((sum, r) => sum + r.duration, 0);
     const avgDuration = totalDuration / this.results.length;
 
@@ -917,7 +963,8 @@ ${failed > 0 ? "❌ SOME TESTS FAILED - REVIEW REQUIRED" : "✅ ALL TESTS PASSED
 // Run tests if called directly
 if (require.main === module) {
   const testSuite = new IntegrationTestSuite();
-  testSuite.runAllTests()
+  testSuite
+    .runAllTests()
     .then((results) => {
       process.exit(results.failed > 0 ? 1 : 0);
     })

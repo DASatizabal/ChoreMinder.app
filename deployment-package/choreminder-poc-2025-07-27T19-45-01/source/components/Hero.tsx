@@ -1,6 +1,5 @@
-import Image from "next/image";
-
 import config from "@/config";
+import Image from "next/image";
 
 import TestimonialsAvatars from "./TestimonialsAvatars";
 

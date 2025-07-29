@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import dbConnect from "@/libs/mongoose";
 import Family from "@/models/Family";
 import User from "@/models/User";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
 interface FamilySetupData {
   name: string;

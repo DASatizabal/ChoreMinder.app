@@ -4,7 +4,12 @@ export interface IAchievement extends Document {
   name: string;
   description: string;
   category: "completion" | "quality" | "consistency" | "milestone" | "special";
-  type: "chores_completed" | "points_earned" | "streak_days" | "perfect_week" | "early_completion";
+  type:
+    | "chores_completed"
+    | "points_earned"
+    | "streak_days"
+    | "perfect_week"
+    | "early_completion";
   targetValue: number;
   tier: "bronze" | "silver" | "gold" | "platinum";
   icon: string;
@@ -36,7 +41,13 @@ const achievementSchema = new Schema<IAchievement>(
     },
     type: {
       type: String,
-      enum: ["chores_completed", "points_earned", "streak_days", "perfect_week", "early_completion"],
+      enum: [
+        "chores_completed",
+        "points_earned",
+        "streak_days",
+        "perfect_week",
+        "early_completion",
+      ],
       required: true,
     },
     targetValue: {
@@ -70,13 +81,15 @@ const achievementSchema = new Schema<IAchievement>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for performance
 achievementSchema.index({ active: 1, category: 1 });
 achievementSchema.index({ type: 1, tier: 1 });
 
-const Achievement = mongoose.models.Achievement || mongoose.model<IAchievement>("Achievement", achievementSchema);
+const Achievement =
+  mongoose.models.Achievement ||
+  mongoose.model<IAchievement>("Achievement", achievementSchema);
 
 export default Achievement;

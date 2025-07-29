@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+
 import AnalyticsDashboard from "./AnalyticsDashboard";
 
 interface FamilyMember {
@@ -38,9 +39,13 @@ interface FamilyAnalyticsData {
 
 export default function FamilyAnalyticsDashboard() {
   const { data: session } = useSession();
-  const [familyData, setFamilyData] = useState<FamilyAnalyticsData | null>(null);
+  const [familyData, setFamilyData] = useState<FamilyAnalyticsData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<"week" | "month" | "quarter" | "year">("month");
+  const [timeRange, setTimeRange] = useState<
+    "week" | "month" | "quarter" | "year"
+  >("month");
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"family" | "individual">("family");
 
@@ -53,8 +58,10 @@ export default function FamilyAnalyticsDashboard() {
   const fetchFamilyAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/analytics/family?timeRange=${timeRange}`);
-      
+      const response = await fetch(
+        `/api/analytics/family?timeRange=${timeRange}`,
+      );
+
       if (response.ok) {
         const data = await response.json();
         setFamilyData(data.analytics);
@@ -70,15 +77,17 @@ export default function FamilyAnalyticsDashboard() {
 
   const handleExport = async (format: "json" | "csv" | "summary") => {
     try {
-      const response = await fetch(`/api/analytics/export?timeRange=${timeRange}&format=${format}`);
-      
+      const response = await fetch(
+        `/api/analytics/export?timeRange=${timeRange}&format=${format}`,
+      );
+
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.style.display = "none";
         a.href = url;
-        a.download = `family-analytics-${timeRange}-${new Date().toISOString().split('T')[0]}.${format === "summary" ? "txt" : format}`;
+        a.download = `family-analytics-${timeRange}-${new Date().toISOString().split("T")[0]}.${format === "summary" ? "txt" : format}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -91,17 +100,23 @@ export default function FamilyAnalyticsDashboard() {
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case "improving": return "📈";
-      case "declining": return "📉";
-      default: return "➡️";
+      case "improving":
+        return "📈";
+      case "declining":
+        return "📉";
+      default:
+        return "➡️";
     }
   };
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
-      case "improving": return "text-success";
-      case "declining": return "text-error";
-      default: return "text-info";
+      case "improving":
+        return "text-success";
+      case "declining":
+        return "text-error";
+      default:
+        return "text-info";
     }
   };
 
@@ -138,7 +153,7 @@ export default function FamilyAnalyticsDashboard() {
     return (
       <div>
         <div className="mb-6">
-          <button 
+          <button
             className="btn btn-ghost btn-sm"
             onClick={() => {
               setViewMode("family");
@@ -148,10 +163,7 @@ export default function FamilyAnalyticsDashboard() {
             ← Back to Family Overview
           </button>
         </div>
-        <AnalyticsDashboard 
-          userId={selectedMember} 
-          showExportButton={true}
-        />
+        <AnalyticsDashboard userId={selectedMember} showExportButton={true} />
       </div>
     );
   }
@@ -173,7 +185,7 @@ export default function FamilyAnalyticsDashboard() {
 
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Time Range Selector */}
-          <select 
+          <select
             className="select select-bordered"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as any)}
@@ -189,10 +201,25 @@ export default function FamilyAnalyticsDashboard() {
             <label tabIndex={0} className="btn btn-outline">
               📤 Export Report
             </label>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-              <li><button onClick={() => handleExport("json")}>Export as JSON</button></li>
-              <li><button onClick={() => handleExport("csv")}>Export as CSV</button></li>
-              <li><button onClick={() => handleExport("summary")}>Export Summary</button></li>
+            <ul
+              tabIndex={0}
+              className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li>
+                <button onClick={() => handleExport("json")}>
+                  Export as JSON
+                </button>
+              </li>
+              <li>
+                <button onClick={() => handleExport("csv")}>
+                  Export as CSV
+                </button>
+              </li>
+              <li>
+                <button onClick={() => handleExport("summary")}>
+                  Export Summary
+                </button>
+              </li>
             </ul>
           </div>
         </div>
@@ -203,18 +230,28 @@ export default function FamilyAnalyticsDashboard() {
         <div className="stat bg-primary text-primary-content rounded-lg">
           <div className="stat-title text-primary-content/70">Total Chores</div>
           <div className="stat-value text-xl">{overview.totalFamilyChores}</div>
-          <div className="stat-desc text-primary-content/60">this {timeRange}</div>
+          <div className="stat-desc text-primary-content/60">
+            this {timeRange}
+          </div>
         </div>
 
         <div className="stat bg-secondary text-secondary-content rounded-lg">
-          <div className="stat-title text-secondary-content/70">Total Points</div>
-          <div className="stat-value text-xl">{overview.totalFamilyPoints.toLocaleString()}</div>
-          <div className="stat-desc text-secondary-content/60">family total</div>
+          <div className="stat-title text-secondary-content/70">
+            Total Points
+          </div>
+          <div className="stat-value text-xl">
+            {overview.totalFamilyPoints.toLocaleString()}
+          </div>
+          <div className="stat-desc text-secondary-content/60">
+            family total
+          </div>
         </div>
 
         <div className="stat bg-accent text-accent-content rounded-lg">
           <div className="stat-title text-accent-content/70">Avg. Rate</div>
-          <div className="stat-value text-xl">{overview.averageCompletionRate}%</div>
+          <div className="stat-value text-xl">
+            {overview.averageCompletionRate}%
+          </div>
           <div className="stat-desc text-accent-content/60">completion</div>
         </div>
 
@@ -227,7 +264,8 @@ export default function FamilyAnalyticsDashboard() {
         <div className="stat bg-info text-info-content rounded-lg">
           <div className="stat-title text-info-content/70">Weekly Trend</div>
           <div className="stat-value text-xl">
-            {overview.thisWeekImprovement > 0 ? '+' : ''}{overview.thisWeekImprovement}%
+            {overview.thisWeekImprovement > 0 ? "+" : ""}
+            {overview.thisWeekImprovement}%
           </div>
           <div className="stat-desc text-info-content/60">vs last week</div>
         </div>
@@ -242,7 +280,9 @@ export default function FamilyAnalyticsDashboard() {
               <div>
                 <h3 className="card-title text-success">Top Performer</h3>
                 <p className="text-lg font-semibold">{insights.topPerformer}</p>
-                <p className="text-sm text-base-content/60">Highest completion rate this {timeRange}</p>
+                <p className="text-sm text-base-content/60">
+                  Highest completion rate this {timeRange}
+                </p>
               </div>
             </div>
           </div>
@@ -255,7 +295,9 @@ export default function FamilyAnalyticsDashboard() {
               <div>
                 <h3 className="card-title text-primary">Most Improved</h3>
                 <p className="text-lg font-semibold">{insights.mostImproved}</p>
-                <p className="text-sm text-base-content/60">Biggest improvement this {timeRange}</p>
+                <p className="text-sm text-base-content/60">
+                  Biggest improvement this {timeRange}
+                </p>
               </div>
             </div>
           </div>
@@ -267,8 +309,12 @@ export default function FamilyAnalyticsDashboard() {
               <div className="text-3xl">🔥</div>
               <div>
                 <h3 className="card-title text-accent">Consistency Champion</h3>
-                <p className="text-lg font-semibold">{insights.consistencyChampion}</p>
-                <p className="text-sm text-base-content/60">Longest streak this {timeRange}</p>
+                <p className="text-lg font-semibold">
+                  {insights.consistencyChampion}
+                </p>
+                <p className="text-sm text-base-content/60">
+                  Longest streak this {timeRange}
+                </p>
               </div>
             </div>
           </div>
@@ -308,24 +354,35 @@ export default function FamilyAnalyticsDashboard() {
                     <td>
                       <div className="flex items-center gap-2">
                         <div className="w-full bg-base-300 rounded-full h-2 max-w-[80px]">
-                          <div 
+                          <div
                             className={`h-2 rounded-full ${
-                              member.completionRate >= 90 ? "bg-success" :
-                              member.completionRate >= 70 ? "bg-warning" : "bg-error"
+                              member.completionRate >= 90
+                                ? "bg-success"
+                                : member.completionRate >= 70
+                                  ? "bg-warning"
+                                  : "bg-error"
                             }`}
-                            style={{ width: `${Math.min(member.completionRate, 100)}%` }}
+                            style={{
+                              width: `${Math.min(member.completionRate, 100)}%`,
+                            }}
                           ></div>
                         </div>
-                        <span className={`font-medium ${getCompletionRateColor(member.completionRate)}`}>
+                        <span
+                          className={`font-medium ${getCompletionRateColor(member.completionRate)}`}
+                        >
                           {member.completionRate}%
                         </span>
                       </div>
                     </td>
                     <td>
-                      <div className="badge badge-primary">{member.totalPoints.toLocaleString()}</div>
+                      <div className="badge badge-primary">
+                        {member.totalPoints.toLocaleString()}
+                      </div>
                     </td>
                     <td>
-                      <div className="badge badge-secondary">Level {member.level}</div>
+                      <div className="badge badge-secondary">
+                        Level {member.level}
+                      </div>
                     </td>
                     <td>
                       <div className="flex items-center gap-1">
@@ -337,13 +394,17 @@ export default function FamilyAnalyticsDashboard() {
                       <div className="font-medium">{member.thisWeekChores}</div>
                     </td>
                     <td>
-                      <div className={`flex items-center gap-1 ${getTrendColor(member.trend)}`}>
+                      <div
+                        className={`flex items-center gap-1 ${getTrendColor(member.trend)}`}
+                      >
                         <span>{getTrendIcon(member.trend)}</span>
-                        <span className="capitalize text-sm">{member.trend}</span>
+                        <span className="capitalize text-sm">
+                          {member.trend}
+                        </span>
                       </div>
                     </td>
                     <td>
-                      <button 
+                      <button
                         className="btn btn-sm btn-ghost"
                         onClick={() => {
                           setSelectedMember(member.userId);
@@ -367,7 +428,10 @@ export default function FamilyAnalyticsDashboard() {
           <h2 className="card-title mb-4">💡 Family Success Tips</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {insights.suggestions.map((suggestion, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 bg-base-100 rounded-lg">
+              <div
+                key={index}
+                className="flex items-start gap-3 p-3 bg-base-100 rounded-lg"
+              >
                 <div className="text-xl flex-shrink-0">💡</div>
                 <div>
                   <p className="text-sm">{suggestion}</p>
@@ -382,7 +446,8 @@ export default function FamilyAnalyticsDashboard() {
       <div className="text-center mt-8 p-6 bg-gradient-to-r from-success/20 to-primary/20 rounded-lg">
         <div className="text-2xl mb-2">🌟 Amazing Family Teamwork! 🌟</div>
         <p className="text-base-content/80">
-          Every chore completed together builds stronger family bonds and life skills.
+          Every chore completed together builds stronger family bonds and life
+          skills.
         </p>
         <p className="text-sm text-base-content/60 mt-2">
           Keep celebrating the small wins and supporting each other! 💪

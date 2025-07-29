@@ -2,8 +2,8 @@ import { Types, Document } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@/libs/next-auth";
 import dbConnect from "@/libs/mongoose";
+import { authOptions } from "@/libs/next-auth";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
 import User from "@/models/User";
@@ -120,17 +120,21 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const status = searchParams.get("status");
     const assignedTo = searchParams.get("assignedTo");
-    
+
     let filteredChores = mockChores;
-    
+
     // Filter by status if provided
     if (status) {
-      filteredChores = filteredChores.filter(chore => chore.status === status);
+      filteredChores = filteredChores.filter(
+        (chore) => chore.status === status,
+      );
     }
-    
+
     // Filter by assignedTo if provided
     if (assignedTo) {
-      filteredChores = filteredChores.filter(chore => chore.assignedTo._id === assignedTo);
+      filteredChores = filteredChores.filter(
+        (chore) => chore.assignedTo._id === assignedTo,
+      );
     }
 
     return NextResponse.json({

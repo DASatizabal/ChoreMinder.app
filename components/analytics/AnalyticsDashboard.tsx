@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import ProgressChart from "./ProgressChart";
+import { useState, useEffect } from "react";
+
 import CategoryChart from "./CategoryChart";
 import InsightsPanel from "./InsightsPanel";
+import ProgressChart from "./ProgressChart";
 
 interface ProgressMetrics {
   totalChores: number;
@@ -60,15 +61,21 @@ interface AnalyticsDashboardProps {
   showExportButton?: boolean;
 }
 
-export default function AnalyticsDashboard({ 
-  userId, 
-  showExportButton = false 
+export default function AnalyticsDashboard({
+  userId,
+  showExportButton = false,
 }: AnalyticsDashboardProps) {
   const { data: session } = useSession();
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<"week" | "month" | "quarter" | "year">("month");
-  const [activeTab, setActiveTab] = useState<"overview" | "trends" | "categories" | "insights">("overview");
+  const [timeRange, setTimeRange] = useState<
+    "week" | "month" | "quarter" | "year"
+  >("month");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "trends" | "categories" | "insights"
+  >("overview");
 
   const targetUserId = userId || session?.user?.id;
 
@@ -81,8 +88,10 @@ export default function AnalyticsDashboard({
   const fetchAnalyticsData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/analytics/progress?userId=${targetUserId}&timeRange=${timeRange}`);
-      
+      const response = await fetch(
+        `/api/analytics/progress?userId=${targetUserId}&timeRange=${timeRange}`,
+      );
+
       if (response.ok) {
         const data = await response.json();
         setAnalyticsData(data);
@@ -98,15 +107,17 @@ export default function AnalyticsDashboard({
 
   const handleExport = async (format: "json" | "csv" | "summary") => {
     try {
-      const response = await fetch(`/api/analytics/export?timeRange=${timeRange}&format=${format}`);
-      
+      const response = await fetch(
+        `/api/analytics/export?timeRange=${timeRange}&format=${format}`,
+      );
+
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.style.display = "none";
         a.href = url;
-        a.download = `analytics-${timeRange}-${new Date().toISOString().split('T')[0]}.${format === "summary" ? "txt" : format}`;
+        a.download = `analytics-${timeRange}-${new Date().toISOString().split("T")[0]}.${format === "summary" ? "txt" : format}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -119,17 +130,23 @@ export default function AnalyticsDashboard({
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case "improving": return "📈";
-      case "declining": return "📉";
-      default: return "➡️";
+      case "improving":
+        return "📈";
+      case "declining":
+        return "📉";
+      default:
+        return "➡️";
     }
   };
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
-      case "improving": return "text-success";
-      case "declining": return "text-error";
-      default: return "text-info";
+      case "improving":
+        return "text-success";
+      case "declining":
+        return "text-error";
+      default:
+        return "text-info";
     }
   };
 
@@ -155,7 +172,8 @@ export default function AnalyticsDashboard({
     );
   }
 
-  const { progressMetrics, timeSeriesData, categoryInsights, trendInsights } = analyticsData;
+  const { progressMetrics, timeSeriesData, categoryInsights, trendInsights } =
+    analyticsData;
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -172,7 +190,7 @@ export default function AnalyticsDashboard({
 
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Time Range Selector */}
-          <select 
+          <select
             className="select select-bordered"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as any)}
@@ -189,10 +207,25 @@ export default function AnalyticsDashboard({
               <label tabIndex={0} className="btn btn-outline">
                 📤 Export
               </label>
-              <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                <li><button onClick={() => handleExport("json")}>Export as JSON</button></li>
-                <li><button onClick={() => handleExport("csv")}>Export as CSV</button></li>
-                <li><button onClick={() => handleExport("summary")}>Export Summary</button></li>
+              <ul
+                tabIndex={0}
+                className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+              >
+                <li>
+                  <button onClick={() => handleExport("json")}>
+                    Export as JSON
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleExport("csv")}>
+                    Export as CSV
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleExport("summary")}>
+                    Export Summary
+                  </button>
+                </li>
               </ul>
             </div>
           )}
@@ -202,8 +235,12 @@ export default function AnalyticsDashboard({
       {/* Overview Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="stat bg-primary text-primary-content rounded-lg">
-          <div className="stat-title text-primary-content/70">Completion Rate</div>
-          <div className="stat-value text-2xl">{progressMetrics.completionRate}%</div>
+          <div className="stat-title text-primary-content/70">
+            Completion Rate
+          </div>
+          <div className="stat-value text-2xl">
+            {progressMetrics.completionRate}%
+          </div>
           <div className="stat-desc text-primary-content/60 flex items-center gap-1">
             <span>{getTrendIcon(progressMetrics.improvementTrend)}</span>
             <span className={getTrendColor(progressMetrics.improvementTrend)}>
@@ -213,16 +250,24 @@ export default function AnalyticsDashboard({
         </div>
 
         <div className="stat bg-secondary text-secondary-content rounded-lg">
-          <div className="stat-title text-secondary-content/70">Total Points</div>
-          <div className="stat-value text-2xl">{progressMetrics.totalPoints.toLocaleString()}</div>
+          <div className="stat-title text-secondary-content/70">
+            Total Points
+          </div>
+          <div className="stat-value text-2xl">
+            {progressMetrics.totalPoints.toLocaleString()}
+          </div>
           <div className="stat-desc text-secondary-content/60">
             {progressMetrics.completedChores} chores completed
           </div>
         </div>
 
         <div className="stat bg-accent text-accent-content rounded-lg">
-          <div className="stat-title text-accent-content/70">Current Streak</div>
-          <div className="stat-value text-2xl">{progressMetrics.streakDays} 🔥</div>
+          <div className="stat-title text-accent-content/70">
+            Current Streak
+          </div>
+          <div className="stat-value text-2xl">
+            {progressMetrics.streakDays} 🔥
+          </div>
           <div className="stat-desc text-accent-content/60">
             consecutive days
           </div>
@@ -230,7 +275,9 @@ export default function AnalyticsDashboard({
 
         <div className="stat bg-success text-success-content rounded-lg">
           <div className="stat-title text-success-content/70">Consistency</div>
-          <div className="stat-value text-2xl">{progressMetrics.consistencyScore}%</div>
+          <div className="stat-value text-2xl">
+            {progressMetrics.consistencyScore}%
+          </div>
           <div className="stat-desc text-success-content/60">
             daily activity score
           </div>
@@ -239,25 +286,25 @@ export default function AnalyticsDashboard({
 
       {/* Navigation Tabs */}
       <div className="tabs tabs-boxed mb-6">
-        <button 
+        <button
           className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("overview")}
         >
           📈 Overview
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === "trends" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("trends")}
         >
           📊 Trends
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === "categories" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("categories")}
         >
           🏷️ Categories
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === "insights" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("insights")}
         >
@@ -300,7 +347,9 @@ export default function AnalyticsDashboard({
               <div className="card-body text-center">
                 <div className="text-3xl mb-2">⏱️</div>
                 <h3 className="card-title justify-center">Avg. Time</h3>
-                <p className="text-2xl font-bold">{progressMetrics.averageCompletionTime.toFixed(1)}h</p>
+                <p className="text-2xl font-bold">
+                  {progressMetrics.averageCompletionTime.toFixed(1)}h
+                </p>
                 <p className="text-sm text-base-content/60">per chore</p>
               </div>
             </div>
@@ -309,7 +358,9 @@ export default function AnalyticsDashboard({
               <div className="card-body text-center">
                 <div className="text-3xl mb-2">🎯</div>
                 <h3 className="card-title justify-center">Total Chores</h3>
-                <p className="text-2xl font-bold">{progressMetrics.totalChores}</p>
+                <p className="text-2xl font-bold">
+                  {progressMetrics.totalChores}
+                </p>
                 <p className="text-sm text-base-content/60">in {timeRange}</p>
               </div>
             </div>
@@ -318,7 +369,9 @@ export default function AnalyticsDashboard({
               <div className="card-body text-center">
                 <div className="text-3xl mb-2">🏆</div>
                 <h3 className="card-title justify-center">Success Rate</h3>
-                <p className="text-2xl font-bold">{progressMetrics.completionRate}%</p>
+                <p className="text-2xl font-bold">
+                  {progressMetrics.completionRate}%
+                </p>
                 <p className="text-sm text-base-content/60">completion rate</p>
               </div>
             </div>
@@ -396,8 +449,14 @@ export default function AnalyticsDashboard({
 
       {/* Footer */}
       <div className="text-center mt-8 text-sm text-base-content/60">
-        <p>Analytics generated on {new Date(analyticsData.generatedAt).toLocaleString()}</p>
-        <p>Keep up the amazing work! Every chore completed is progress toward your goals! 🌟</p>
+        <p>
+          Analytics generated on{" "}
+          {new Date(analyticsData.generatedAt).toLocaleString()}
+        </p>
+        <p>
+          Keep up the amazing work! Every chore completed is progress toward
+          your goals! 🌟
+        </p>
       </div>
     </div>
   );

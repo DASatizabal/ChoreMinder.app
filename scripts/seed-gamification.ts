@@ -379,11 +379,15 @@ async function seedGamificationData() {
     console.log(`- ${createdAchievements.length} achievements created`);
     console.log(`- ${createdChallenges.length} challenges created`);
     console.log(`- ${createdRewards.length} rewards created`);
-    
+
     console.log("\n🏆 Achievement Tiers:");
-    console.log("- Bronze: First Steps, Getting Started, Point Collector, On a Roll");
+    console.log(
+      "- Bronze: First Steps, Getting Started, Point Collector, On a Roll",
+    );
     console.log("- Silver: Chore Champion, Point Master, Streak Master");
-    console.log("- Gold: Super Helper, Point Legend, Unstoppable, Perfect Week");
+    console.log(
+      "- Gold: Super Helper, Point Legend, Unstoppable, Perfect Week",
+    );
     console.log("- Platinum: Household Hero");
 
     console.log("\n🎯 Challenge Types:");
@@ -397,7 +401,6 @@ async function seedGamificationData() {
     console.log("- Activities: Playdates, outings, crafts");
     console.log("- Items: Toys, books");
     console.log("- Experiences: Virtual rewards and badges");
-
   } catch (error) {
     console.error("❌ Error seeding gamification data:", error);
   } finally {

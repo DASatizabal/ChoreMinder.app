@@ -1,7 +1,6 @@
-import Link from "next/link";
-
 import config from "@/config";
 import { getSEOTags } from "@/libs/seo";
+import Link from "next/link";
 
 // CHATGPT PROMPT TO GENERATE YOUR TERMS & SERVICES — replace with your own data 👇
 

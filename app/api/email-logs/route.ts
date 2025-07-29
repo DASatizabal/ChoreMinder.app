@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
+import {
+  getEmailLogs,
+  getEmailStats,
+  addEmailLog,
+  clearEmailLogs,
+} from "@/libs/email-storage";
 import { authOptions } from "@/libs/next-auth";
-import { getEmailLogs, getEmailStats, addEmailLog, clearEmailLogs } from "@/libs/email-storage";
 
 // GET /api/email-logs - Get all email logs
 export async function GET(req: NextRequest) {
@@ -14,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     // In a real app, check if user is admin
     // For now, anyone can view logs in development
-    
+
     const searchParams = req.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "50");
     const type = searchParams.get("type");
@@ -31,7 +36,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching email logs:", error);
     return NextResponse.json(
       { error: "Failed to fetch email logs" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -54,15 +59,15 @@ export async function POST(req: NextRequest) {
       success,
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: "Email log stored successfully",
-      logId: logEntry.id 
+      logId: logEntry.id,
     });
   } catch (error) {
     console.error("Error storing email log:", error);
     return NextResponse.json(
       { error: "Failed to store email log" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -77,14 +82,14 @@ export async function DELETE(req: NextRequest) {
 
     const clearedCount = clearEmailLogs();
 
-    return NextResponse.json({ 
-      message: `Cleared ${clearedCount} email log entries` 
+    return NextResponse.json({
+      message: `Cleared ${clearedCount} email log entries`,
     });
   } catch (error) {
     console.error("Error clearing email logs:", error);
     return NextResponse.json(
       { error: "Failed to clear email logs" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

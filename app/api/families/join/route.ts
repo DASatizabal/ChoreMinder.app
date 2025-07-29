@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@/libs/next-auth";
 import dbConnect from "@/libs/mongoose";
+import { authOptions } from "@/libs/next-auth";
 import Family from "@/models/Family";
 import User from "@/models/User";
 

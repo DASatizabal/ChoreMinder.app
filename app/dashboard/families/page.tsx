@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
+import SubscriptionGate from "@/components/SubscriptionGate";
+
 interface FamilyMember {
   _id: string;
   user: {
@@ -32,6 +34,14 @@ interface Invitation {
 }
 
 export default function FamiliesPage() {
+  return (
+    <SubscriptionGate>
+      <FamiliesPageContent />
+    </SubscriptionGate>
+  );
+}
+
+function FamiliesPageContent() {
   const { data: session } = useSession();
   const [family, setFamily] = useState<Family | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -67,7 +77,7 @@ export default function FamiliesPage() {
         };
 
         setFamily(mockFamily);
-        
+
         // Fetch pending invitations
         // const inviteResponse = await fetch(`/api/families/${mockFamily._id}/invite`);
         // if (inviteResponse.ok) {
@@ -102,7 +112,10 @@ export default function FamiliesPage() {
       });
 
       const data = await response.json();
-      console.log("🔍 [INVITE RESPONSE] Full API response:", JSON.stringify(data, null, 2));
+      console.log(
+        "🔍 [INVITE RESPONSE] Full API response:",
+        JSON.stringify(data, null, 2),
+      );
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to create invitation");
@@ -110,13 +123,19 @@ export default function FamiliesPage() {
 
       // Check email status and show appropriate message
       if (data.emailSent) {
-        toast.success(`📧 Invitation email sent successfully to ${inviteEmail}!`);
+        toast.success(
+          `📧 Invitation email sent successfully to ${inviteEmail}!`,
+        );
       } else {
-        toast.error(`⚠️ Invitation created but email failed: ${data.emailError || 'Unknown error'}`);
+        toast.error(
+          `⚠️ Invitation created but email failed: ${data.emailError || "Unknown error"}`,
+        );
       }
-      
+
       // Show detailed invitation info in a more user-friendly way
-      const emailStatus = data.emailSent ? "✅ Email sent successfully!" : "❌ Email failed to send";
+      const emailStatus = data.emailSent
+        ? "✅ Email sent successfully!"
+        : "❌ Email failed to send";
       const confirmationMessage = `
 ✅ Invitation Code Created!
 
@@ -133,23 +152,30 @@ ${data.emailSent ? "Check their email for the invitation!" : "Share the code man
 
 💡 Invite codes expire in 7 days.
       `.trim();
-      
+
       alert(confirmationMessage);
-      
+
       setInviteEmail("");
-      
+
       // Refresh invitations
       // Add new invitation to the list
-      setInvitations(prev => [...prev, {
-        code: data.inviteCode,
-        email: inviteEmail,
-        role: inviteRole,
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      }]);
+      setInvitations((prev) => [
+        ...prev,
+        {
+          code: data.inviteCode,
+          email: inviteEmail,
+          role: inviteRole,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(
+            Date.now() + 7 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+        },
+      ]);
     } catch (error) {
       console.error("Error creating invitation:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to create invitation");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create invitation",
+      );
     } finally {
       setInviting(false);
     }
@@ -174,9 +200,7 @@ ${data.emailSent ? "Check their email for the invitation!" : "Share the code man
               {/* Family Overview */}
               <div className="card bg-base-200 shadow-lg">
                 <div className="card-body">
-                  <h2 className="card-title text-2xl mb-4">
-                    🏠 {family.name}
-                  </h2>
+                  <h2 className="card-title text-2xl mb-4">🏠 {family.name}</h2>
                   <div className="stats stats-vertical lg:stats-horizontal shadow">
                     <div className="stat">
                       <div className="stat-title">Family Members</div>
@@ -207,7 +231,10 @@ ${data.emailSent ? "Check their email for the invitation!" : "Share the code man
                         <div className="avatar">
                           <div className="w-12 h-12 rounded-full">
                             {member.user.image ? (
-                              <img src={member.user.image} alt={member.user.name} />
+                              <img
+                                src={member.user.image}
+                                alt={member.user.name}
+                              />
                             ) : (
                               <div className="bg-primary text-primary-content flex items-center justify-center">
                                 {member.user.name.charAt(0).toUpperCase()}
@@ -221,7 +248,9 @@ ${data.emailSent ? "Check their email for the invitation!" : "Share the code man
                             {member.user.email}
                           </div>
                         </div>
-                        <div className={`badge ${member.role === "parent" ? "badge-primary" : "badge-secondary"}`}>
+                        <div
+                          className={`badge ${member.role === "parent" ? "badge-primary" : "badge-secondary"}`}
+                        >
                           {member.role}
                         </div>
                         {member.user._id === session?.user?.id && (
@@ -298,13 +327,19 @@ ${data.emailSent ? "Check their email for the invitation!" : "Share the code man
                             const data = await response.json();
                             console.log("📧 Test email result:", data);
                             if (response.ok && data.success) {
-                              toast.success("✅ Test email sent! Check your inbox.");
+                              toast.success(
+                                "✅ Test email sent! Check your inbox.",
+                              );
                             } else {
-                              toast.error("❌ Email test failed: " + (data.error || "Unknown error"));
+                              toast.error(
+                                `❌ Email test failed: ${data.error || "Unknown error"}`,
+                              );
                             }
                           } catch (error) {
                             console.error("📧 Test email error:", error);
-                            toast.error("❌ Email test failed: " + (error instanceof Error ? error.message : "Unknown"));
+                            toast.error(
+                              `❌ Email test failed: ${error instanceof Error ? error.message : "Unknown"}`,
+                            );
                           }
                         }}
                         className="btn btn-outline btn-sm"
@@ -330,7 +365,10 @@ ${data.emailSent ? "Check their email for the invitation!" : "Share the code man
                           <div>
                             <div className="font-bold">{invitation.email}</div>
                             <div className="text-sm text-base-content/70">
-                              Role: {invitation.role} • Expires: {new Date(invitation.expiresAt).toLocaleDateString()}
+                              Role: {invitation.role} • Expires:{" "}
+                              {new Date(
+                                invitation.expiresAt,
+                              ).toLocaleDateString()}
                             </div>
                           </div>
                           <div className="text-sm font-mono bg-neutral text-neutral-content px-3 py-1 rounded">
@@ -360,9 +398,12 @@ ${data.emailSent ? "Check their email for the invitation!" : "Share the code man
                 <div>
                   <h3 className="font-bold">How to invite family members:</h3>
                   <div className="text-sm">
-                    1. Enter their email address and select their role<br/>
-                    2. Click "Send Invitation" to generate an invite code<br/>
-                    3. Share the code or link with them<br/>
+                    1. Enter their email address and select their role
+                    <br />
+                    2. Click "Send Invitation" to generate an invite code
+                    <br />
+                    3. Share the code or link with them
+                    <br />
                     4. They can join by visiting /join-family?code=INVITE_CODE
                   </div>
                 </div>

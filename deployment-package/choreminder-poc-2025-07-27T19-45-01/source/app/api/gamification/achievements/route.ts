@@ -1,9 +1,8 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getGamificationService } from "@/libs/gamification";
+import { dbConnect } from "@/libs/mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { dbConnect } from "@/libs/mongoose";
-import { getGamificationService } from "@/libs/gamification";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,18 +14,20 @@ export async function GET(req: NextRequest) {
     await dbConnect();
 
     const gamificationService = getGamificationService();
-    const achievements = await gamificationService.getUserAchievements(session.user.id);
+    const achievements = await gamificationService.getUserAchievements(
+      session.user.id,
+    );
 
     return NextResponse.json({
       achievements,
       totalCount: achievements.length,
-      completedCount: achievements.filter(a => a.isCompleted).length,
+      completedCount: achievements.filter((a) => a.isCompleted).length,
     });
   } catch (error: any) {
     console.error("Get achievements API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     if (!achievementId) {
       return NextResponse.json(
         { error: "Achievement ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     // For now, just return success - actual achievement awarding happens automatically
     // through the gamification service when chores are completed
-    
+
     return NextResponse.json({
       message: "Achievement progress updated",
       achievementId,
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
     console.error("Award achievement API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,10 +1,11 @@
-import { Resend } from "resend";
-
 import { renderWelcomeEmail } from "@/components/emails/WelcomeEmail";
 import config from "@/config";
+import { Resend } from "resend";
 
 const isResendConfigured = Boolean(process.env.RESEND_API_KEY);
-const resend = isResendConfigured ? new Resend(process.env.RESEND_API_KEY) : null;
+const resend = isResendConfigured
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 // Centralized email service
 export const emailService = {
@@ -16,7 +17,7 @@ export const emailService = {
       console.warn("Resend not configured, skipping email");
       return { success: false, error: "Email service not configured" };
     }
-    
+
     try {
       const html = await renderWelcomeEmail({
         name,
@@ -75,7 +76,7 @@ export const emailService = {
       console.warn("Resend not configured, skipping email");
       return { success: false, error: "Email service not configured" };
     }
-    
+
     try {
       const { data, error } = await resend.emails.send({
         from: config.resend.fromNoReply,
@@ -118,7 +119,7 @@ export const emailService = {
       console.warn("Resend not configured, skipping email");
       return { success: false, error: "Email service not configured" };
     }
-    
+
     try {
       const { data, error } = await resend.emails.send({
         from: config.resend.fromAdmin,
@@ -156,7 +157,7 @@ export const emailService = {
       console.warn("Resend not configured, skipping email");
       return { success: false, error: "Email service not configured" };
     }
-    
+
     try {
       let html = "";
 
@@ -285,7 +286,7 @@ export const sendChoreNotificationEmail = async (
     console.warn("Resend not configured, skipping email");
     return { success: false, error: "Email service not configured" };
   }
-  
+
   const { user, chore } = context;
 
   let subject = "";

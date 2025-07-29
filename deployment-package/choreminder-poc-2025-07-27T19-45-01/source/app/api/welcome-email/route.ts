@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-
 import { emailService } from "@/libs/resend";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {

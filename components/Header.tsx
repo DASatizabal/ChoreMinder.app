@@ -29,7 +29,14 @@ const links: {
   },
 ];
 
-const cta: JSX.Element = <ButtonSignin extraStyle="btn-primary" />;
+const cta: JSX.Element = (
+  <div className="flex gap-2">
+    <a href="#pricing" className="btn btn-primary">
+      Get Started
+    </a>
+    <ButtonSignin extraStyle="btn-outline" />
+  </div>
+);
 
 // A header with a logo on the left, links in the center (like Pricing, etc...), and a CTA (like Get Started or Login) on the right.
 // The header is responsive, and on mobile, the links are hidden behind a burger button.
@@ -174,7 +181,12 @@ const Header = () => {
             </div>
             <div className="divider"></div>
             {/* Your CTA on small screens */}
-            <div className="flex flex-col">{cta}</div>
+            <div className="flex flex-col gap-2">
+              <a href="#pricing" className="btn btn-primary">
+                Get Started
+              </a>
+              <ButtonSignin extraStyle="btn-outline" />
+            </div>
           </div>
         </div>
       </div>

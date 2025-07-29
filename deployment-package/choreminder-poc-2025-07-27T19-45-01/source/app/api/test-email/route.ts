@@ -1,7 +1,6 @@
 // app/api/test-email/route.ts
-import { NextResponse } from "next/server";
-
 import { emailService } from "@/libs/resend";
+import { NextResponse } from "next/server";
 
 // Only enable this endpoint in development
 export async function POST(req: Request) {

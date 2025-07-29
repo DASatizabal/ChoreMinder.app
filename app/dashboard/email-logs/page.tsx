@@ -46,10 +46,10 @@ export default function EmailLogsPage() {
       if (filter !== "all") {
         params.append("type", filter);
       }
-      
+
       const response = await fetch(`/api/email-logs?${params}`);
       if (!response.ok) throw new Error("Failed to fetch email logs");
-      
+
       const data = await response.json();
       setLogs(data.logs);
       setStats(data.stats);
@@ -63,11 +63,11 @@ export default function EmailLogsPage() {
 
   const clearLogs = async () => {
     if (!confirm("Are you sure you want to clear all email logs?")) return;
-    
+
     try {
       const response = await fetch("/api/email-logs", { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to clear logs");
-      
+
       toast.success("Email logs cleared successfully");
       await fetchEmailLogs();
     } catch (error) {
@@ -82,10 +82,14 @@ export default function EmailLogsPage() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "invitation": return "badge-primary";
-      case "notification": return "badge-secondary";
-      case "reminder": return "badge-warning";
-      default: return "badge-neutral";
+      case "invitation":
+        return "badge-primary";
+      case "notification":
+        return "badge-secondary";
+      case "reminder":
+        return "badge-warning";
+      default:
+        return "badge-neutral";
     }
   };
 
@@ -116,11 +120,15 @@ export default function EmailLogsPage() {
             </div>
             <div className="stat bg-base-200 rounded-lg">
               <div className="stat-title">Invitations</div>
-              <div className="stat-value text-secondary">{stats.invitations}</div>
+              <div className="stat-value text-secondary">
+                {stats.invitations}
+              </div>
             </div>
             <div className="stat bg-base-200 rounded-lg">
               <div className="stat-title">Notifications</div>
-              <div className="stat-value text-accent">{stats.notifications}</div>
+              <div className="stat-value text-accent">
+                {stats.notifications}
+              </div>
             </div>
             <div className="stat bg-base-200 rounded-lg">
               <div className="stat-title">Successful</div>
@@ -158,7 +166,7 @@ export default function EmailLogsPage() {
           <div className="card bg-base-200 shadow-lg">
             <div className="card-body">
               <h2 className="card-title mb-4">Recent Email Activity</h2>
-              
+
               {logs.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-4">📭</div>
@@ -187,14 +195,18 @@ export default function EmailLogsPage() {
                             {formatDate(log.timestamp)}
                           </td>
                           <td>
-                            <div className={`badge ${getTypeColor(log.type)} badge-sm`}>
+                            <div
+                              className={`badge ${getTypeColor(log.type)} badge-sm`}
+                            >
                               {log.type}
                             </div>
                           </td>
                           <td className="font-mono text-sm">{log.to}</td>
                           <td className="max-w-xs truncate">{log.subject}</td>
                           <td>
-                            <div className={`badge ${log.success ? "badge-success" : "badge-error"} badge-sm`}>
+                            <div
+                              className={`badge ${log.success ? "badge-success" : "badge-error"} badge-sm`}
+                            >
                               {log.success ? "✓ Sent" : "✗ Failed"}
                             </div>
                           </td>
@@ -202,7 +214,9 @@ export default function EmailLogsPage() {
                             <details className="dropdown">
                               <summary className="btn btn-xs">View</summary>
                               <div className="dropdown-content z-[1] p-4 shadow bg-base-100 rounded-box w-96 max-h-60 overflow-auto">
-                                <pre className="text-xs">{JSON.stringify(log.details, null, 2)}</pre>
+                                <pre className="text-xs">
+                                  {JSON.stringify(log.details, null, 2)}
+                                </pre>
                               </div>
                             </details>
                           </td>
@@ -232,10 +246,13 @@ export default function EmailLogsPage() {
             <div>
               <h3 className="font-bold">Email Logging Information:</h3>
               <div className="text-sm">
-                • All email activity is logged here for debugging and monitoring<br/>
-                • Logs are stored in memory and will reset when the server restarts<br/>
-                • In production, these would be stored in a database<br/>
-                • View details to see full invitation codes and links
+                • All email activity is logged here for debugging and monitoring
+                <br />
+                • Logs are stored in memory and will reset when the server
+                restarts
+                <br />
+                • In production, these would be stored in a database
+                <br />• View details to see full invitation codes and links
               </div>
             </div>
           </div>

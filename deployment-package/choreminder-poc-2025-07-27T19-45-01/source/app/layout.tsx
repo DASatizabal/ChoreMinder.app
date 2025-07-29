@@ -1,10 +1,10 @@
+import ClientLayout from "@/components/LayoutClient";
+import config from "@/config";
+import { getSEOTags } from "@/libs/seo";
 import { Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ReactNode } from "react";
 
-import ClientLayout from "@/components/LayoutClient";
-import config from "@/config";
-import { getSEOTags } from "@/libs/seo";
 import "./globals.css";
 
 const font = Inter({ subsets: ["latin"] });

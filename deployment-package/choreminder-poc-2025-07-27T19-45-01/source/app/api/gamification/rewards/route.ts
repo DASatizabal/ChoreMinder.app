@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { dbConnect } from "@/libs/mongoose";
 import { getGamificationService } from "@/libs/gamification";
+import { dbConnect } from "@/libs/mongoose";
 import Reward from "@/models/Reward";
 import User from "@/models/User";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +16,9 @@ export async function GET(req: NextRequest) {
     await dbConnect();
 
     const gamificationService = getGamificationService();
-    const rewards = await gamificationService.getAvailableRewards(session.user.id);
+    const rewards = await gamificationService.getAvailableRewards(
+      session.user.id,
+    );
 
     // Get user's pending and redeemed rewards
     const user = await User.findById(session.user.id);
@@ -26,12 +27,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       availableRewards: rewards,
-      pendingRewards: pendingRewards.map(pr => ({
+      pendingRewards: pendingRewards.map((pr) => ({
         rewardId: pr.rewardId.toString(),
         requestedAt: pr.requestedAt,
         pointsCost: pr.pointsCost,
       })),
-      redeemedRewards: redeemedRewards.map(rr => ({
+      redeemedRewards: redeemedRewards.map((rr) => ({
         rewardId: rr.rewardId.toString(),
         redeemedAt: rr.redeemedAt,
         pointsCost: rr.pointsCost,
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
     console.error("Get rewards API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -61,24 +62,24 @@ export async function POST(req: NextRequest) {
     if (!rewardId) {
       return NextResponse.json(
         { error: "Reward ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     await dbConnect();
 
     const gamificationService = getGamificationService();
-    const result = await gamificationService.requestReward(session.user.id, rewardId);
+    const result = await gamificationService.requestReward(
+      session.user.id,
+      rewardId,
+    );
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     return NextResponse.json({
-      message: result.needsApproval 
+      message: result.needsApproval
         ? "Reward request sent to parents for approval"
         : "Reward redeemed successfully",
       needsApproval: result.needsApproval,
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
     console.error("Request reward API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -107,14 +108,14 @@ export async function PUT(req: NextRequest) {
     if (!childId || !rewardId || !action) {
       return NextResponse.json(
         { error: "Child ID, reward ID, and action are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!["approve", "deny"].includes(action)) {
       return NextResponse.json(
         { error: "Action must be 'approve' or 'deny'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -127,23 +128,20 @@ export async function PUT(req: NextRequest) {
     if (!parent || !child || parent.role !== "parent") {
       return NextResponse.json(
         { error: "Unauthorized - must be a parent" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     if (parent.familyId?.toString() !== child.familyId?.toString()) {
       return NextResponse.json(
         { error: "Child not in same family" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     const reward = await Reward.findById(rewardId);
     if (!reward) {
-      return NextResponse.json(
-        { error: "Reward not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Reward not found" }, { status: 404 });
     }
 
     if (action === "approve") {
@@ -185,7 +183,7 @@ export async function PUT(req: NextRequest) {
     console.error("Approve/deny reward API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

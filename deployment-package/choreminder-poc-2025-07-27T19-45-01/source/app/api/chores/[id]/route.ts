@@ -1,12 +1,11 @@
-import { Types } from "mongoose";
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
 import User from "@/models/User";
+import { Types } from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
 interface RouteParams {
   params: {

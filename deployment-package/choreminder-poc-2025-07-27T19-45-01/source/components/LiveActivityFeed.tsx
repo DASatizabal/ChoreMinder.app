@@ -1,9 +1,8 @@
 "use client";
 
+import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-
-import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 
 interface ActivityFeedProps {
   familyId: string;

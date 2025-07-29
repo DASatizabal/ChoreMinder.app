@@ -1,10 +1,11 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 import ChoreCreationModal from "./ChoreCreationModal";
 import ChoreList from "./ChoreList";
+import ErrorAlert from "./ErrorAlert";
 import QuickActions from "./QuickActions";
 
 interface FamilyMember {
@@ -54,16 +55,39 @@ const ParentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  // Error states
+  const [errors, setErrors] = useState({
+    familyMembers: null as string | null,
+    stats: null as string | null,
+    familyContext: null as string | null,
+  });
+
+  // Data loading states
+  const [dataStates, setDataStates] = useState({
+    familyMembersLoaded: false,
+    statsLoaded: false,
+    hasFamilyMembers: false,
+    hasStats: false,
+  });
+
   // Fetch family context
   useEffect(() => {
     const fetchFamilyContext = async () => {
       try {
+        setErrors((prev) => ({ ...prev, familyContext: null }));
         const response = await fetch("/api/families/context");
-        if (!response.ok) throw new Error("Failed to fetch family context");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch family context: ${response.status}`);
+        }
         const data = await response.json();
         setFamilyContext(data);
       } catch (error) {
         console.error("Error fetching family context:", error);
+        setErrors((prev) => ({
+          ...prev,
+          familyContext:
+            "Unable to load family information. Please try refreshing the page.",
+        }));
       }
     };
 
@@ -78,14 +102,41 @@ const ParentDashboard = () => {
       if (!familyContext?.activeFamily?.id) return;
 
       try {
+        setErrors((prev) => ({ ...prev, familyMembers: null }));
         const response = await fetch(
           `/api/families/${familyContext.activeFamily.id}/members`,
         );
-        if (!response.ok) throw new Error("Failed to fetch family members");
+
+        if (!response.ok) {
+          // Check if it's a 404 (no members exist) vs other errors
+          if (response.status === 404) {
+            setFamilyMembers([]);
+            setDataStates((prev) => ({
+              ...prev,
+              familyMembersLoaded: true,
+              hasFamilyMembers: false,
+            }));
+            return;
+          }
+          throw new Error(`Failed to fetch family members: ${response.status}`);
+        }
+
         const data = await response.json();
-        setFamilyMembers(data.members || []);
+        const members = data.members || [];
+        setFamilyMembers(members);
+        setDataStates((prev) => ({
+          ...prev,
+          familyMembersLoaded: true,
+          hasFamilyMembers: members.length > 0,
+        }));
       } catch (error) {
         console.error("Error fetching family members:", error);
+        // Only show error if we expected data to exist
+        setDataStates((prev) => ({ ...prev, familyMembersLoaded: true }));
+        setErrors((prev) => ({
+          ...prev,
+          familyMembers: "Unable to load family members. Please try again.",
+        }));
       }
     };
 
@@ -99,19 +150,38 @@ const ParentDashboard = () => {
 
       try {
         setLoading(true);
+        setErrors((prev) => ({ ...prev, stats: null }));
         const response = await fetch(
           `/api/chores?familyId=${familyContext.activeFamily.id}`,
         );
-        if (!response.ok) throw new Error("Failed to fetch chores");
-        const data = await response.json();
 
+        if (!response.ok) {
+          // Check if it's a 404 (no chores exist) vs other errors
+          if (response.status === 404) {
+            setStats({
+              totalChores: 0,
+              pendingChores: 0,
+              completedToday: 0,
+              overdueChores: 0,
+            });
+            setDataStates((prev) => ({
+              ...prev,
+              statsLoaded: true,
+              hasStats: false,
+            }));
+            return;
+          }
+          throw new Error(`Failed to fetch chores: ${response.status}`);
+        }
+
+        const data = await response.json();
         const chores = data.chores || [];
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        setStats({
+        const calculatedStats = {
           totalChores: chores.length,
           pendingChores: chores.filter((c: any) => c.status === "pending")
             .length,
@@ -127,9 +197,21 @@ const ParentDashboard = () => {
               new Date(c.dueDate) < new Date() &&
               !["completed", "verified"].includes(c.status),
           ).length,
-        });
+        };
+
+        setStats(calculatedStats);
+        setDataStates((prev) => ({
+          ...prev,
+          statsLoaded: true,
+          hasStats: chores.length > 0,
+        }));
       } catch (error) {
         console.error("Error fetching stats:", error);
+        setDataStates((prev) => ({ ...prev, statsLoaded: true }));
+        setErrors((prev) => ({
+          ...prev,
+          stats: "Unable to load chore statistics. Please try again.",
+        }));
       } finally {
         setLoading(false);
       }
@@ -220,12 +302,61 @@ const ParentDashboard = () => {
                 </svg>
                 Create Chore
               </button>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="btn btn-outline btn-lg"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                Logout
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Error Messages */}
+        {errors.familyContext && (
+          <ErrorAlert
+            title="Family Information Error"
+            message={errors.familyContext}
+            type="error"
+            onRetry={() => window.location.reload()}
+          />
+        )}
+
+        {errors.familyMembers &&
+          dataStates.familyMembersLoaded &&
+          dataStates.hasFamilyMembers && (
+            <ErrorAlert
+              title="Family Members Error"
+              message={errors.familyMembers}
+              type="error"
+              onRetry={() => window.location.reload()}
+            />
+          )}
+
+        {errors.stats && dataStates.statsLoaded && dataStates.hasStats && (
+          <ErrorAlert
+            title="Statistics Error"
+            message={errors.stats}
+            type="error"
+            onRetry={() => window.location.reload()}
+          />
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="stats shadow bg-base-200">

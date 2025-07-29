@@ -13,22 +13,63 @@ interface FAQItemProps {
 
 const faqList: FAQItemProps[] = [
   {
-    question: "What do I get exactly?",
-    answer: <div className="space-y-2 leading-relaxed">Loreum Ipseum</div>,
+    question: "How old do kids need to be to use ChoreMinder?",
+    answer: (
+      <div className="space-y-2 leading-relaxed">
+        <p>
+          ChoreMinder works great for kids aged 4 and up! Younger children (4-7)
+          can participate with photo submissions and simple tasks, while older
+          kids can manage their own accounts and handle more complex chores. The
+          gamification elements are designed to engage all age groups.
+        </p>
+      </div>
+    ),
   },
   {
-    question: "Can I get a refund?",
+    question: "What if my child doesn't have a smartphone?",
     answer: (
       <p>
-        Yes! You can request a refund within 7 days of your purchase. Reach out
-        by email.
+        No problem! Parents can manage everything from their account, including
+        submitting photos on behalf of younger children. ChoreMinder also works
+        on tablets, computers, and we have a simple web interface that works on
+        any device.
       </p>
     ),
   },
   {
-    question: "I have another question",
+    question: "Can I customize the chores and rewards?",
     answer: (
-      <div className="space-y-2 leading-relaxed">Cool, contact us by email</div>
+      <div className="space-y-2 leading-relaxed">
+        <p>
+          Absolutely! You can create custom chores, set your own point values,
+          design family-specific rewards, and adjust difficulty levels. The AI
+          suggestions learn from your family's preferences to make better
+          recommendations over time.
+        </p>
+      </div>
+    ),
+  },
+  {
+    question: "Is there a free trial?",
+    answer: (
+      <p>
+        Yes! We offer a 14-day free trial with full access to all features. No
+        credit card required to start. After the trial, you can choose the plan
+        that best fits your family size and needs.
+      </p>
+    ),
+  },
+  {
+    question: "How does photo verification work?",
+    answer: (
+      <div className="space-y-2 leading-relaxed">
+        <p>
+          Kids take photos of completed chores using the app. Parents receive
+          notifications and can quickly approve or request improvements. This
+          creates accountability, reduces arguments about whether tasks were
+          done, and builds trust between parents and children.
+        </p>
+      </div>
     ),
   },
 ];

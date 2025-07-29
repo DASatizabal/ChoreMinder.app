@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@/lib/auth";
-
-import dbConnect from "@/lib/mongoose";
+import dbConnect from "@/libs/mongoose";
+import { authOptions } from "@/libs/next-auth";
 
 // Simple in-memory storage for demo purposes
 // In production, this would be stored in the database

@@ -1,6 +1,4 @@
 // app/api/families/[id]/photo-summary/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
@@ -9,6 +7,8 @@ import {
   canUserApprovePhotos,
 } from "@/lib/photo-verification";
 import Family from "@/models/Family";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
 interface RouteParams {
   params: {

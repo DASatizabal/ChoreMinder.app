@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-
 import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface OfflineIndicatorProps {
   position?: "top" | "bottom";

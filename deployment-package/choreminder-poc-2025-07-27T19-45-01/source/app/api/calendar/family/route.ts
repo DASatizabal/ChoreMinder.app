@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { dbConnect } from "@/libs/mongoose";
 import { getSchedulingService } from "@/libs/scheduling";
 import User from "@/models/User";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,19 +13,29 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const startDate = new Date(searchParams.get("start") || Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = new Date(searchParams.get("end") || Date.now() + 60 * 24 * 60 * 60 * 1000);
+    const startDate = new Date(
+      searchParams.get("start") || Date.now() - 30 * 24 * 60 * 60 * 1000,
+    );
+    const endDate = new Date(
+      searchParams.get("end") || Date.now() + 60 * 24 * 60 * 60 * 1000,
+    );
 
     await dbConnect();
 
     const user = await User.findById(session.user.id);
     if (!user?.familyId) {
-      return NextResponse.json({ error: "User not in a family" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User not in a family" },
+        { status: 400 },
+      );
     }
 
     // Verify user is parent or admin (calendar access control)
     if (!["parent", "admin"].includes(user.role)) {
-      return NextResponse.json({ error: "Only parents can view family calendar" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only parents can view family calendar" },
+        { status: 403 },
+      );
     }
 
     const schedulingService = getSchedulingService();
@@ -35,7 +44,7 @@ export async function GET(req: NextRequest) {
     const scheduleData = await schedulingService.getFamilySchedule(
       user.familyId.toString(),
       startDate,
-      endDate
+      endDate,
     );
 
     return NextResponse.json({
@@ -52,7 +61,7 @@ export async function GET(req: NextRequest) {
     console.error("Family calendar API error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

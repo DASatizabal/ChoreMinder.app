@@ -1,11 +1,10 @@
-import { headers } from "next/headers";
-import { NextResponse, NextRequest } from "next/server";
-import Stripe from "stripe";
-
 import configFile from "@/config";
 import connectMongo from "@/libs/mongoose";
 import { findCheckoutSession } from "@/libs/stripe";
 import User from "@/models/User";
+import { headers } from "next/headers";
+import { NextResponse, NextRequest } from "next/server";
+import Stripe from "stripe";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not defined");

@@ -1,6 +1,5 @@
 "use client";
 
-import { Doughnut, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -11,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { Doughnut, Bar } from "react-chartjs-2";
 
 ChartJS.register(
   ArcElement,
@@ -19,7 +19,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 interface CategoryInsights {
@@ -41,7 +41,7 @@ interface CategoryChartProps {
 
 const CATEGORY_COLORS = [
   "#3B82F6", // Blue
-  "#10B981", // Green  
+  "#10B981", // Green
   "#F59E0B", // Yellow
   "#EF4444", // Red
   "#8B5CF6", // Purple
@@ -63,7 +63,9 @@ export default function CategoryChart({
       <div className="w-full h-64 flex items-center justify-center bg-base-200 rounded-lg">
         <div className="text-center">
           <p className="text-base-content/60">No category data available</p>
-          <p className="text-sm text-base-content/40">Complete more chores to see insights</p>
+          <p className="text-sm text-base-content/40">
+            Complete more chores to see insights
+          </p>
         </div>
       </div>
     );
@@ -71,30 +73,40 @@ export default function CategoryChart({
 
   const getMetricLabel = () => {
     switch (metric) {
-      case "completionRate": return "Completion Rate (%)";
-      case "totalChores": return "Total Chores";
-      case "averagePoints": return "Average Points";
-      default: return "Value";
+      case "completionRate":
+        return "Completion Rate (%)";
+      case "totalChores":
+        return "Total Chores";
+      case "averagePoints":
+        return "Average Points";
+      default:
+        return "Value";
     }
   };
 
   const getMetricValue = (item: CategoryInsights) => {
     switch (metric) {
-      case "completionRate": return item.completionRate;
-      case "totalChores": return item.totalChores;
-      case "averagePoints": return item.averagePoints;
-      default: return 0;
+      case "completionRate":
+        return item.completionRate;
+      case "totalChores":
+        return item.totalChores;
+      case "averagePoints":
+        return item.averagePoints;
+      default:
+        return 0;
     }
   };
 
   const chartData = {
-    labels: data.map(d => d.category || "Uncategorized"),
+    labels: data.map((d) => d.category || "Uncategorized"),
     datasets: [
       {
         label: getMetricLabel(),
         data: data.map(getMetricValue),
         backgroundColor: CATEGORY_COLORS.slice(0, data.length),
-        borderColor: CATEGORY_COLORS.slice(0, data.length).map(color => color + "CC"),
+        borderColor: CATEGORY_COLORS.slice(0, data.length).map(
+          (color) => `${color}CC`,
+        ),
         borderWidth: 2,
         borderRadius: type === "bar" ? 4 : 0,
         borderSkipped: type === "bar" ? "bottom" : undefined,
@@ -141,7 +153,7 @@ export default function CategoryChart({
           label: (context: any) => {
             const categoryData = data[context.dataIndex];
             const value = context.parsed;
-            
+
             const lines = [
               `${getMetricLabel()}: ${value}${metric === "completionRate" ? "%" : ""}`,
               `Total Chores: ${categoryData.totalChores}`,
@@ -191,7 +203,7 @@ export default function CategoryChart({
           label: (context: any) => {
             const categoryData = data[context.dataIndex];
             const value = context.parsed.y;
-            
+
             return [
               `${getMetricLabel()}: ${value}${metric === "completionRate" ? "%" : ""}`,
               `Completion Rate: ${categoryData.completionRate}%`,
@@ -261,8 +273,8 @@ export default function CategoryChart({
               <tr key={category.category} className="hover">
                 <td>
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
+                    <div
+                      className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: CATEGORY_COLORS[index] }}
                     ></div>
                     <span className="font-medium">{category.category}</span>
@@ -276,15 +288,17 @@ export default function CategoryChart({
                 <td>
                   <div className="flex items-center gap-2">
                     <div className="w-full bg-base-300 rounded-full h-2 max-w-[60px]">
-                      <div 
-                        className="h-2 rounded-full" 
-                        style={{ 
+                      <div
+                        className="h-2 rounded-full"
+                        style={{
                           width: `${Math.min(category.completionRate, 100)}%`,
-                          backgroundColor: CATEGORY_COLORS[index]
+                          backgroundColor: CATEGORY_COLORS[index],
                         }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium">{category.completionRate}%</span>
+                    <span className="text-sm font-medium">
+                      {category.completionRate}%
+                    </span>
                   </div>
                 </td>
                 <td>

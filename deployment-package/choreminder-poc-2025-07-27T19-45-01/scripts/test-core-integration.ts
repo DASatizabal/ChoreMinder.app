@@ -1,11 +1,11 @@
-import { dbConnect } from "../libs/mongoose";
-import User from "../models/User";
-import Family from "../models/Family";
-import Chore from "../models/Chore";
-import { getGamificationService } from "../libs/gamification";
-import { getSchedulingService } from "../libs/scheduling";
 import { getAnalyticsService } from "../libs/analytics";
+import { getGamificationService } from "../libs/gamification";
+import { dbConnect } from "../libs/mongoose";
 import { getPerformanceService } from "../libs/performance";
+import { getSchedulingService } from "../libs/scheduling";
+import Chore from "../models/Chore";
+import Family from "../models/Family";
+import User from "../models/User";
 
 interface TestResult {
   test: string;
@@ -26,7 +26,9 @@ class CoreIntegrationTestSuite {
     results: TestResult[];
     summary: string;
   }> {
-    console.log("🧪 Starting Core Integration Tests (External Services Excluded)");
+    console.log(
+      "🧪 Starting Core Integration Tests (External Services Excluded)",
+    );
     console.log("=".repeat(60));
 
     await this.setupTestEnvironment();
@@ -51,25 +53,25 @@ class CoreIntegrationTestSuite {
 
   private async runTest(
     testName: string,
-    testFunction: () => Promise<void>
+    testFunction: () => Promise<void>,
   ): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       console.log(`\n🔍 Testing: ${testName}`);
       await testFunction();
-      
+
       const duration = Date.now() - startTime;
       this.results.push({
         test: testName,
         status: "PASS",
         duration,
       });
-      
+
       console.log(`✅ PASS: ${testName} (${duration}ms)`);
     } catch (error: any) {
       const duration = Date.now() - startTime;
-      
+
       if (error.message.startsWith("SKIP:")) {
         this.results.push({
           test: testName,
@@ -77,7 +79,7 @@ class CoreIntegrationTestSuite {
           duration,
           error: error.message.replace("SKIP: ", ""),
         });
-        
+
         console.log(`⏭️ SKIP: ${testName} (${duration}ms)`);
         console.log(`   Reason: ${error.message.replace("SKIP: ", "")}`);
       } else {
@@ -87,7 +89,7 @@ class CoreIntegrationTestSuite {
           duration,
           error: error.message,
         });
-        
+
         console.log(`❌ FAIL: ${testName} (${duration}ms)`);
         console.log(`   Error: ${error.message}`);
       }
@@ -97,7 +99,7 @@ class CoreIntegrationTestSuite {
   private async setupTestEnvironment(): Promise<void> {
     await this.runTest("Setup Test Environment", async () => {
       await dbConnect();
-      
+
       // Create test family
       const testFamily = new Family({
         name: "Core Test Family",
@@ -159,13 +161,17 @@ class CoreIntegrationTestSuite {
     await this.runTest("Database Connectivity", async () => {
       const performanceService = getPerformanceService();
       const dbHealth = await performanceService.getDatabaseHealth();
-      
+
       if (dbHealth.connectionStatus !== "healthy") {
-        throw new Error(`Database health check failed: ${dbHealth.connectionStatus}`);
+        throw new Error(
+          `Database health check failed: ${dbHealth.connectionStatus}`,
+        );
       }
-      
+
       if (dbHealth.responseTime > 1000) {
-        throw new Error(`Database response time too slow: ${dbHealth.responseTime}ms`);
+        throw new Error(
+          `Database response time too slow: ${dbHealth.responseTime}ms`,
+        );
       }
     });
   }
@@ -183,7 +189,8 @@ class CoreIntegrationTestSuite {
 
       const savedUser = await User.findById(newUser._id);
       if (!savedUser) throw new Error("User not saved properly");
-      if (savedUser.role !== "child") throw new Error("User role not set correctly");
+      if (savedUser.role !== "child")
+        throw new Error("User role not set correctly");
 
       await User.findByIdAndDelete(newUser._id);
     });
@@ -220,17 +227,25 @@ class CoreIntegrationTestSuite {
       await chore1.save();
 
       const family2Chores = await Chore.find({ family: family2._id });
-      const family1ChoresVisible = await Chore.find({ 
+      const family1ChoresVisible = await Chore.find({
         family: this.testData.familyId,
-        assignedTo: user2._id 
+        assignedTo: user2._id,
       });
 
-      if (family2Chores.some(c => c.family.toString() === this.testData.familyId.toString())) {
-        throw new Error("Family data isolation breach: Family 2 can see Family 1 chores");
+      if (
+        family2Chores.some(
+          (c) => c.family.toString() === this.testData.familyId.toString(),
+        )
+      ) {
+        throw new Error(
+          "Family data isolation breach: Family 2 can see Family 1 chores",
+        );
       }
 
       if (family1ChoresVisible.length > 0) {
-        throw new Error("Family data isolation breach: Cross-family assignment possible");
+        throw new Error(
+          "Family data isolation breach: Cross-family assignment possible",
+        );
       }
 
       await Chore.findByIdAndDelete(chore1._id);
@@ -279,21 +294,23 @@ class CoreIntegrationTestSuite {
   private async testGamificationIntegration(): Promise<void> {
     await this.runTest("Gamification Points System", async () => {
       const gamificationService = getGamificationService();
-      
+
       const pointsBreakdown = await gamificationService.calculatePointsForChore(
         this.testData.testChoreId,
         this.testData.childId,
-        "good"
+        "good",
       );
 
       if (pointsBreakdown.basePoints !== 25) {
-        throw new Error(`Incorrect base points: expected 25, got ${pointsBreakdown.basePoints}`);
+        throw new Error(
+          `Incorrect base points: expected 25, got ${pointsBreakdown.basePoints}`,
+        );
       }
 
       const result = await gamificationService.awardPoints(
         this.testData.childId,
         pointsBreakdown,
-        this.testData.testChoreId
+        this.testData.testChoreId,
       );
 
       if (result.totalPoints <= 0) {
@@ -310,7 +327,7 @@ class CoreIntegrationTestSuite {
   private async testSchedulingSystem(): Promise<void> {
     await this.runTest("Recurring Chore Scheduling", async () => {
       const schedulingService = getSchedulingService();
-      
+
       const scheduledChore = await schedulingService.createScheduledChore({
         title: "Weekly Test Chore",
         description: "Recurring weekly chore",
@@ -342,15 +359,21 @@ class CoreIntegrationTestSuite {
   private async testAnalyticsSystem(): Promise<void> {
     await this.runTest("Analytics Data Generation", async () => {
       const analyticsService = getAnalyticsService();
-      
-      const progress = await analyticsService.getUserProgress(this.testData.childId, "week");
-      
+
+      const progress = await analyticsService.getUserProgress(
+        this.testData.childId,
+        "week",
+      );
+
       if (progress.completionRate < 0 || progress.completionRate > 100) {
         throw new Error("Invalid completion rate calculated");
       }
 
-      const timeSeriesData = await analyticsService.getTimeSeriesData(this.testData.childId, "week");
-      
+      const timeSeriesData = await analyticsService.getTimeSeriesData(
+        this.testData.childId,
+        "week",
+      );
+
       if (!Array.isArray(timeSeriesData)) {
         throw new Error("Time series data not generated properly");
       }
@@ -374,9 +397,9 @@ class CoreIntegrationTestSuite {
   private async testPerformanceOptimizations(): Promise<void> {
     await this.runTest("Database Query Performance", async () => {
       const performanceService = getPerformanceService();
-      
+
       const startTime = Date.now();
-      
+
       const chores = await performanceService.optimizedFind(
         Chore,
         { family: this.testData.familyId },
@@ -385,11 +408,11 @@ class CoreIntegrationTestSuite {
           populate: "assignedTo",
           cache: true,
           cacheTTL: 5,
-        }
+        },
       );
-      
+
       const queryTime = Date.now() - startTime;
-      
+
       if (queryTime > 1000) {
         throw new Error(`Query too slow: ${queryTime}ms`);
       }
@@ -415,7 +438,9 @@ class CoreIntegrationTestSuite {
       if (!family) throw new Error("Test family not found");
 
       if (family.members.length !== familyUsers.length) {
-        throw new Error(`Family member count mismatch: family has ${family.members.length}, users table has ${familyUsers.length}`);
+        throw new Error(
+          `Family member count mismatch: family has ${family.members.length}, users table has ${familyUsers.length}`,
+        );
       }
     });
   }
@@ -455,7 +480,7 @@ class CoreIntegrationTestSuite {
       await Chore.deleteMany({ family: this.testData.familyId });
       await User.deleteMany({ familyId: this.testData.familyId });
       await Family.findByIdAndDelete(this.testData.familyId);
-      
+
       if (this.testData.scheduleId) {
         await Chore.deleteMany({ scheduleId: this.testData.scheduleId });
       }
@@ -471,10 +496,10 @@ class CoreIntegrationTestSuite {
     results: TestResult[];
     summary: string;
   } {
-    const passed = this.results.filter(r => r.status === "PASS").length;
-    const failed = this.results.filter(r => r.status === "FAIL").length;
-    const skipped = this.results.filter(r => r.status === "SKIP").length;
-    
+    const passed = this.results.filter((r) => r.status === "PASS").length;
+    const failed = this.results.filter((r) => r.status === "FAIL").length;
+    const skipped = this.results.filter((r) => r.status === "SKIP").length;
+
     const totalDuration = this.results.reduce((sum, r) => sum + r.duration, 0);
     const avgDuration = totalDuration / this.results.length;
 
@@ -505,7 +530,8 @@ ${failed > 0 ? "❌ SOME CORE TESTS FAILED - REVIEW REQUIRED" : "✅ ALL CORE TE
 // Run tests if called directly
 if (require.main === module) {
   const testSuite = new CoreIntegrationTestSuite();
-  testSuite.runAllTests()
+  testSuite
+    .runAllTests()
     .then((results) => {
       process.exit(results.failed > 0 ? 1 : 0);
     })

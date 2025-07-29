@@ -1,11 +1,11 @@
 // app/api/notifications/preferences/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
 import Family from "@/models/Family";
 import NotificationPreferences from "@/models/NotificationPreferences";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
 // GET /api/notifications/preferences - Get user's notification preferences for all families
 export async function GET(req: NextRequest) {

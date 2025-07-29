@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+
 import config from "@/config";
 
 // Initialize Resend
@@ -120,12 +121,14 @@ If you didn't expect this email, you can safely ignore it.
 };
 
 // Send family invitation email
-export async function sendFamilyInvitationEmail(data: InvitationEmailData): Promise<EmailResult> {
+export async function sendFamilyInvitationEmail(
+  data: InvitationEmailData,
+): Promise<EmailResult> {
   try {
     console.log(`📧 [RESEND] Sending invitation email to: ${data.to}`);
     console.log(`📧 [RESEND] From address: ${config.resend.fromNoReply}`);
     console.log(`📧 [RESEND] API Key present: ${!!process.env.RESEND_API_KEY}`);
-    
+
     const result = await resend.emails.send({
       from: config.resend.fromNoReply,
       to: data.to,
@@ -137,7 +140,10 @@ export async function sendFamilyInvitationEmail(data: InvitationEmailData): Prom
     console.log(`📧 [RESEND] Full result:`, JSON.stringify(result, null, 2));
 
     if (result.error) {
-      console.error(`📧 [RESEND] Error details:`, JSON.stringify(result.error, null, 2));
+      console.error(
+        `📧 [RESEND] Error details:`,
+        JSON.stringify(result.error, null, 2),
+      );
       return {
         success: false,
         error: result.error.message || JSON.stringify(result.error),
@@ -151,7 +157,10 @@ export async function sendFamilyInvitationEmail(data: InvitationEmailData): Prom
     };
   } catch (error) {
     console.error(`📧 [RESEND] Exception:`, error);
-    console.error(`📧 [RESEND] Exception stack:`, error instanceof Error ? error.stack : "No stack");
+    console.error(
+      `📧 [RESEND] Exception stack:`,
+      error instanceof Error ? error.stack : "No stack",
+    );
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -164,9 +173,13 @@ export async function sendTestEmail(to: string): Promise<EmailResult> {
   try {
     console.log(`📧 [RESEND] Sending test email to: ${to}`);
     console.log(`📧 [RESEND] From address: ${config.resend.fromNoReply}`);
-    console.log(`📧 [RESEND] API Key length: ${process.env.RESEND_API_KEY?.length || 0}`);
-    console.log(`📧 [RESEND] API Key starts with: ${process.env.RESEND_API_KEY?.substring(0, 10) || 'NOT_SET'}...`);
-    
+    console.log(
+      `📧 [RESEND] API Key length: ${process.env.RESEND_API_KEY?.length || 0}`,
+    );
+    console.log(
+      `📧 [RESEND] API Key starts with: ${process.env.RESEND_API_KEY?.substring(0, 10) || "NOT_SET"}...`,
+    );
+
     const result = await resend.emails.send({
       from: config.resend.fromNoReply,
       to,
@@ -180,10 +193,16 @@ export async function sendTestEmail(to: string): Promise<EmailResult> {
       text: `🎉 Email Setup Working!\n\nThis is a test email from ChoreMinder.\nIf you received this, your email configuration is working correctly!\n\nTimestamp: ${new Date().toISOString()}`,
     });
 
-    console.log(`📧 [RESEND] Test email full result:`, JSON.stringify(result, null, 2));
+    console.log(
+      `📧 [RESEND] Test email full result:`,
+      JSON.stringify(result, null, 2),
+    );
 
     if (result.error) {
-      console.error(`📧 [RESEND] Test email error details:`, JSON.stringify(result.error, null, 2));
+      console.error(
+        `📧 [RESEND] Test email error details:`,
+        JSON.stringify(result.error, null, 2),
+      );
       return {
         success: false,
         error: result.error.message || JSON.stringify(result.error),
@@ -197,7 +216,10 @@ export async function sendTestEmail(to: string): Promise<EmailResult> {
     };
   } catch (error) {
     console.error(`📧 [RESEND] Test email exception:`, error);
-    console.error(`📧 [RESEND] Test email exception stack:`, error instanceof Error ? error.stack : "No stack");
+    console.error(
+      `📧 [RESEND] Test email exception stack:`,
+      error instanceof Error ? error.stack : "No stack",
+    );
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

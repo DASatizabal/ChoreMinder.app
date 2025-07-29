@@ -1,10 +1,9 @@
 "use client";
 
+import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-
-import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 
 import CelebrationAnimation from "./CelebrationAnimation";
 import EnhancedPhotoVerification from "./EnhancedPhotoVerification";

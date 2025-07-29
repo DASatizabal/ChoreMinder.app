@@ -322,7 +322,7 @@ Thank you for your patience! 🙏`;
 /**
  * Main function to send WhatsApp messages with fallback to email
  */
-export class WhatsAppMessenger {
+class WhatsAppMessenger {
   private twilioService = getTwilioWhatsAppService();
 
   /**
@@ -458,7 +458,7 @@ export class WhatsAppMessenger {
   ): Promise<{ success: boolean; method: "email"; error?: string }> {
     try {
       // Import email service dynamically to avoid circular dependencies
-      const { sendChoreNotificationEmail } = await import("./emails");
+      const { sendChoreNotificationEmail } = await import("./resend");
 
       await sendChoreNotificationEmail(context, type, options);
 

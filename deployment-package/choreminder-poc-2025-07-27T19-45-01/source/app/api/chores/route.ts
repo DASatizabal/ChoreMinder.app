@@ -1,12 +1,11 @@
-import { Types, Document } from "mongoose";
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
 import User from "@/models/User";
+import { Types, Document } from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
 // Define a type for the user document with populated families
 type UserWithFamilies = Document<

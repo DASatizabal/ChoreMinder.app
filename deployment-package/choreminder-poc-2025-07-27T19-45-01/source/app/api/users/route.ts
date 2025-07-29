@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-
 import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 // Define the response type for better type safety
 type User = {

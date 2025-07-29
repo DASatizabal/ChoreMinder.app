@@ -122,7 +122,7 @@ const challengeSchema = new Schema<IChallenge>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for performance
@@ -132,6 +132,8 @@ challengeSchema.index({ createdFor: 1, active: 1 });
 challengeSchema.index({ familyId: 1, active: 1 });
 challengeSchema.index({ "participants.userId": 1 });
 
-const Challenge = mongoose.models.Challenge || mongoose.model<IChallenge>("Challenge", challengeSchema);
+const Challenge =
+  mongoose.models.Challenge ||
+  mongoose.model<IChallenge>("Challenge", challengeSchema);
 
 export default Challenge;
