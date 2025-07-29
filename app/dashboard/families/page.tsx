@@ -102,25 +102,34 @@ export default function FamiliesPage() {
       });
 
       const data = await response.json();
+      console.log("🔍 [INVITE RESPONSE] Full API response:", JSON.stringify(data, null, 2));
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to create invitation");
       }
 
-      // Show success message with proper formatting
-      toast.success(`📧 Invitation email sent to ${inviteEmail}!`);
+      // Check email status and show appropriate message
+      if (data.emailSent) {
+        toast.success(`📧 Invitation email sent successfully to ${inviteEmail}!`);
+      } else {
+        toast.error(`⚠️ Invitation created but email failed: ${data.emailError || 'Unknown error'}`);
+      }
       
       // Show detailed invitation info in a more user-friendly way
+      const emailStatus = data.emailSent ? "✅ Email sent successfully!" : "❌ Email failed to send";
       const confirmationMessage = `
-✅ Invitation Successfully Sent!
+✅ Invitation Code Created!
 
 📧 Email: ${inviteEmail}
 👤 Role: ${inviteRole}
 🔑 Invite Code: ${data.inviteCode}
+📨 Email Status: ${emailStatus}
 
-The invitation has been sent! They can either:
-• Use the invite code: ${data.inviteCode}
-• Click this link: ${data.inviteLink}
+They can join using:
+• Invite code: ${data.inviteCode}
+• Direct link: ${data.inviteLink}
+
+${data.emailSent ? "Check their email for the invitation!" : "Share the code manually since email failed."}
 
 💡 Invite codes expire in 7 days.
       `.trim();
@@ -257,20 +266,52 @@ The invitation has been sent! They can either:
                         </select>
                       </div>
                     </div>
-                    <button
-                      type="submit"
-                      disabled={inviting || !inviteEmail.trim()}
-                      className="btn btn-primary"
-                    >
-                      {inviting ? (
-                        <>
-                          <span className="loading loading-spinner loading-sm"></span>
-                          Creating Invitation...
-                        </>
-                      ) : (
-                        "Send Invitation"
-                      )}
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={inviting || !inviteEmail.trim()}
+                        className="btn btn-primary"
+                      >
+                        {inviting ? (
+                          <>
+                            <span className="loading loading-spinner loading-sm"></span>
+                            Creating Invitation...
+                          </>
+                        ) : (
+                          "Send Invitation"
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!inviteEmail.trim()) {
+                            toast.error("Please enter an email first");
+                            return;
+                          }
+                          try {
+                            console.log("📧 Testing real email sending...");
+                            const response = await fetch("/api/test-email", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ email: inviteEmail }),
+                            });
+                            const data = await response.json();
+                            console.log("📧 Test email result:", data);
+                            if (response.ok && data.success) {
+                              toast.success("✅ Test email sent! Check your inbox.");
+                            } else {
+                              toast.error("❌ Email test failed: " + (data.error || "Unknown error"));
+                            }
+                          } catch (error) {
+                            console.error("📧 Test email error:", error);
+                            toast.error("❌ Email test failed: " + (error instanceof Error ? error.message : "Unknown"));
+                          }
+                        }}
+                        className="btn btn-outline btn-sm"
+                      >
+                        📧 Test Email
+                      </button>
+                    </div>
                   </form>
                 </div>
               </div>

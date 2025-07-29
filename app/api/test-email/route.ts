@@ -1,45 +1,56 @@
-// app/api/test-email/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
-import { emailService } from "@/libs/resend";
+import { authOptions } from "@/libs/next-auth";
+import { sendTestEmail } from "@/libs/email";
 
-// Only enable this endpoint in development
-export async function POST(req: Request) {
-  if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "Disabled in production" },
-      { status: 404 },
-    );
-  }
-
-  // Use a test email from environment variables or fallback
-  const testEmail = process.env.TEST_EMAIL || "test@example.com";
-
+// Test endpoint to verify Resend email setup
+export async function POST(req: NextRequest) {
   try {
-    const result = await emailService.sendWelcomeEmail(testEmail, "Test User");
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
+    const { email } = await req.json();
+    
+    if (!email || !email.includes("@")) {
+      return NextResponse.json(
+        { error: "Valid email address is required" },
+        { status: 400 }
+      );
+    }
+
+    console.log(`🧪 [TEST EMAIL] Sending test email to: ${email}`);
+    
+    const result = await sendTestEmail(email);
+    
     return NextResponse.json({
       success: result.success,
-      data: result.data,
+      message: result.success 
+        ? "Test email sent successfully!" 
+        : "Failed to send test email",
+      messageId: result.messageId,
       error: result.error,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Test email error:", error);
+    console.error("🧪 [TEST EMAIL] Error:", error);
     return NextResponse.json(
-      {
+      { 
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: "Test email failed", 
+        details: error instanceof Error ? error.message : "Unknown error" 
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
-// Optional: Keep GET for easier testing via browser
-export async function GET() {
+export async function GET(req: NextRequest) {
   return NextResponse.json({
-    message: "Send a POST request to test email functionality",
-    method: "POST",
-    body: "{}",
+    message: "Test email endpoint is ready",
+    instructions: "POST with { email: 'your@email.com' } to send a test email",
+    timestamp: new Date().toISOString(),
   });
 }

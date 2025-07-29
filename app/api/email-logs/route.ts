@@ -2,17 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/libs/next-auth";
-
-// Store email logs in memory for development (in production, use database)
-const emailLogs: Array<{
-  id: string;
-  timestamp: string;
-  type: string;
-  to: string;
-  subject: string;
-  details: any;
-  success: boolean;
-}> = [];
+import { getEmailLogs, getEmailStats, addEmailLog, clearEmailLogs } from "@/libs/email-storage";
 
 // GET /api/email-logs - Get all email logs
 export async function GET(req: NextRequest) {
@@ -29,27 +19,13 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const type = searchParams.get("type");
 
-    let filteredLogs = emailLogs;
-    
-    if (type) {
-      filteredLogs = emailLogs.filter(log => log.type === type);
-    }
-
-    // Sort by timestamp (newest first) and limit
-    const sortedLogs = filteredLogs
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, limit);
+    const logs = getEmailLogs(limit, type);
+    const stats = getEmailStats();
 
     return NextResponse.json({
-      logs: sortedLogs,
-      total: filteredLogs.length,
-      stats: {
-        totalEmails: emailLogs.length,
-        invitations: emailLogs.filter(log => log.type === "invitation").length,
-        notifications: emailLogs.filter(log => log.type === "notification").length,
-        successful: emailLogs.filter(log => log.success).length,
-        failed: emailLogs.filter(log => !log.success).length,
-      }
+      logs,
+      total: logs.length,
+      stats,
     });
   } catch (error) {
     console.error("Error fetching email logs:", error);
@@ -70,24 +46,13 @@ export async function POST(req: NextRequest) {
 
     const { type, to, subject, details, success = true } = await req.json();
 
-    const logEntry = {
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
+    const logEntry = addEmailLog({
       type,
       to,
       subject,
       details,
       success,
-    };
-
-    emailLogs.push(logEntry);
-
-    // Keep only last 1000 logs to prevent memory issues
-    if (emailLogs.length > 1000) {
-      emailLogs.splice(0, emailLogs.length - 1000);
-    }
-
-    console.log(`📧 [EMAIL LOG STORED] ${type.toUpperCase()}:`, logEntry);
+    });
 
     return NextResponse.json({ 
       message: "Email log stored successfully",
@@ -110,10 +75,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const clearedCount = emailLogs.length;
-    emailLogs.length = 0; // Clear the array
-
-    console.log(`📧 [EMAIL LOGS CLEARED] Removed ${clearedCount} log entries`);
+    const clearedCount = clearEmailLogs();
 
     return NextResponse.json({ 
       message: `Cleared ${clearedCount} email log entries` 
@@ -127,5 +89,4 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
-// Export the email logs array for other modules to use
-export { emailLogs };
+// Email logs are now managed by the shared storage module

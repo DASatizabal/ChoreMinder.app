@@ -2,14 +2,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
+import { authOptions } from "@/libs/next-auth";
+import dbConnect from "@/libs/mongoose";
 import Family from "@/models/Family";
 import User from "@/models/User";
 
 interface RouteParams {
   params: {
-    id: string;
+    familyId: string;
   };
 }
 
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     await dbConnect();
 
-    const family = await Family.findById(params.id).populate(
+    const family = await Family.findById(params.familyId).populate(
       "members.user",
       "name email image",
     );
@@ -73,7 +73,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     const updates = await req.json();
     await dbConnect();
 
-    const family = await Family.findById(params.id);
+    const family = await Family.findById(params.familyId);
     if (!family) {
       return NextResponse.json({ error: "Family not found" }, { status: 404 });
     }
@@ -138,7 +138,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
     await dbConnect();
 
-    const family = await Family.findById(params.id);
+    const family = await Family.findById(params.familyId);
     if (!family) {
       return NextResponse.json({ error: "Family not found" }, { status: 404 });
     }
@@ -154,7 +154,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     // Check if family has active chores
     const Chore = require("@/models/Chore").default;
     const activeChores = await Chore.countDocuments({
-      family: params.id,
+      family: params.familyId,
       status: { $nin: ["completed", "verified", "cancelled"] },
     });
 
@@ -167,15 +167,15 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
     // Remove family from all member's families array
     await User.updateMany(
-      { families: params.id },
+      { families: params.familyId },
       {
-        $pull: { families: params.id },
-        $unset: { familyId: params.id },
+        $pull: { families: params.familyId },
+        $unset: { familyId: params.familyId },
       },
     );
 
     // Delete the family
-    await Family.findByIdAndDelete(params.id);
+    await Family.findByIdAndDelete(params.familyId);
 
     return NextResponse.json({ message: "Family deleted successfully" });
   } catch (error) {

@@ -6,24 +6,29 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/libs/next-auth";
 import dbConnect from "@/libs/mongoose";
+import { sendFamilyInvitationEmail } from "@/libs/email";
+import { addEmailLog } from "@/libs/email-storage";
 import Family from "@/models/Family";
 import User from "@/models/User";
 
 interface RouteParams {
   params: {
-    id: string;
+    familyId: string;
   };
 }
 
-// POST /api/families/[id]/invite - Create invitation code
+// POST /api/families/[familyId]/invite - Create invitation code
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
+    console.log(`📨 [INVITE API] Called with familyId: ${params.familyId}`);
+    
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { email, role = "child" } = await req.json();
+    console.log(`📨 [INVITE API] Request data:`, { email, role, userId: session.user.id });
 
     // Validate email
     if (!email || !email.includes("@")) {
@@ -43,7 +48,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // Handle mock family data for development
-    if (params.id === "mock_family_id") {
+    if (params.familyId === "mock_family_id") {
       // Generate invite code for mock family
       const inviteCode = crypto.randomBytes(8).toString("hex").toUpperCase();
       
@@ -58,43 +63,63 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
       });
 
+      // Actually send the email using Resend
+      const emailResult = await sendFamilyInvitationEmail({
+        to: email,
+        inviterName: session.user.name || "A family member",
+        familyName: "Smith Family",
+        inviteCode,
+        inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
+        role,
+      });
+
       // Store in email logs
       try {
-        await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/email-logs`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: "invitation",
-            to: email,
-            subject: `You're invited to join Smith Family on ChoreMinder!`,
-            details: {
-              role,
-              inviteCode,
-              invitedBy: session.user.name || session.user.id,
-              familyName: "Smith Family",
-              inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
-            },
-            success: true,
-          }),
+        addEmailLog({
+          type: "invitation",
+          to: email,
+          subject: `🏠 You're invited to join Smith Family on ChoreMinder!`,
+          details: {
+            role,
+            inviteCode,
+            invitedBy: session.user.name || session.user.id,
+            familyName: "Smith Family",
+            inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
+            messageId: emailResult.messageId,
+            emailSent: emailResult.success,
+            emailError: emailResult.error,
+          },
+          success: emailResult.success,
         });
       } catch (logError) {
         console.error("Failed to log email:", logError);
       }
 
+      // Return response with email status
+      if (!emailResult.success) {
+        console.error("Failed to send invitation email:", emailResult.error);
+        // Still return success but note the email issue
+      }
+
       return NextResponse.json({
-        message: "Invitation created successfully",
+        message: emailResult.success 
+          ? "Invitation created and email sent successfully" 
+          : "Invitation created but email failed to send",
         inviteCode,
         inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
         inviterName: session.user.name || "Family Member",
         familyName: "Smith Family",
         instructions: `Share this code with ${email}: ${inviteCode}`,
-        emailSent: true,
+        emailSent: emailResult.success,
+        emailStatus: emailResult.success ? "sent" : "failed",
+        emailError: emailResult.error,
+        messageId: emailResult.messageId,
       });
     }
 
     await dbConnect();
 
-    const family = await Family.findById(params.id);
+    const family = await Family.findById(params.familyId);
     if (!family) {
       return NextResponse.json({ error: "Family not found" }, { status: 404 });
     }
@@ -159,38 +184,52 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
     });
 
+    // Actually send the email using Resend
+    const emailResult = await sendFamilyInvitationEmail({
+      to: email,
+      inviterName: inviter?.name || "A family member",
+      familyName: family.name,
+      inviteCode,
+      inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
+      role,
+    });
+
     // Store in email logs
     try {
-      await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/email-logs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "invitation",
-          to: email,
-          subject: `You're invited to join ${family.name} on ChoreMinder!`,
-          details: {
-            role,
-            inviteCode,
-            invitedBy: inviter?.name || session.user.id,
-            familyId: family._id,
-            familyName: family.name,
-            inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
-          },
-          success: true,
-        }),
+      addEmailLog({
+        type: "invitation",
+        to: email,
+        subject: `🏠 You're invited to join ${family.name} on ChoreMinder!`,
+        details: {
+          role,
+          inviteCode,
+          invitedBy: inviter?.name || session.user.id,
+          familyId: family._id,
+          familyName: family.name,
+          inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
+          messageId: emailResult.messageId,
+          emailSent: emailResult.success,
+          emailError: emailResult.error,
+        },
+        success: emailResult.success,
       });
     } catch (logError) {
       console.error("Failed to log email:", logError);
     }
 
     return NextResponse.json({
-      message: "Invitation created successfully",
+      message: emailResult.success 
+        ? "Invitation created and email sent successfully" 
+        : "Invitation created but email failed to send",
       inviteCode,
       inviteLink: `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/join-family?code=${inviteCode}`,
       inviterName: inviter?.name,
       familyName: family.name,
       instructions: `Share this code with ${email}: ${inviteCode}`,
-      emailSent: true,
+      emailSent: emailResult.success,
+      emailStatus: emailResult.success ? "sent" : "failed",
+      emailError: emailResult.error,
+      messageId: emailResult.messageId,
     });
   } catch (error) {
     console.error("Error creating invitation:", error);
@@ -211,7 +250,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     await dbConnect();
 
-    const family = await Family.findById(params.id);
+    const family = await Family.findById(params.familyId);
     if (!family) {
       return NextResponse.json({ error: "Family not found" }, { status: 404 });
     }
