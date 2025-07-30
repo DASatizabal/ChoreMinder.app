@@ -69,7 +69,7 @@ function FamiliesPageContent() {
                 _id: session.user.id || "",
                 name: session.user.name || "You",
                 email: session.user.email || "",
-                image: session.user.image,
+                image: session.user.image || undefined,
               },
               role: "parent" as const,
             },

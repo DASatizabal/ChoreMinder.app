@@ -144,7 +144,7 @@ export default function FamilyCalendar() {
       default: { bg: "#6B7280", border: "#4B5563", text: "#FFFFFF" },
     };
 
-    let baseColor = colors[category] || colors.default;
+    let baseColor = colors[category as keyof typeof colors] || colors.default;
 
     // Adjust opacity based on priority
     if (priority === "urgent") {

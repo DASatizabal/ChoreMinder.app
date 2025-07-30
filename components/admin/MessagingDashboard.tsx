@@ -225,7 +225,7 @@ const MessagingDashboard = () => {
                 </div>
               </div>
 
-              {config.fromNumber && (
+              {"fromNumber" in config && config.fromNumber && (
                 <div className="text-xs opacity-75 mt-2">
                   From: {config.fromNumber}
                 </div>

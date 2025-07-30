@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-import { useNotifications } from "@/hooks/useNotifications.tsx";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface ChoreAssignmentFlowProps {
   onChoreAssigned: (chore: Chore, assignedMember: FamilyMember) => void;
@@ -154,7 +154,7 @@ const ChoreAssignmentFlow = ({
       title: "Chore Details",
       description: "Define the chore and requirements",
       component: renderChoreDetailsStep(),
-      isValid: validateChoreData(),
+      isValid: Boolean(validateChoreData()),
       isRequired: true,
     },
     {

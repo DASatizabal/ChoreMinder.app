@@ -343,30 +343,22 @@ export async function POST(req: NextRequest) {
       choreName: metadata.choreName,
       fromUser: {
         id: fromUserId,
-        name: fromUser.name,
+        name: fromUser.name || "Unknown User",
         role: fromUser.role,
       },
       toUser: {
         id: toUserId,
-        name: toUser.name,
+        name: toUser.name || "Unknown User",
         role: toUser.role,
       },
       familyId,
       timestamp: new Date().toISOString(),
       read: false,
       actionRequired: template.actionRequired,
-      actions: template.actions,
       metadata,
     };
 
-    // Set expiration if defined in template
-    if (template.autoExpire) {
-      const expirationTime = new Date();
-      expirationTime.setMinutes(
-        expirationTime.getMinutes() + template.autoExpire,
-      );
-      notification.expiresAt = expirationTime.toISOString();
-    }
+    // Simplified - no auto expiration
 
     // Store notification (in production, save to database)
     notificationStore.push(notification);

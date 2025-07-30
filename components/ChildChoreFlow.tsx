@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
-import { useNotifications } from "@/hooks/useNotifications.tsx";
+import { useNotifications } from "@/hooks/useNotifications";
 
 import ChoreDetail from "./ChoreDetail";
 import HelpRequest from "./HelpRequest";
@@ -175,10 +175,11 @@ const ChildChoreFlow = ({
       title: "Get Approval",
       description: "Wait for parent to approve your work",
       emoji: "⭐",
-      isActive:
+      isActive: Boolean(
         chore.status === "completed" &&
         (!chore.requiresPhotoVerification ||
-          chore.photoVerification?.some((p) => p.status === "pending")),
+          chore.photoVerification?.some((p) => p.status === "pending"))
+      ),
       isCompleted: chore.status === "verified",
       isRequired: true,
     });

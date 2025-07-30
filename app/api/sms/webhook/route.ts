@@ -154,9 +154,9 @@ async function handleChoreCompletion(user: any): Promise<string> {
     choreToComplete.completedAt = new Date();
     choreToComplete.history.push({
       action: "completed",
-      performedBy: user._id,
+      user: user._id,
       timestamp: new Date(),
-      note: "Completed via SMS",
+      details: { note: "Completed via SMS" },
     });
 
     await choreToComplete.save();
@@ -172,7 +172,7 @@ async function handleChoreCompletion(user: any): Promise<string> {
       const smsService = getTwilioSMSService();
       for (const parent of parents) {
         await smsService.sendMessage({
-          to: parent.phone,
+          to: parent.phone || "",
           body: `ChoreMinder: ${user.name} completed "${choreToComplete.title}" (${choreToComplete.points} pts). Review in app to approve.`,
         });
       }

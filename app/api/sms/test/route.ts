@@ -146,7 +146,7 @@ Time: ${new Date().toLocaleString()}`;
           id: user._id,
           name: user.name,
           role: user.role,
-          family: user.family?.name,
+          family: "Test Family",
         },
       },
       service: smsService.getServiceInfo(),

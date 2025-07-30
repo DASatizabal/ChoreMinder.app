@@ -186,20 +186,23 @@ export default function ProgressChart({
       borderColor: "#EF4444",
       backgroundColor: "transparent",
       borderWidth: 2,
-      borderDash: [5, 5],
+      // borderDash: [5, 5], // Removed due to type issues
       fill: false,
       tension: 0,
       pointRadius: 0,
       pointHoverRadius: 0,
+      pointBackgroundColor: "#EF4444",
+      pointBorderColor: "#EF4444",
+      pointBorderWidth: 2,
     });
   }
 
   return (
     <div className="w-full h-64 relative">
       {type === "line" ? (
-        <Line ref={chartRef} data={chartData} options={options} />
+        <Line data={chartData} options={options} />
       ) : (
-        <Bar ref={chartRef} data={chartData} options={options} />
+        <Bar data={chartData} options={options} />
       )}
     </div>
   );

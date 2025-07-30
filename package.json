@@ -62,6 +62,7 @@
     "eslint": "^8.56.0",
     "eslint-config-next": "13.4.19",
     "form-data": "^4.0.0",
+    "framer-motion": "^12.23.11",
     "mongodb": "^6.18.0",
     "mongoose": "^7.6.10",
     "next": "^14.1.4",

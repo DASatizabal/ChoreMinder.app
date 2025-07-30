@@ -372,7 +372,7 @@ export default function PerformanceDashboard() {
       {/* Slow Queries */}
       <div className="card bg-base-200 shadow-lg mb-8">
         <div className="card-body">
-          <h2 className="card-title">🐌 Slow Queries (>100ms)</h2>
+          <h2 className="card-title">🐌 Slow Queries (&gt;100ms)</h2>
           {metrics.performance.queryStats.slowQueries.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="table table-zebra">

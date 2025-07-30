@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-import { useNotifications } from "@/hooks/useNotifications.tsx";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface PhotoApprovalFlowProps {
   chore: Chore;

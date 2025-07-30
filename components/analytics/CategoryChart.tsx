@@ -109,7 +109,7 @@ export default function CategoryChart({
         ),
         borderWidth: 2,
         borderRadius: type === "bar" ? 4 : 0,
-        borderSkipped: type === "bar" ? "bottom" : undefined,
+        ...(type === "bar" && { borderSkipped: "bottom" as const }),
       },
     ],
   };
