@@ -36,7 +36,9 @@
       "Bash(timeout 10 npm run dev)",
       "Bash(git add:*)",
       "Bash(sed:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(copy:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
