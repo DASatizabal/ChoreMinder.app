@@ -5,7 +5,6 @@ import { Types } from "mongoose";
 import dbConnect from "@/libs/mongoose";
 import { authOptions } from "@/libs/next-auth";
 import Family from "@/models/Family";
-import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
   try {
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Add member to family
+    // Add member to family with proper ObjectId
     const newMember = {
       user: new Types.ObjectId(session.user.id),
       name: session.user.name || "New Member",
