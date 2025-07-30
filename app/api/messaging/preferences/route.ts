@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
         points: 10,
         priority: "medium",
       },
-      family: user.family || { name: "Test Family" },
+      family: { name: "Test Family" },
     };
 
     const result = await messagingService.sendMessage({
