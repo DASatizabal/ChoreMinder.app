@@ -4,9 +4,18 @@ import OpenAI from "openai";
 
 import { authOptions } from "@/libs/next-auth";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
+// Initialize OpenAI client only when needed
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY environment variable is required");
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 interface AIAnalysis {
   confidence: number;
@@ -77,6 +86,7 @@ Respond in JSON format:
 Be encouraging and constructive. Focus on what was done well, and offer gentle suggestions for improvement if needed.`;
 
     try {
+      const openai = getOpenAIClient();
       const response = await openai.chat.completions.create({
         model: "gpt-4-vision-preview",
         messages: [

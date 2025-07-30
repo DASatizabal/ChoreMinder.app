@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { uploadToS3 } from "@/libs/s3";
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const fakeImageBuffer = Buffer.from("hello world");

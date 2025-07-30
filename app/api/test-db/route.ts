@@ -1,51 +1,52 @@
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { dbConnect } from "@/libs/mongoose";
+import User from "@/models/User";
+import mongoose from "mongoose";
 
-// Create a new Prisma client instance
-const prisma = new PrismaClient();
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Test the connection
-    await prisma.$connect();
+    // Test the database connection
+    await dbConnect();
 
     // Get database name from the connection string
     const dbName =
-      process.env.DATABASE_URL?.split("/").pop()?.split("?")[0] || "test";
+      process.env.DATABASE_URL?.split("/").pop()?.split("?")[0] || 
+      process.env.MONGODB_URI?.split("/").pop()?.split("?")[0] || 
+      "test";
 
-    // Get database stats
-    const dbStats = await prisma.$runCommandRaw({
-      dbStats: 1,
-    });
-
-    // Get list of all collections in the database
-    const collections = await prisma.$runCommandRaw({
-      listCollections: 1,
-      nameOnly: true,
-    });
+    // Get connection state
+    const connectionState = mongoose.connection.readyState;
+    const connectionStates = {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting",
+    };
 
     // Get collection names
-    const collectionNames =
-      (collections as any)?.cursor?.firstBatch?.map(
-        (collection: { name: string }) => collection.name,
-      ) || [];
+    const db = mongoose.connection.db;
+    const collections = await db?.listCollections().toArray() || [];
+    const collectionNames = collections.map((collection) => collection.name);
 
     // Check if users collection exists
     const usersCollectionExists = collectionNames.includes("users");
 
     // Count documents in users collection
-    const userCount = usersCollectionExists ? await prisma.user.count() : 0;
+    const userCount = usersCollectionExists ? await User.countDocuments() : 0;
 
-    // Get sample users
+    // Get sample users (limited data for security)
     const sampleUsers = usersCollectionExists
-      ? await prisma.user.findMany({ take: 5 })
+      ? await User.find({}, { name: 1, email: 1, role: 1, createdAt: 1 }).limit(5)
       : [];
 
     return NextResponse.json({
       success: true,
       database: {
         name: dbName,
-        stats: dbStats,
+        connectionState: connectionStates[connectionState as keyof typeof connectionStates],
         collections: collectionNames,
       },
       users: {
@@ -60,12 +61,9 @@ export async function GET() {
       {
         success: false,
         error: error instanceof Error ? error.message : String(error),
-        code: (error as any)?.code || "UNKNOWN_ERROR",
         timestamp: new Date().toISOString(),
       },
       { status: 500 },
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

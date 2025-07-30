@@ -4,9 +4,18 @@ import OpenAI from "openai";
 
 import { authOptions } from "@/libs/next-auth";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
+// Initialize OpenAI client only when needed
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY environment variable is required");
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 interface ChoreData {
   title: string;
@@ -69,6 +78,7 @@ export async function POST(req: NextRequest) {
       template,
     );
 
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
