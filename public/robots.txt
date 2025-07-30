@@ -1,6 +1,9 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /test-*
 
 # Host
 Host: https://choreminder.app
