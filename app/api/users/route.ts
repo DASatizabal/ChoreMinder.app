@@ -1,35 +1,24 @@
 import { NextResponse } from "next/server";
+import { dbConnect } from "@/libs/mongoose";
+import User from "@/models/User";
 
-import { prisma } from "@/lib/prisma";
-
-// Define the response type for better type safety
-type User = {
-  id: string;
-  name: string | null;
-  email: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     // Test database connection first
-    await prisma.$connect();
+    await dbConnect();
     console.log("Database connection successful");
 
-    // Fetch users from the database
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    // Fetch users from the database using Mongoose
+    const users = await User.find({}, {
+      name: 1,
+      email: 1,
+      role: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    }).sort({ createdAt: -1 });
 
     console.log("Users fetched successfully");
 
@@ -67,7 +56,5 @@ export async function GET() {
       },
       { status: 500 },
     );
-  } finally {
-    await prisma.$disconnect().catch(console.error);
   }
 }
