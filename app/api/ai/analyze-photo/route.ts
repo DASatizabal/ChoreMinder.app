@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import { authOptions } from "@/libs/next-auth";
 
 // Force this route to be dynamic
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // Initialize OpenAI client only when needed
 function getOpenAIClient() {
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const photo = formData.get("photo") as File;
-    const choreId = formData.get("choreId") as string;
+    // const choreId = formData.get("choreId") as string; // TODO: Use choreId for analytics/logging
     const choreTitle = formData.get("choreTitle") as string;
     const choreCategory = formData.get("choreCategory") as string;
     const choreInstructions = formData.get("choreInstructions") as string;
@@ -113,7 +113,7 @@ Be encouraging and constructive. Focus on what was done well, and offer gentle s
       }
 
       try {
-        const parsedAnalysis = JSON.parse(analysis);
+        const parsedAnalysis = JSON.parse(analysis) as AIAnalysis;
 
         // Validate response structure
         const requiredFields = [

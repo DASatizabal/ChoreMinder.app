@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import { authOptions } from "@/libs/next-auth";
 
 // Force this route to be dynamic
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // Initialize OpenAI client only when needed
 function getOpenAIClient() {
@@ -49,8 +49,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { section, choreData, currentInstructions, template } =
-      await req.json();
+    const requestData = (await req.json()) as {
+      section: keyof GeneratedInstructions;
+      choreData: ChoreData;
+      currentInstructions: GeneratedInstructions;
+      template?: string;
+    };
+    const { section, choreData, currentInstructions, template } = requestData;
 
     if (!section || !choreData || !currentInstructions) {
       return NextResponse.json(
@@ -100,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     try {
       // Try to parse as JSON first
-      const parsed = JSON.parse(response);
+      const parsed = JSON.parse(response) as unknown;
       return NextResponse.json({ newContent: parsed });
     } catch {
       // If not JSON, treat as direct content based on section type
@@ -111,9 +116,16 @@ export async function POST(req: NextRequest) {
     console.error("Error regenerating section:", error);
 
     // Return fallback content
-    const { section, choreData } = await req.json().catch(() => ({}));
+    const fallbackData = (await req.json().catch(() => ({}))) as {
+      section?: keyof GeneratedInstructions;
+      choreData?: ChoreData;
+    };
+    const { section, choreData } = fallbackData;
     return NextResponse.json({
-      newContent: generateFallbackSection(section, choreData || {}),
+      newContent: generateFallbackSection(
+        section,
+        choreData || ({} as ChoreData),
+      ),
     });
   }
 }
@@ -122,7 +134,7 @@ function createSectionPrompt(
   section: keyof GeneratedInstructions,
   choreData: ChoreData,
   currentInstructions: GeneratedInstructions,
-  template: string,
+  _template?: string,
 ): string {
   const age = choreData.assignedTo?.age || 10;
   const choreTitle = choreData.title;
@@ -196,7 +208,7 @@ Regenerate the ${section} section with fresh content.`;
 function processSectionResponse(
   section: keyof GeneratedInstructions,
   response: string,
-): any {
+): unknown {
   // Clean up the response
   const cleaned = response.trim().replace(/^```json\n?|\n?```$/g, "");
 
@@ -209,13 +221,14 @@ function processSectionResponse(
       case "photoGuidelines":
       case "safetyReminders":
       case "tips":
-      case "parentNotes":
+      case "parentNotes": {
         // Try to extract array from text
         const lines = cleaned
           .split("\n")
-          .map((line) => line.replace(/^[\d\-\*\•]\s*/, "").trim())
+          .map((line) => line.replace(/^[\d\-*•]\s*/, "").trim())
           .filter((line) => line.length > 0);
         return lines.length > 0 ? lines : ["Unable to regenerate this section"];
+      }
 
       case "motivationalMessage":
       case "ageAppropriateInstructions":
@@ -228,9 +241,9 @@ function processSectionResponse(
 }
 
 function generateFallbackSection(
-  section: keyof GeneratedInstructions,
+  section: keyof GeneratedInstructions | undefined,
   choreData: ChoreData,
-): any {
+): unknown {
   const age = choreData.assignedTo?.age || 10;
   const choreTitle = choreData.title || "this task";
 

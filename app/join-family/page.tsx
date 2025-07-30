@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import toast from "react-hot-toast";
 
 interface InvitationInfo {
@@ -21,7 +21,7 @@ interface InvitationInfo {
   requiresAuth: boolean;
 }
 
-export default function JoinFamilyPage() {
+function JoinFamilyContent() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const router = useRouter();
@@ -264,5 +264,17 @@ export default function JoinFamilyPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function JoinFamilyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
+    }>
+      <JoinFamilyContent />
+    </Suspense>
   );
 }

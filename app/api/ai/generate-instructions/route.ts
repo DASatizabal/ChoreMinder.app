@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import { authOptions } from "@/libs/next-auth";
 
 // Force this route to be dynamic
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // Initialize OpenAI client only when needed
 function getOpenAIClient() {
@@ -52,7 +52,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { prompt, choreData, options, template } = await req.json();
+    const requestData = (await req.json()) as {
+      prompt: string;
+      choreData: ChoreData;
+      options: GenerationOptions;
+      template?: string;
+    };
+    const { prompt, choreData, options } = requestData;
+    // template is available in requestData if needed
 
     if (!prompt || !choreData) {
       return NextResponse.json(
@@ -115,7 +122,7 @@ Response format: Return a JSON object with these exact fields:
     }
 
     try {
-      const instructions = JSON.parse(response);
+      const instructions = JSON.parse(response) as Record<string, unknown>;
 
       // Validate the response structure
       const requiredFields = [
@@ -148,11 +155,15 @@ Response format: Return a JSON object with these exact fields:
     console.error("Error generating AI instructions:", error);
 
     // Return fallback instructions instead of error
-    const { choreData, options } = await req.json().catch(() => ({}));
+    const fallbackData = (await req.json().catch(() => ({}))) as {
+      choreData?: ChoreData;
+      options?: GenerationOptions;
+    };
+    const { choreData, options } = fallbackData;
     return NextResponse.json({
       instructions: generateFallbackInstructions(
-        choreData || {},
-        options || {},
+        choreData || ({} as ChoreData),
+        options || ({} as GenerationOptions),
       ),
     });
   }
@@ -160,11 +171,12 @@ Response format: Return a JSON object with these exact fields:
 
 function generateFallbackInstructions(
   choreData: ChoreData,
-  options: GenerationOptions,
+  _options: GenerationOptions,
 ) {
   const age = choreData.assignedTo?.age || 10;
-  const isYoung = age <= 8;
-  const isTeen = age >= 13;
+  // Age-based customization could be added here
+  // const isYoung = age <= 8;
+  // const isTeen = age >= 13;
 
   return {
     stepByStep: generateStepByStep(choreData, age),
@@ -184,7 +196,7 @@ function generateFallbackInstructions(
   };
 }
 
-function generateStepByStep(choreData: ChoreData, age: number): string[] {
+function generateStepByStep(choreData: ChoreData, _age: number): string[] {
   const baseSteps = [
     `Get ready by gathering everything you need for ${choreData.title}`,
     "Take your time and work carefully",
@@ -221,7 +233,7 @@ function generateStepByStep(choreData: ChoreData, age: number): string[] {
 
 function generateMotivationalMessage(
   choreData: ChoreData,
-  age: number,
+  _age: number,
 ): string {
   const messages = [
     `You're going to do an amazing job with ${choreData.title}! Every great accomplishment starts with taking the first step.`,
@@ -245,7 +257,7 @@ function generateAgeAppropriateInstructions(age: number): string {
   }
 }
 
-function generateSafetyReminders(choreData: ChoreData, age: number): string[] {
+function generateSafetyReminders(choreData: ChoreData, _age: number): string[] {
   const generalSafety = [
     "Ask an adult if you're unsure about anything",
     "Take breaks if you feel tired",
@@ -288,7 +300,7 @@ function getDifficultyLevel(
   return baseDifficulty;
 }
 
-function generateTips(choreData: ChoreData, age: number): string[] {
+function generateTips(choreData: ChoreData, _age: number): string[] {
   const generalTips = [
     "Break big tasks into smaller, manageable pieces",
     "Celebrate small wins along the way",
