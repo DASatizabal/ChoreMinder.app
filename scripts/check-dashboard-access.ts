@@ -13,7 +13,7 @@ if (!uri) {
 
 async function checkDashboardAccess() {
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri!);
     console.log("Connected to MongoDB");
 
     const db = mongoose.connection.db;
@@ -24,12 +24,14 @@ async function checkDashboardAccess() {
       .find(
         {},
         {
-          name: 1,
-          email: 1,
-          customerId: 1,
-          priceId: 1,
-          role: 1,
-          createdAt: 1,
+          projection: {
+            name: 1,
+            email: 1,
+            customerId: 1,
+            priceId: 1,
+            role: 1,
+            createdAt: 1,
+          },
         },
       )
       .sort({ _id: -1 })

@@ -22,7 +22,7 @@ interface OnboardingOrchestratorProps {
 }
 
 interface FamilyData {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   rules: string[];
@@ -34,22 +34,28 @@ interface FamilyData {
     timezone: string;
   };
   members: FamilyMember[];
+  kids: KidData[];
+}
+
+interface KidData {
+  name: string;
+  email: string;
+  invited: boolean;
+  tempId: string;
 }
 
 interface FamilyMember {
-  _id: string;
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  role: "parent" | "child" | "admin";
+  name: string;
+  email: string;
+  role: "parent" | "child";
   age?: number;
   preferences: {
     favoriteChores: string[];
     notifications: boolean;
     reminderTime: string;
   };
+  invited?: boolean;
+  tempId?: string;
 }
 
 const OnboardingOrchestrator = ({
@@ -151,28 +157,31 @@ const OnboardingOrchestrator = ({
   const skipStep = () => {
     switch (step) {
       case "family-setup":
-        toast.info(
+        toast(
           "Family setup skipped. You can create a family later from your dashboard.",
+          { icon: "ℹ️" },
         );
         setStep("complete");
         onComplete();
         break;
       case "member-invitation":
-        toast.info(
+        toast(
           "Member invitations skipped. You can invite family members later.",
+          { icon: "ℹ️" },
         );
         setStep("chore-setup");
         break;
       case "chore-setup":
-        toast.info(
+        toast(
           "Chore setup skipped. You can create chores from your dashboard.",
+          { icon: "ℹ️" },
         );
         setStep("tutorial");
         break;
       case "tutorial":
-        toast.info(
-          "Tutorial skipped. You can access help anytime from the menu.",
-        );
+        toast("Tutorial skipped. You can access help anytime from the menu.", {
+          icon: "ℹ️",
+        });
         handleTutorialComplete();
         break;
     }
@@ -402,14 +411,14 @@ const OnboardingOrchestrator = ({
           <FamilySetupWizard
             onComplete={handleFamilySetupComplete}
             onSkip={skipStep}
-            existingFamily={familyData}
+            existingFamily={familyData || undefined}
           />
         )}
 
         {step === "member-invitation" && familyData && (
           <div className="max-w-4xl mx-auto">
             <MemberInvitation
-              familyId={familyData.id}
+              familyId={familyData.id || ""}
               familyName={familyData.name}
               onInvitationSent={() => {}}
             />
@@ -430,8 +439,8 @@ const OnboardingOrchestrator = ({
 
         {step === "chore-setup" && familyData && (
           <InitialChoreSetup
-            familyId={familyData.id}
-            familyMembers={familyData.members}
+            familyId={familyData.id || ""}
+            familyMembers={familyData.members as any}
             onComplete={handleChoreSetupComplete}
             onSkip={skipStep}
           />

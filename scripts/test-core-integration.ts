@@ -148,8 +148,8 @@ class CoreIntegrationTestSuite {
 
       // Update family members
       testFamily.members = [
-        { userId: parentUser._id, role: "parent", joinedAt: new Date() },
-        { userId: childUser._id, role: "child", joinedAt: new Date() },
+        { user: parentUser._id, role: "parent" } as any,
+        { user: childUser._id, role: "child" } as any,
       ];
       await testFamily.save();
 
@@ -282,7 +282,7 @@ class CoreIntegrationTestSuite {
       chore.completedBy = this.testData.childId;
       await chore.save();
 
-      chore.status = "approved";
+      chore.status = "verified";
       chore.verifiedAt = new Date();
       chore.verifiedBy = this.testData.parentId;
       await chore.save();
@@ -424,7 +424,7 @@ class CoreIntegrationTestSuite {
       const user = await User.findById(this.testData.childId);
       const completedChores = await Chore.countDocuments({
         assignedTo: this.testData.childId,
-        status: "approved",
+        status: "verified",
       });
 
       if (!user?.gamification) {
@@ -466,7 +466,7 @@ class CoreIntegrationTestSuite {
       newChore.completedBy = this.testData.childId;
       await newChore.save();
 
-      newChore.status = "approved";
+      newChore.status = "verified";
       newChore.verifiedAt = new Date();
       newChore.verifiedBy = this.testData.parentId;
       await newChore.save();

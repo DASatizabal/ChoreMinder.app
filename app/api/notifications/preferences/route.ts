@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/libs/next-auth";
 import dbConnect from "@/libs/mongoose";
+import { authOptions } from "@/libs/next-auth";
 import User from "@/models/User";
 
 // GET /api/notifications/preferences - Get notification preferences
@@ -31,7 +31,8 @@ export async function GET(req: NextRequest) {
       familyUpdates: true,
     };
 
-    const preferences = user.communicationPreferences?.enabledNotifications || defaultPreferences;
+    const preferences =
+      user.communicationPreferences?.enabledNotifications || defaultPreferences;
 
     return NextResponse.json({
       preferences,

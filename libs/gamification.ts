@@ -604,11 +604,11 @@ class GamificationService {
     userId: string,
     reward: any,
   ): Promise<void> {
-    const user = await User.findById(userId).populate("family");
-    if (!user?.family) return;
+    const user = await User.findById(userId);
+    if (!user?.familyId) return;
 
     const parents = await User.find({
-      family: user.family._id,
+      familyId: user.familyId,
       role: "parent",
     });
 

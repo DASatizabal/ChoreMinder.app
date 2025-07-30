@@ -245,10 +245,11 @@ const MemberInvitation = ({
       });
 
       if (result.skippedCount > 0) {
-        toast.info(
+        toast(
           `⚠️ ${result.skippedCount} invitations were skipped (already members or invited)`,
           {
             duration: 4000,
+            icon: "⚠️",
           },
         );
       }

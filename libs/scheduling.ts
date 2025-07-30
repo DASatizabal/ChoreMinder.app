@@ -181,10 +181,10 @@ class SchedulingService {
   ): Promise<void> {
     await dbConnect();
 
-    const scheduledChore = await Chore.findOne({
+    const scheduledChore = (await Chore.findOne({
       scheduleId,
       isRecurring: true,
-    });
+    })) as any;
     if (!scheduledChore || !scheduledChore.recurrencePattern) return;
 
     const endDate = new Date();
@@ -269,15 +269,16 @@ class SchedulingService {
     const conflictsByDate = new Map<string, any[]>();
 
     chores.forEach((chore) => {
-      const dateKey = chore.dueDate.toDateString();
+      const dateKey = chore.dueDate?.toDateString();
+      if (!dateKey) return;
       if (!conflictsByDate.has(dateKey)) {
         conflictsByDate.set(dateKey, []);
       }
       conflictsByDate.get(dateKey)!.push({
         choreId: chore._id.toString(),
         title: chore.title,
-        assignedTo: chore.assignedTo.toString(),
-        estimatedDuration: chore.estimatedDuration || 30,
+        assignedTo: chore.assignedTo?.toString() || "",
+        estimatedDuration: (chore as any).estimatedDuration || 30,
       });
     });
 
@@ -350,11 +351,12 @@ class SchedulingService {
     });
 
     chores.forEach((chore) => {
-      const assigneeId = chore.assignedTo._id.toString();
+      const assigneeId = chore.assignedTo?._id?.toString();
+      if (!assigneeId) return;
       if (workloadByMember.has(assigneeId)) {
         const workload = workloadByMember.get(assigneeId);
         workload.chores.push(chore);
-        workload.totalDuration += chore.estimatedDuration || 30;
+        workload.totalDuration += (chore as any).estimatedDuration || 30;
       }
     });
 
@@ -381,7 +383,8 @@ class SchedulingService {
       // Suggest redistributions
       overloaded.forEach((overloadedMember) => {
         const choreToMove = overloadedMember.chores.sort(
-          (a, b) => (a.estimatedDuration || 30) - (b.estimatedDuration || 30),
+          (a: any, b: any) =>
+            (a.estimatedDuration || 30) - (b.estimatedDuration || 30),
         )[0];
 
         const targetMember = underloaded[0];
@@ -519,7 +522,7 @@ class SchedulingService {
       });
 
       for (const schedule of activeSchedules) {
-        await this.generateUpcomingInstances(schedule.scheduleId, 7); // Generate 1 week ahead
+        await this.generateUpcomingInstances((schedule as any).scheduleId, 7); // Generate 1 week ahead
       }
 
       // Send notifications for due chores

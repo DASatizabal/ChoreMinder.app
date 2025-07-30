@@ -194,8 +194,8 @@ class IntegrationTestSuite {
 
       // Update family members
       testFamily.members = [
-        { userId: parentUser._id, role: "parent", joinedAt: new Date() },
-        { userId: childUser._id, role: "child", joinedAt: new Date() },
+        { user: parentUser._id, role: "parent" } as any,
+        { user: childUser._id, role: "child" } as any,
       ];
       await testFamily.save();
 
@@ -366,13 +366,13 @@ class IntegrationTestSuite {
         throw new Error("Status transition to completed failed");
       }
 
-      chore.status = "approved";
+      chore.status = "verified";
       chore.verifiedAt = new Date();
       chore.verifiedBy = this.testData.parentId;
       await chore.save();
 
-      if (chore.status !== "approved") {
-        throw new Error("Status transition to approved failed");
+      if (chore.status !== "verified") {
+        throw new Error("Status transition to verified failed");
       }
 
       this.testData.testChoreId = chore._id;
@@ -743,7 +743,7 @@ class IntegrationTestSuite {
       const user = await User.findById(this.testData.childId);
       const completedChores = await Chore.countDocuments({
         assignedTo: this.testData.childId,
-        status: "approved",
+        status: "verified",
       });
 
       if (!user?.gamification) {
@@ -761,7 +761,7 @@ class IntegrationTestSuite {
         {
           $match: {
             assignedTo: user._id,
-            status: "approved",
+            status: "verified",
           },
         },
         {
@@ -798,11 +798,11 @@ class IntegrationTestSuite {
       // Verify all family members exist as users
       for (const member of family.members) {
         const user = familyUsers.find(
-          (u) => u._id.toString() === member.userId.toString(),
+          (u) => u._id.toString() === member.user.toString(),
         );
         if (!user) {
           throw new Error(
-            `Family member ${member.userId} not found in users table`,
+            `Family member ${member.user} not found in users table`,
           );
         }
         if (user.role !== member.role) {
@@ -840,7 +840,7 @@ class IntegrationTestSuite {
       await newChore.save();
 
       // 3. Parent approves chore
-      newChore.status = "approved";
+      newChore.status = "verified";
       newChore.verifiedAt = new Date();
       newChore.verifiedBy = this.testData.parentId;
       await newChore.save();
@@ -859,7 +859,7 @@ class IntegrationTestSuite {
         newChore._id.toString(),
       );
 
-      if (!result.newTotalPoints || result.newTotalPoints <= 0) {
+      if (!result.totalPoints || result.totalPoints <= 0) {
         throw new Error("Gamification not updated after parent approval");
       }
 

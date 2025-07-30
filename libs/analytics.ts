@@ -91,7 +91,8 @@ class AnalyticsService {
     });
 
     const completedChores = chores.filter(
-      (c) => c.status === "approved" || c.status === "verified",
+      (c) =>
+        (c.status as any) === "approved" || (c.status as any) === "verified",
     );
 
     // Calculate completion rate
@@ -252,11 +253,11 @@ class AnalyticsService {
         cat.completedChores > 0 ? cat.totalPoints / cat.completedChores : 0;
 
       // Find most common completion day
-      const validDays = cat.completionDays.filter((d) => d !== null);
-      const dayFrequency = validDays.reduce((acc, day) => {
+      const validDays = cat.completionDays.filter((d: any) => d !== null);
+      const dayFrequency = validDays.reduce((acc: any, day: any) => {
         acc[day] = (acc[day] || 0) + 1;
         return acc;
-      }, {});
+      }, {} as any);
 
       const favoriteDay =
         Object.keys(dayFrequency).length > 0
@@ -422,7 +423,7 @@ class AnalyticsService {
         activeChildren: familyMembers.length,
         thisWeekImprovement: Math.round(thisWeekImprovement * 100) / 100,
       },
-      memberProgress,
+      memberProgress: memberProgress as any,
       insights,
     };
   }

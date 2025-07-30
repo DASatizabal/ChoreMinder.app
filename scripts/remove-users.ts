@@ -18,7 +18,7 @@ const emailsToRemove = [
 
 async function removeUsers() {
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri!);
     console.log("Connected to MongoDB");
 
     const db = mongoose.connection.db;
@@ -88,7 +88,7 @@ async function removeUsers() {
           // Remove users from family members arrays
           const familyUpdateResult = await collection.updateMany(
             { "members.user": { $in: userIds } },
-            { $pull: { members: { user: { $in: userIds } } } },
+            { $pull: { members: { user: { $in: userIds } } } } as any,
           );
           if (familyUpdateResult.modifiedCount > 0) {
             console.log(

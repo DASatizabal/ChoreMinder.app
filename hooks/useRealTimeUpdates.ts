@@ -174,7 +174,7 @@ export const useRealTimeUpdates = (options: UseRealTimeUpdatesOptions = {}) => {
     if (notificationConfig) {
       toast(notificationConfig.message, {
         icon: notificationConfig.icon,
-        duration: notificationConfig.duration || 4000,
+        duration: 4000,
         position: "top-right",
         style: {
           background: notificationConfig.background,

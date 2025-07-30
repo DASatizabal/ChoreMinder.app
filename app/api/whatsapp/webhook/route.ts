@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    
+
     // Simplified webhook response - WhatsApp functionality not fully implemented
     console.log("WhatsApp webhook received:", body);
-    
+
     return NextResponse.json({
       success: true,
       message: "WhatsApp webhook functionality not implemented yet",
@@ -34,7 +34,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(challenge);
     }
 
-    return NextResponse.json({ error: "Invalid verification request" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid verification request" },
+      { status: 400 },
+    );
   } catch (error) {
     console.error("Error verifying WhatsApp webhook:", error);
     return NextResponse.json(

@@ -1,13 +1,13 @@
 // Email blacklist management
 // This prevents specific email addresses from creating accounts
 
-const BLACKLISTED_EMAILS = [
+const BLACKLISTED_EMAILS: string[] = [
   // Add emails here that should be blocked from registration
   // Example: 'blocked@example.com',
 ];
 
 // Domains that are blocked (if needed)
-const BLACKLISTED_DOMAINS = [
+const BLACKLISTED_DOMAINS: string[] = [
   // Add domains here if needed, e.g., 'tempmail.com'
 ];
 

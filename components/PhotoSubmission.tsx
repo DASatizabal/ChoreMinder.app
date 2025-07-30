@@ -183,7 +183,7 @@ const PhotoSubmission = ({
       setSelectedChore(null);
 
       // Send notification to parent that photo was submitted
-      const parentId = selectedChore.assignedBy?._id; // Assuming chore has assignedBy field
+      const parentId = (selectedChore as any).assignedBy?._id; // Assuming chore has assignedBy field
       if (parentId) {
         await notifications.notifyPhotoSubmitted(
           selectedChore._id,

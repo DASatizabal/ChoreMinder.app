@@ -145,7 +145,7 @@ const PhotoApprovalFlow = ({
 
   useEffect(() => {
     if (photos.length === 0) {
-      toast.info("No pending photos to review");
+      toast("No pending photos to review", { icon: "ℹ️" });
       onFlowClose();
     }
   }, [photos.length, onFlowClose]);
@@ -157,7 +157,7 @@ const PhotoApprovalFlow = ({
     try {
       await processApproval(
         option.action === "approve",
-        option.reason,
+        option.reason || "",
         currentPhoto,
       );
 
@@ -165,7 +165,7 @@ const PhotoApprovalFlow = ({
       if (currentPhotoIndex < photos.length - 1) {
         setCurrentPhotoIndex(currentPhotoIndex + 1);
       } else {
-        onApprovalComplete(option.action === "approve", option.reason);
+        onApprovalComplete(option.action === "approve", option.reason || "");
       }
     } catch (error) {
       console.error("Error in quick approval:", error);

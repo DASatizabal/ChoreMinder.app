@@ -177,8 +177,8 @@ const ChildChoreFlow = ({
       emoji: "⭐",
       isActive: Boolean(
         chore.status === "completed" &&
-        (!chore.requiresPhotoVerification ||
-          chore.photoVerification?.some((p) => p.status === "pending"))
+          (!chore.requiresPhotoVerification ||
+            chore.photoVerification?.some((p) => p.status === "pending")),
       ),
       isCompleted: chore.status === "verified",
       isRequired: true,

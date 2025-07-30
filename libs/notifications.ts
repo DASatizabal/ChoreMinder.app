@@ -286,7 +286,11 @@ class NotificationService {
       }
     } catch (error) {
       console.error("Error sending notification:", error);
-      await this.handleNotificationFailure(notification, null, error.message);
+      await this.handleNotificationFailure(
+        notification,
+        null,
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -330,11 +334,11 @@ class NotificationService {
     rule: NotificationRule,
   ): Promise<void> {
     try {
-      const user = await User.findById(notification.userId).populate("family");
-      if (!user?.family) return;
+      const user = await User.findById(notification.userId);
+      if (!user?.familyId) return;
 
       const parents = await User.find({
-        family: user.family._id,
+        familyId: user.familyId,
         role: "parent",
       });
 
@@ -346,7 +350,7 @@ class NotificationService {
           chore: notification.choreId
             ? await Chore.findById(notification.choreId)
             : null,
-          family: user.family,
+          familyId: user.familyId,
           childUser: user,
         };
 
@@ -354,7 +358,7 @@ class NotificationService {
           userId: parent._id.toString(),
           type: "update",
           priority: "high",
-          context: escalationContext,
+          context: escalationContext as any,
           options: {
             reason: `Notification escalation: ${user.name} may need attention regarding a chore reminder.`,
           },
@@ -533,7 +537,7 @@ class NotificationService {
       points_milestone: "update",
     };
 
-    return mapping[eventType] || "update";
+    return (mapping as any)[eventType] || "update";
   }
 
   /**

@@ -1,6 +1,6 @@
+import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Types } from "mongoose";
 
 import dbConnect from "@/libs/mongoose";
 import { authOptions } from "@/libs/next-auth";

@@ -529,7 +529,7 @@ const ChoreManagement = () => {
               familyId={familyContext.activeFamily.id}
               refreshTrigger={refreshTrigger}
               onRefresh={refreshData}
-              onEditChore={handleEditChore}
+              onEditChore={(chore: any) => handleEditChore(chore as Chore)}
               showEditButton={true}
             />
           </div>

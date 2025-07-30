@@ -69,7 +69,7 @@ async function createNotificationLog(data: {
 }) {
   try {
     await dbConnect();
-    return await NotificationLog.createLog({
+    return await NotificationLog.create({
       user: data.userId,
       family: data.familyId,
       chore: data.choreId,
@@ -106,10 +106,12 @@ async function sendEmailWithLogging(
     if (error) {
       // Mark as failed in log
       if (log) {
-        await log.markAsFailed({
-          message: error.message || "Unknown error",
-          code: error.name,
-          details: error,
+        await NotificationLog.findByIdAndUpdate(log._id, {
+          status: "failed",
+          errorMessage: error.message || "Unknown error",
+          errorCode: error.name,
+          errorDetails: error,
+          updatedAt: new Date(),
         });
       }
       return { success: false, error, logId: log?._id };
@@ -117,16 +119,24 @@ async function sendEmailWithLogging(
 
     // Mark as sent in log
     if (log) {
-      await log.markAsSent(data?.id, data);
+      await NotificationLog.findByIdAndUpdate(log._id, {
+        status: "sent",
+        sentAt: new Date(),
+        externalId: data?.id,
+        responseData: data,
+        updatedAt: new Date(),
+      });
     }
 
     return { success: true, data, logId: log?._id };
   } catch (error) {
     // Mark as failed in log
     if (log) {
-      await log.markAsFailed({
-        message: error instanceof Error ? error.message : "Unknown error",
-        details: error,
+      await NotificationLog.findByIdAndUpdate(log._id, {
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
+        errorDetails: error,
+        updatedAt: new Date(),
       });
     }
     return { success: false, error, logId: log?._id };

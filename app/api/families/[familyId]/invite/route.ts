@@ -274,13 +274,16 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     // Get active invitations from global store
     const now = new Date();
     const activeInvitations = [];
-    
+
     const globalThis = global as any;
     const familyInvites = globalThis.familyInvites || new Map();
-    
+
     for (const [code, invite] of familyInvites.entries()) {
-      const inviteData = invite as any;
-      if (inviteData.familyId === params.familyId && new Date(inviteData.expiresAt) > now) {
+      const inviteData = invite;
+      if (
+        inviteData.familyId === params.familyId &&
+        new Date(inviteData.expiresAt) > now
+      ) {
         activeInvitations.push({
           code: userMember.role === "parent" ? code : "***", // Only show code to parents
           email: inviteData.email,

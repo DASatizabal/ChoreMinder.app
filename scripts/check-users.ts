@@ -13,7 +13,7 @@ if (!uri) {
 
 async function checkUsers() {
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri!);
     console.log("Connected to MongoDB");
 
     // Check users collection directly

@@ -649,7 +649,7 @@ const InteractiveChoreCompletion = ({
       {currentStep === "timer" && renderTimer()}
       {currentStep === "photo" && (
         <EnhancedPhotoVerification
-          chore={chore}
+          chore={chore as any}
           onPhotoSubmitted={handlePhotoSubmitted}
           onCancel={() => setCurrentStep("feedback")}
           mode="capture"

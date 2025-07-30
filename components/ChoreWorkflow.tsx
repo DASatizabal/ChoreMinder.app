@@ -148,9 +148,9 @@ const ChoreWorkflow = ({
           if (!hasPhoto) return "completed";
 
           const latestPhoto =
-            chore.photoVerification[chore.photoVerification.length - 1];
-          if (latestPhoto.status === "pending") return "under_review";
-          if (latestPhoto.status === "approved") return "approved";
+            chore.photoVerification?.[chore.photoVerification.length - 1];
+          if (latestPhoto?.status === "pending") return "under_review";
+          if (latestPhoto?.status === "approved") return "approved";
           return "rejected";
         }
         return "completed";

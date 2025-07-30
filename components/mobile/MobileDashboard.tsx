@@ -331,7 +331,7 @@ const MobileDashboard = ({
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">Your Chores</h2>
         <InteractiveButton
-          variant="ghost"
+          variant="secondary"
           size="sm"
           onClick={() => setViewMode("overview")}
         >
@@ -378,7 +378,7 @@ const MobileDashboard = ({
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">Your Progress</h2>
         <InteractiveButton
-          variant="ghost"
+          variant="secondary"
           size="sm"
           onClick={() => setViewMode("overview")}
         >

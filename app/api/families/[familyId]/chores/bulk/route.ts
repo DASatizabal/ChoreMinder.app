@@ -62,10 +62,7 @@ export async function POST(
       (member: any) => member.user.toString() === session.user.id,
     );
 
-    if (
-      userMember?.role !== "parent" &&
-      session.user.role !== "admin"
-    ) {
+    if (userMember?.role !== "parent" && session.user.role !== "admin") {
       return NextResponse.json(
         { error: "Only parents can create chores" },
         { status: 403 },

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 interface PerformanceMetrics {
   cacheStats: {
@@ -53,7 +53,9 @@ export default function PerformanceDashboard() {
   const { data: session } = useSession();
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(
+    null,
+  );
   const [autoRefresh, setAutoRefresh] = useState(false);
 
   useEffect(() => {
@@ -84,7 +86,7 @@ export default function PerformanceDashboard() {
     try {
       setLoading(true);
       const response = await fetch("/api/performance/metrics");
-      
+
       if (response.ok) {
         const data = await response.json();
         setMetrics(data);
@@ -103,7 +105,7 @@ export default function PerformanceDashboard() {
       const response = await fetch("/api/performance/metrics", {
         method: "DELETE",
       });
-      
+
       if (response.ok) {
         alert("Cache cleared successfully");
         fetchMetrics(); // Refresh metrics
@@ -121,14 +123,14 @@ export default function PerformanceDashboard() {
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
   const formatUptime = (seconds: number): string => {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (days > 0) return `${days}d ${hours}h ${minutes}m`;
     if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
@@ -136,23 +138,33 @@ export default function PerformanceDashboard() {
 
   const getHealthColor = (status: string): string => {
     switch (status) {
-      case "healthy": return "text-success";
-      case "warning": return "text-warning";
-      case "error": return "text-error";
-      default: return "text-base-content";
+      case "healthy":
+        return "text-success";
+      case "warning":
+        return "text-warning";
+      case "error":
+        return "text-error";
+      default:
+        return "text-base-content";
     }
   };
 
-  const getPerformanceScore = (): { score: number; status: string; color: string } => {
-    if (!metrics) return { score: 0, status: "Unknown", color: "text-base-content" };
+  const getPerformanceScore = (): {
+    score: number;
+    status: string;
+    color: string;
+  } => {
+    if (!metrics)
+      return { score: 0, status: "Unknown", color: "text-base-content" };
 
     let score = 100;
-    
+
     // Deduct points for poor performance
     if (metrics.performance.queryStats.averageExecutionTime > 100) score -= 20;
     if (metrics.performance.cacheStats.hitRate < 50) score -= 15;
     if (metrics.database.responseTime > 100) score -= 15;
-    if (metrics.performance.memoryUsage.heapUsed > 500 * 1024 * 1024) score -= 10; // 500MB
+    if (metrics.performance.memoryUsage.heapUsed > 500 * 1024 * 1024)
+      score -= 10; // 500MB
     if (metrics.performance.queryStats.slowQueries.length > 5) score -= 10;
 
     let status = "Excellent";
@@ -217,16 +229,16 @@ export default function PerformanceDashboard() {
           <div className="form-control">
             <label className="label cursor-pointer gap-2">
               <span className="label-text">Auto-refresh</span>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 className="toggle toggle-primary"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
               />
             </label>
           </div>
-          
-          <button 
+
+          <button
             className="btn btn-outline"
             onClick={fetchMetrics}
             disabled={loading}
@@ -238,10 +250,7 @@ export default function PerformanceDashboard() {
             )}
           </button>
 
-          <button 
-            className="btn btn-warning"
-            onClick={clearCache}
-          >
+          <button className="btn btn-warning" onClick={clearCache}>
             🗑️ Clear Cache
           </button>
         </div>
@@ -272,8 +281,12 @@ export default function PerformanceDashboard() {
       {/* System Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="stat bg-primary text-primary-content rounded-lg">
-          <div className="stat-title text-primary-content/70">System Uptime</div>
-          <div className="stat-value text-xl">{formatUptime(metrics.uptime)}</div>
+          <div className="stat-title text-primary-content/70">
+            System Uptime
+          </div>
+          <div className="stat-value text-xl">
+            {formatUptime(metrics.uptime)}
+          </div>
           <div className="stat-desc text-primary-content/60">
             Node.js {metrics.nodeVersion}
           </div>
@@ -281,7 +294,9 @@ export default function PerformanceDashboard() {
 
         <div className={`stat bg-base-200 rounded-lg`}>
           <div className="stat-title">Database Health</div>
-          <div className={`stat-value text-xl ${getHealthColor(metrics.database.connectionStatus)}`}>
+          <div
+            className={`stat-value text-xl ${getHealthColor(metrics.database.connectionStatus)}`}
+          >
             {metrics.database.connectionStatus}
           </div>
           <div className="stat-desc">
@@ -295,7 +310,8 @@ export default function PerformanceDashboard() {
             {metrics.performance.cacheStats.hitRate.toFixed(1)}%
           </div>
           <div className="stat-desc">
-            {metrics.performance.cacheStats.size}/{metrics.performance.cacheStats.maxSize} entries
+            {metrics.performance.cacheStats.size}/
+            {metrics.performance.cacheStats.maxSize} entries
           </div>
         </div>
 
@@ -319,10 +335,12 @@ export default function PerformanceDashboard() {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Heap Used</span>
-                  <span>{formatBytes(metrics.performance.memoryUsage.heapUsed)}</span>
+                  <span>
+                    {formatBytes(metrics.performance.memoryUsage.heapUsed)}
+                  </span>
                 </div>
-                <progress 
-                  className="progress progress-primary w-full" 
+                <progress
+                  className="progress progress-primary w-full"
                   value={metrics.performance.memoryUsage.heapUsed}
                   max={metrics.performance.memoryUsage.heapTotal}
                 ></progress>
@@ -331,10 +349,12 @@ export default function PerformanceDashboard() {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>RSS (Resident Set Size)</span>
-                  <span>{formatBytes(metrics.performance.memoryUsage.rss)}</span>
+                  <span>
+                    {formatBytes(metrics.performance.memoryUsage.rss)}
+                  </span>
                 </div>
-                <progress 
-                  className="progress progress-secondary w-full" 
+                <progress
+                  className="progress progress-secondary w-full"
                   value={metrics.performance.memoryUsage.rss}
                   max={metrics.performance.memoryUsage.rss * 1.5}
                 ></progress>
@@ -343,7 +363,9 @@ export default function PerformanceDashboard() {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>External</span>
-                  <span>{formatBytes(metrics.performance.memoryUsage.external)}</span>
+                  <span>
+                    {formatBytes(metrics.performance.memoryUsage.external)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -354,8 +376,13 @@ export default function PerformanceDashboard() {
           <div className="card-body">
             <h2 className="card-title">📊 Query Statistics</h2>
             <div className="space-y-3">
-              {Object.entries(metrics.performance.queryStats.queriesByCollection).map(([collection, count]) => (
-                <div key={collection} className="flex justify-between items-center">
+              {Object.entries(
+                metrics.performance.queryStats.queriesByCollection,
+              ).map(([collection, count]) => (
+                <div
+                  key={collection}
+                  className="flex justify-between items-center"
+                >
                   <span className="capitalize">{collection}</span>
                   <div className="badge badge-primary">{count}</div>
                 </div>
@@ -363,7 +390,8 @@ export default function PerformanceDashboard() {
             </div>
             <div className="divider"></div>
             <div className="text-sm text-base-content/60">
-              Total queries in current session: {metrics.performance.queryStats.totalQueries}
+              Total queries in current session:{" "}
+              {metrics.performance.queryStats.totalQueries}
             </div>
           </div>
         </div>
@@ -386,34 +414,42 @@ export default function PerformanceDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {metrics.performance.queryStats.slowQueries.map((query, index) => (
-                    <tr key={index}>
-                      <td>
-                        <div className="badge badge-outline">{query.collection}</div>
-                      </td>
-                      <td>
-                        <div className={`font-bold ${query.executionTime > 500 ? "text-error" : query.executionTime > 200 ? "text-warning" : "text-info"}`}>
-                          {query.executionTime}ms
-                        </div>
-                      </td>
-                      <td>{query.result_count || "N/A"}</td>
-                      <td className="text-sm text-base-content/60">
-                        {new Date(query.timestamp).toLocaleTimeString()}
-                      </td>
-                      <td>
-                        <div className="max-w-xs truncate font-mono text-xs bg-base-100 p-2 rounded">
-                          {query.query}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {metrics.performance.queryStats.slowQueries.map(
+                    (query, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div className="badge badge-outline">
+                            {query.collection}
+                          </div>
+                        </td>
+                        <td>
+                          <div
+                            className={`font-bold ${query.executionTime > 500 ? "text-error" : query.executionTime > 200 ? "text-warning" : "text-info"}`}
+                          >
+                            {query.executionTime}ms
+                          </div>
+                        </td>
+                        <td>{query.result_count || "N/A"}</td>
+                        <td className="text-sm text-base-content/60">
+                          {new Date(query.timestamp).toLocaleTimeString()}
+                        </td>
+                        <td>
+                          <div className="max-w-xs truncate font-mono text-xs bg-base-100 p-2 rounded">
+                            {query.query}
+                          </div>
+                        </td>
+                      </tr>
+                    ),
+                  )}
                 </tbody>
               </table>
             </div>
           ) : (
             <div className="text-center py-8">
               <div className="text-4xl mb-2">🚀</div>
-              <p className="text-base-content/60">No slow queries detected! Great performance!</p>
+              <p className="text-base-content/60">
+                No slow queries detected! Great performance!
+              </p>
             </div>
           )}
         </div>
@@ -425,8 +461,13 @@ export default function PerformanceDashboard() {
           <h2 className="card-title">📑 Database Index Usage</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {metrics.database.indexUsage.map((collection) => (
-              <div key={collection.collection} className="bg-base-100 p-4 rounded-lg">
-                <h3 className="font-bold capitalize mb-2">{collection.collection}</h3>
+              <div
+                key={collection.collection}
+                className="bg-base-100 p-4 rounded-lg"
+              >
+                <h3 className="font-bold capitalize mb-2">
+                  {collection.collection}
+                </h3>
                 <div className="space-y-2">
                   {collection.indexes.map((index, i) => (
                     <div key={i} className="text-sm">

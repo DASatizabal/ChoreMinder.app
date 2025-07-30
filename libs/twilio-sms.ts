@@ -244,8 +244,8 @@ class TwilioSMSService {
 
       return {
         valid: true,
-        carrier: phoneNumberInfo.carrier?.name,
-        type: phoneNumberInfo.carrier?.type,
+        carrier: phoneNumberInfo.carrier?.name as unknown as string,
+        type: phoneNumberInfo.carrier?.type as unknown as string,
       };
     } catch (error: any) {
       console.error("Phone number validation failed:", error);

@@ -135,7 +135,9 @@ const MobileTestHelper = () => {
             </button>
             <button
               onClick={() => {
-                const tabBar = document.querySelector("[data-mobile-tab-bar]");
+                const tabBar = document.querySelector(
+                  "[data-mobile-tab-bar]",
+                ) as HTMLElement;
                 if (tabBar) {
                   tabBar.style.border = "2px solid red";
                   setTimeout(() => {

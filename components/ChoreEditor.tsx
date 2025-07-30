@@ -165,7 +165,7 @@ const ChoreEditor = ({
         requiresPhotoVerification: chore.requiresPhotoVerification || false,
         isRecurring: chore.isRecurring || false,
         recurrence: {
-          type: chore.recurrence?.type || "once",
+          type: (chore.recurrence?.type as "once") || "once",
           interval: chore.recurrence?.interval || 1,
           daysOfWeek: chore.recurrence?.daysOfWeek || [],
           dayOfMonth: chore.recurrence?.dayOfMonth || 1,

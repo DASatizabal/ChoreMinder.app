@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/libs/next-auth";
 import dbConnect from "@/libs/mongoose";
+import { authOptions } from "@/libs/next-auth";
 import User from "@/models/User";
 
 // GET /api/messaging/preferences - Get user messaging preferences

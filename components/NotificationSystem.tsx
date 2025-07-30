@@ -399,7 +399,7 @@ const NotificationSystem = ({
 
   const handleNotificationAction = async (
     notification: Notification,
-    action: Notification["actions"][0],
+    action: NonNullable<Notification["actions"]>[0],
   ) => {
     try {
       // Interpolate variables in endpoint

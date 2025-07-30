@@ -285,11 +285,6 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                 >
                   <span className="text-lg mr-1">{item.icon}</span>
                   <span className="hidden xl:inline">{item.label}</span>
-                  {item.badge && (
-                    <div className="badge badge-error badge-sm absolute -top-2 -right-2">
-                      {item.badge}
-                    </div>
-                  )}
                 </Link>
               </li>
             ))}
@@ -379,11 +374,6 @@ const Navigation = ({ familyContext, onFamilyChange }: NavigationProps) => {
                         {item.description}
                       </div>
                     </div>
-                    {item.badge && (
-                      <div className="badge badge-error badge-sm">
-                        {item.badge}
-                      </div>
-                    )}
                   </Link>
                 </li>
               ))}
