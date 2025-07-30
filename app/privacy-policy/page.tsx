@@ -13,16 +13,16 @@ import { getSEOTags } from "@/libs/seo";
 // You are an excellent lawyer.
 
 // I need your help to write a simple privacy policy for my website. Here is some context:
-// - Website: https://fenago.com
-// - Name: FeNAgO
-// - Description: A Next.js agentic SaaS boilerplate to help entrepreneurs build AI-powered applications more efficiently
+// - Website: https://choreminder.app
+// - Name: ChoreMinder
+// - Description: An AI-powered household management application that helps parents assign, track, and verify chores for their children
 // - User data collected: name, email and payment information
 // - Non-personal data collection: web cookies
 // - Purpose of Data Collection: Order processing
 // - Data sharing: we do not share the data with any other parties
 // - Children's Privacy: we do not collect any data from children
 // - Updates to the Privacy Policy: users will be updated by email
-// - Contact information: support@fenago.com
+// - Contact information: support@choreminder.app
 
 // Please write a simple privacy policy for my site. Add the current date.  Do not add or explain your reasoning. Answer:
 
@@ -58,9 +58,9 @@ const PrivacyPolicy = () => {
           className="leading-relaxed whitespace-pre-wrap"
           style={{ fontFamily: "sans-serif" }}
         >
-          {`Last Updated: May 5, 2025
+          {`Last Updated: July 30, 2025
 
-Thank you for visiting FeNAgO ("we," "us," or "our"). This Privacy Policy outlines how we collect, use, and protect your personal and non-personal information when you use our website located at https://fenago.com (the "Website").
+Thank you for visiting ChoreMinder ("we," "us," or "our"). This Privacy Policy outlines how we collect, use, and protect your personal and non-personal information when you use our website located at https://choreminder.app (the "Website").
 
 By accessing or using the Website, you agree to the terms of this Privacy Policy. If you do not agree with the practices described in this policy, please do not use the Website.
 
@@ -88,7 +88,7 @@ We do not share your personal data with any third parties except as required for
 
 4. Children's Privacy
 
-FeNAgO is not intended for children under the age of 13. We do not knowingly collect personal information from children. If you are a parent or guardian and believe that your child has provided us with personal information, please contact us at the email address provided below.
+ChoreMinder is designed for family use and may include children as users under parental supervision. We do not collect personal information directly from children under 13 without parental consent. If you are a parent or guardian and have questions about your child's data, please contact us at the email address provided below.
 
 5. Updates to the Privacy Policy
 
@@ -98,11 +98,11 @@ We may update this Privacy Policy from time to time to reflect changes in our pr
 
 If you have any questions, concerns, or requests related to this Privacy Policy, you can contact us at:
 
-Email: support@fenago.com
+Email: support@choreminder.app
 
 For all other inquiries, please visit our Contact Us page on the Website.
 
-By using FeNAgO, you consent to the terms of this Privacy Policy.`}
+By using ChoreMinder, you consent to the terms of this Privacy Policy.`}
         </pre>
       </div>
     </main>

@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://fenago.com
+Host: https://choreminder.app
 
 # Sitemaps
-Sitemap: https://fenago.com/sitemap.xml
+Sitemap: https://choreminder.app/sitemap.xml
