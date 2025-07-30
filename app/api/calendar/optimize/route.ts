@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+export const dynamic = 'force-dynamic';
+
 import { dbConnect } from "@/libs/mongoose";
 import { authOptions } from "@/libs/next-auth";
 import { getSchedulingService } from "@/libs/scheduling";
