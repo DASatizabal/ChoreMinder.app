@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { Types } from "mongoose";
 
 import dbConnect from "@/libs/mongoose";
 import { authOptions } from "@/libs/next-auth";
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     // Add member to family
     const newMember = {
-      user: session.user.id,
+      user: new Types.ObjectId(session.user.id),
       name: session.user.name || "New Member",
       role: invitation.role || "child",
     };
