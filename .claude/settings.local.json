@@ -24,7 +24,7 @@
       "Bash(npm run launch:checklist:*)",
       "Bash(npm run validate:launch:*)",
       "Bash(curl:*)",
-      "Bash(move \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.ts\" \"C:\\Windsurf\\SaaS\\fenago21\\hooks\\useNotifications.tsx\")",
+      "Bash(move \"C:\\Windsurf\\SaaS\\ChoreMinder\\hooks\\useNotifications.ts\" \"C:\\Windsurf\\SaaS\\ChoreMinder\\hooks\\useNotifications.tsx\")",
       "Bash(set -a)",
       "Bash(source:*)",
       "Bash(npm audit:*)",
