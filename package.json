@@ -86,10 +86,10 @@
     "postcss": "^8.4.38",
     "autoprefixer": "^10.4.19",
     "dotenv": "^17.2.1",
-    "daisyui": "^4.10.1"
+    "daisyui": "^4.10.1",
+    "@faker-js/faker": "^9.9.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^9.9.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.12",
     "@types/mdx": "^2.0.12",
