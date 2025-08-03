@@ -1,42 +1,32 @@
 import { Metadata } from "next";
-import { Suspense, ReactNode } from "react";
-
-import CTA from "@/components/CTA";
-import FAQ from "@/components/FAQ";
-import FeaturesAccordion from "@/components/FeaturesAccordion";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import Pricing from "@/components/Pricing";
-import Problem from "@/components/Problem";
-import Testimonials3 from "@/components/Testimonials3";
 
 // Add metadata for SEO
 export const metadata: Metadata = {
-  title: "ChoreMinder - AI-Powered Family Chore Management",
-  description:
-    "Tired of the chore wars? Let ChoreMinder keep score and keep the peace. Smart chore assignment, automated reminders, and gamified tracking for happier families.",
-  keywords:
-    "chore management, family organization, household tasks, parenting tools, chore tracking, family app, smart home, ChoreMinder",
+  title: "ChoreMinder - Coming Soon",
+  description: "ChoreMinder is under construction. We're building something amazing for families!",
 };
 
-export default function Home(): JSX.Element {
+export default function UnderConstruction(): JSX.Element {
   return (
-    <>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Header />
-      </Suspense>
-      <main>
-        {/* FeNAgO - The complete platform for building agentic AI-powered SaaS products */}
-        <Hero />
-        <Problem />
-        <FeaturesAccordion />
-        <Pricing />
-        <Testimonials3 />
-        <FAQ />
-        <CTA />
-      </main>
-      <Footer />
-    </>
+    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+      <div className="text-center text-white px-8">
+        <div className="mb-8">
+          <h1 className="text-6xl font-bold mb-4">🚧</h1>
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">Under Construction</h1>
+          <p className="text-xl md:text-2xl mb-8 opacity-90">
+            We're building something amazing for families!
+          </p>
+          <p className="text-lg opacity-75">
+            ChoreMinder will be launching soon with AI-powered chore management.
+          </p>
+        </div>
+        
+        <div className="animate-bounce">
+          <div className="w-16 h-16 mx-auto bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-white rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
