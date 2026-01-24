@@ -1,32 +1,63 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 
-// Add metadata for SEO
+import config from "@/config";
+
+import CTA from "@/components/CTA";
+import FAQ from "@/components/FAQ";
+import FeaturesAccordion from "@/components/FeaturesAccordion";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+import Pricing from "@/components/Pricing";
+import Testimonials3 from "@/components/Testimonials3";
+
 export const metadata: Metadata = {
-  title: "ChoreMinder - Coming Soon",
-  description: "ChoreMinder is under construction. We're building something amazing for families!",
+  title: `${config.appName} - AI-Powered Chore Management for Families`,
+  description:
+    "Transform household chaos into family harmony with ChoreMinder. AI-powered chore assignment, photo verification, gamification, and smart reminders help kids actually want to help around the house.",
+  keywords: [
+    "chore management",
+    "family chores",
+    "kids chores",
+    "household management",
+    "chore app",
+    "family organization",
+    "gamified chores",
+    "photo verification",
+    "smart reminders",
+    "parenting app",
+  ],
+  openGraph: {
+    title: `${config.appName} - From Family Chaos to Household Harmony`,
+    description:
+      "AI-powered chore management that makes kids actually want to help. Photo verification, gamification, and smart reminders included.",
+    type: "website",
+    url: `https://${config.domainName}`,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${config.appName} - AI-Powered Chore Management`,
+    description:
+      "Transform your household with gamified chores, photo verification, and smart reminders.",
+  },
 };
 
-export default function UnderConstruction(): JSX.Element {
+export default function LandingPage(): JSX.Element {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-      <div className="text-center text-white px-8">
-        <div className="mb-8">
-          <h1 className="text-6xl font-bold mb-4">🚧</h1>
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">Under Construction</h1>
-          <p className="text-xl md:text-2xl mb-8 opacity-90">
-            We're building something amazing for families!
-          </p>
-          <p className="text-lg opacity-75">
-            ChoreMinder will be launching soon with AI-powered chore management.
-          </p>
-        </div>
-        
-        <div className="animate-bounce">
-          <div className="w-16 h-16 mx-auto bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-            <div className="w-8 h-8 bg-white rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <>
+      <Suspense>
+        <Header />
+      </Suspense>
+      <main>
+        <Hero />
+        <FeaturesAccordion />
+        <Pricing />
+        <Testimonials3 />
+        <FAQ />
+        <CTA />
+      </main>
+      <Footer />
+    </>
   );
 }
