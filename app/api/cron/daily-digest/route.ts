@@ -1,7 +1,7 @@
 // app/api/cron/daily-digest/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-import { reminderScheduler } from "@/lib/reminder-scheduler";
+import { reminderScheduler } from "@/libs/reminder-scheduler";
 
 // POST /api/cron/daily-digest - Process daily digests (called by cron service)
 export async function POST(req: NextRequest) {

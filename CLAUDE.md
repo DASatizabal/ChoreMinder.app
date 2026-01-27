@@ -153,7 +153,7 @@ TWILIO_PHONE_NUMBER=your-phone
 ### TypeScript Path Aliases
 The project uses these path aliases (configured in `tsconfig.json`):
 - `@/*` - Root directory
-- `@/lib/*` - Library files
+- `@/libs/*` - Library files (utilities, services, integrations)
 - `@/models/*` - Database models
 - `@/app/*` - App directory files
 

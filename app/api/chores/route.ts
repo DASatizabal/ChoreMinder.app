@@ -29,121 +29,93 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // For now, return mock data to get the dashboard working
-    // TODO: Implement proper database queries once family relationships are set up
-    const mockChores = [
-      {
-        _id: "mock_chore_1",
-        title: "Clean Your Room",
-        description: "Make your bed, organize clothes, and vacuum",
-        status: "pending",
-        points: 10,
-        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        assignedTo: {
-          _id: session.user.id,
-          name: session.user.name || "User",
-          email: session.user.email,
-        },
-        createdBy: {
-          _id: "parent_id",
-          name: "Parent",
-          email: "parent@example.com",
-        },
-        family: {
-          _id: "mock_family_id",
-          name: "Smith Family",
-        },
-        category: "household",
-        priority: "medium",
-        requiresPhotoVerification: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        _id: "mock_chore_2",
-        title: "Take Out Trash",
-        description: "Empty all trash cans and take bags to the curb",
-        status: "completed",
-        points: 5,
-        dueDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        completedAt: new Date().toISOString(),
-        assignedTo: {
-          _id: session.user.id,
-          name: session.user.name || "User",
-          email: session.user.email,
-        },
-        createdBy: {
-          _id: "parent_id",
-          name: "Parent",
-          email: "parent@example.com",
-        },
-        family: {
-          _id: "mock_family_id",
-          name: "Smith Family",
-        },
-        category: "household",
-        priority: "high",
-        requiresPhotoVerification: false,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        _id: "mock_chore_3",
-        title: "Do Homework",
-        description: "Complete math and science assignments",
-        status: "in_progress",
-        points: 15,
-        dueDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-        assignedTo: {
-          _id: session.user.id,
-          name: session.user.name || "User",
-          email: session.user.email,
-        },
-        createdBy: {
-          _id: "parent_id",
-          name: "Parent",
-          email: "parent@example.com",
-        },
-        family: {
-          _id: "mock_family_id",
-          name: "Smith Family",
-        },
-        category: "education",
-        priority: "high",
-        requiresPhotoVerification: false,
-        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
+    await dbConnect();
 
-    // Parse query parameters for filtering
+    // Parse query parameters for filtering and pagination
     const searchParams = req.nextUrl.searchParams;
     const status = searchParams.get("status");
     const assignedTo = searchParams.get("assignedTo");
+    const familyId = searchParams.get("familyId");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50", 10), 100);
+    const skip = parseInt(searchParams.get("skip") || "0", 10);
 
-    let filteredChores = mockChores;
+    // Get user's families
+    const user = await User.findById(session.user.id).lean();
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    // Filter by status if provided
+    // Find families the user belongs to
+    const families = await Family.find({
+      "members.user": new Types.ObjectId(session.user.id),
+    }).lean();
+
+    if (families.length === 0) {
+      // User has no families, return empty result
+      return NextResponse.json({
+        chores: [],
+        pagination: {
+          total: 0,
+          limit,
+          skip,
+          hasMore: false,
+        },
+      });
+    }
+
+    const userFamilyIds = families.map((f) => f._id);
+
+    // Build query filter
+    const filter: Record<string, any> = {
+      family: familyId
+        ? new Types.ObjectId(familyId)
+        : { $in: userFamilyIds },
+      deletedAt: null, // Exclude soft-deleted chores
+    };
+
+    // If a specific familyId was provided, verify user belongs to it
+    if (familyId) {
+      const isMember = userFamilyIds.some(
+        (id) => id.toString() === familyId
+      );
+      if (!isMember) {
+        return NextResponse.json(
+          { error: "You are not a member of this family" },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Apply status filter if provided
     if (status) {
-      filteredChores = filteredChores.filter(
-        (chore) => chore.status === status,
-      );
+      filter.status = status;
     }
 
-    // Filter by assignedTo if provided
+    // Apply assignedTo filter if provided
     if (assignedTo) {
-      filteredChores = filteredChores.filter(
-        (chore) => chore.assignedTo._id === assignedTo,
-      );
+      filter.assignedTo = new Types.ObjectId(assignedTo);
     }
+
+    // Get total count for pagination
+    const total = await Chore.countDocuments(filter);
+
+    // Query chores with population
+    const chores = await Chore.find(filter)
+      .populate("assignedTo", "name email avatar")
+      .populate("createdBy", "name email")
+      .populate("family", "name")
+      .sort({ dueDate: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     return NextResponse.json({
-      chores: filteredChores,
+      chores,
       pagination: {
-        total: filteredChores.length,
-        limit: 50,
-        skip: 0,
-        hasMore: false,
+        total,
+        limit,
+        skip,
+        hasMore: skip + chores.length < total,
       },
     });
   } catch (error) {

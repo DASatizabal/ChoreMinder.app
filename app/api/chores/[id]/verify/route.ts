@@ -3,8 +3,8 @@ import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
+import { authOptions } from "@/libs/next-auth";
+import dbConnect from "@/libs/mongoose";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
 

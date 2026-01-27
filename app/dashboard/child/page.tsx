@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 
 import AppLayout from "@/components/AppLayout";
 import ChildDashboard from "@/components/ChildDashboard";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/libs/next-auth";
 
 export default async function ChildDashboardPage() {
   const session = await getServerSession(authOptions);

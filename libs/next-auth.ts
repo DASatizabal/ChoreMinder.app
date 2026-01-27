@@ -8,7 +8,7 @@ import GoogleProvider from "next-auth/providers/google";
 import config from "@/config";
 import { User } from "@/models";
 
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/libs/mongoose";
 
 import { isEmailBlacklisted } from "./email-blacklist";
 import clientPromise from "./mongo";

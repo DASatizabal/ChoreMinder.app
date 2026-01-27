@@ -5,9 +5,9 @@ import { Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-import { authOptions } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
-import { optimizeImageBuffer } from "@/lib/image-optimization";
+import { authOptions } from "@/libs/next-auth";
+import dbConnect from "@/libs/mongoose";
+import { optimizeImageBuffer } from "@/libs/image-optimization";
 import { uploadToS3 } from "@/libs/s3";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";

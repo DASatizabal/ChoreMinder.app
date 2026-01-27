@@ -1,5 +1,5 @@
-// lib/reminder-scheduler.ts
-import dbConnect from "@/lib/dbConnect";
+// libs/reminder-scheduler.ts
+import dbConnect from "@/libs/mongoose";
 import Chore from "@/models/Chore";
 import Family from "@/models/Family";
 import NotificationPreferences from "@/models/NotificationPreferences";

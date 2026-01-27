@@ -1,4 +1,4 @@
-// lib/notification-service.ts
+// libs/notification-service.ts
 import { Resend } from "resend";
 
 import {
@@ -9,7 +9,7 @@ import {
   renderPhotoRejectionEmail,
 } from "@/components/emails/ChoreEmails";
 import config from "@/config";
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/libs/mongoose";
 import NotificationLog from "@/models/NotificationLog";
 
 if (!process.env.RESEND_API_KEY) {

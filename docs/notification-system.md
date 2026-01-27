@@ -244,7 +244,7 @@ For Vercel deployment, use `vercel.json`:
 
 #### From Chore Creation
 ```typescript
-import { notificationService } from '@/lib/notification-service';
+import { notificationService } from '@/libs/notification-service';
 
 // After creating a chore
 const result = await notificationService.sendChoreAssignmentNotification({
